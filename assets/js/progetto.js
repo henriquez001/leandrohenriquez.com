@@ -34,10 +34,30 @@ function PROJECT(root,D){
   function size(){R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();}addEventListener('resize',size);size();
   const ease=x=>x*x*(3-2*x),cl=(x,a,b)=>Math.max(a,Math.min(b,x)),T=new THREE.Vector3(0,0,0),v=new THREE.Vector3();
   function P(x,y,z){v.set(x,y,z).project(cam);return [(v.x*.5+.5)*innerWidth,(-v.y*.5+.5)*innerHeight];}
-  function dline(a,b,label,off,acc){const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1,nx=-dy/l*off,ny=dx/l*off;const A=[a[0]+nx,a[1]+ny],B=[b[0]+nx,b[1]+ny];
-    const tk=(p)=>`<line x1="${p[0]-nx*.25}" y1="${p[1]-ny*.25}" x2="${p[0]+nx*.25}" y2="${p[1]+ny*.25}"/>`;
-    const mxp=(A[0]+B[0])/2+nx*.6,myp=(A[1]+B[1])/2+ny*.6;
-    return `<g stroke="${'#111'}" stroke-width="1.2"><line x1="${a[0]}" y1="${a[1]}" x2="${A[0]}" y2="${A[1]}" stroke-dasharray="2 3"/><line x1="${b[0]}" y1="${b[1]}" x2="${B[0]}" y2="${B[1]}" stroke-dasharray="2 3"/><line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}"/>${tk(A)}${tk(B)}</g><text x="${mxp}" y="${myp}" text-anchor="middle" dominant-baseline="middle" style="fill:${'#111'}">${label}</text>`;}
+  // quotes: straight (horizontal or vertical) lines anchored to the model's centre section.
+  // x follows the live camera; heights come from the stop's rest pose, so they never bob up and down
+  function hq(a,b,label,vert,pos){const r=Math.round;let A,B,Lb;
+    if(!vert){const y=r(pos.y);A=[r(a[0]),y];B=[r(b[0]),y];Lb=[r((A[0]+B[0])/2),y+(pos.under?16:-12)];}
+    else{const x=r(pos.x);A=[x,r(pos.ya)];B=[x,r(pos.yb)];Lb=[x+(pos.right?14:-14),r((A[1]+B[1])/2)];}
+    const t=6,tk=p=>vert?`<line x1="${p[0]-t}" y1="${p[1]}" x2="${p[0]+t}" y2="${p[1]}"/>`:`<line x1="${p[0]}" y1="${p[1]-t}" x2="${p[0]}" y2="${p[1]+t}"/>`;
+    const ex=(p,q)=>`<line x1="${r(p[0])}" y1="${r(p[1])}" x2="${q[0]}" y2="${q[1]}" stroke-dasharray="2 3"/>`;
+    return `<g stroke="#111" stroke-width="1.2">${ex(a,A)}${ex(b,B)}<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}"/>${tk(A)}${tk(B)}</g><text x="${Lb[0]}" y="${Lb[1]}" text-anchor="${vert?(pos.right?'start':'end'):'middle'}" dominant-baseline="middle">${esc(label)}</text>`;}
+  let rest=null,restKey='';
+  function restPose(st){const key=st+'|'+innerWidth+'|'+innerHeight;if(key===restKey)return rest;
+    const sp=cam.position.clone(),sq=cam.quaternion.clone(),s=K[st],d=s.d*(cam.aspect<1?1.7:1),yr=s.y*Math.PI/180,pr=s.p*Math.PI/180;
+    cam.position.set(d*Math.cos(pr)*Math.sin(yr),d*Math.sin(pr),d*Math.cos(pr)*Math.cos(yr));cam.lookAt(T);cam.updateMatrixWorld();
+    rest=(D.tappe[st].quote||[]).map(q=>q.sfera?{c:P(0,0,0)}:{da:P(...q.da),a:P(...q.a),rif:(q.rif||[]).map(p=>P(...p))});
+    cam.position.copy(sp);cam.quaternion.copy(sq);cam.updateMatrixWorld();restKey=key;return rest;}
+  function drawQuotes(st){const Q=D.tappe[st].quote;if(!Q)return '';const R0=restPose(st);let svg='';
+    Q.forEach((q,i)=>{const r0=R0[i];
+      if(q.sfera){const c=P(0,L.userData.sphere.position.y,0),e=P(q.sfera,L.userData.sphere.position.y,0),rr=Math.round(Math.hypot(e[0]-c[0],e[1]-c[1])),cx=Math.round(c[0]),cy=Math.round(r0.c[1]);
+        svg+=`<circle cx="${cx}" cy="${cy}" r="${rr+14}" fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="3 4"/>`+hq([cx-rr,cy],[cx+rr,cy],q.testo,false,{y:cy-rr-(q.scosta||40),under:false});return;}
+      const a=P(...q.da),b=P(...q.a);
+      if(q.verso==='v'){const xs=(q.rif||[q.da,q.a]).map(p=>P(...p)[0]),right=(q.scosta||0)>=0;
+        svg+=hq(a,b,q.testo,true,{x:(right?Math.max(...xs):Math.min(...xs))+q.scosta,ya:r0.da[1],yb:r0.a[1],right});}
+      else{const ys=(r0.rif.length?r0.rif:[r0.da,r0.a]).map(p=>p[1]),under=(q.scosta||0)>=0;
+        const[l,rt]=a[0]<=b[0]?[a,b]:[b,a];svg+=hq(l,rt,q.testo,false,{y:(under?Math.max(...ys):Math.min(...ys))+q.scosta,under});}});
+    return svg;}
   let last=performance.now();
   return function(now){const dt=Math.min(.033,(now-last)/1000);last=now;const H=innerHeight;
     const tourH=tour.offsetHeight,raw=cl(root.scrollTop/H,0,N-1);prog.t=RM?Math.round(raw):raw;if(RM)prog.x=prog.t;else prog.step(dt);
@@ -52,13 +72,9 @@ function PROJECT(root,D){
     const st=Math.round(t),near=1-Math.min(1,Math.abs(t-st)*2.2);
     big.forEach((b,j)=>{const on=j===st;bigW[j].t=on?1:0;if(RM||!on)bigW[j].x=on?1:bigW[j].x*Math.pow(.0005,dt);else bigW[j].step(dt);const w=Math.max(0,bigW[j].x);
       b.style.opacity=(Math.pow(w,3)*fade*(on?Math.max(.15,near):0)).toFixed(3);b.style.fontVariationSettings=`'wdth' ${(62+63*w).toFixed(1)},'wght' ${(300+500*w).toFixed(0)}`;b.style.transform=`translateY(${((1-w)*6).toFixed(2)}vh)`;});
-    // real dimensions from the model, per stop (tappe[].quote): a line between two points, or the sphere
-    let svg='';const op=near*fade;
-    if(op>.02&&D.tappe[st].quote)for(const q of D.tappe[st].quote){
-      if(q.sfera){const sy=L.userData.sphere.position.y,c=P(0,sy,0),e=P(q.sfera,sy,0),r=Math.hypot(e[0]-c[0],e[1]-c[1]);
-        svg+=`<circle cx="${c[0]}" cy="${c[1]}" r="${r+14}" fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="3 4"/>`+dline(P(-q.sfera,0,0),P(q.sfera,0,0),esc(q.testo),-r-40,true);}
-      else svg+=dline(P(...q.da),P(...q.a),esc(q.testo),q.scosta,false);}
-    dim.innerHTML=svg;dim.style.opacity=op.toFixed(3);
+    // quotes stay visible for the whole stop (they change only when the stop changes) and fade only when the content arrives
+    const op=fade;const svg=op>.02?drawQuotes(st):'';
+    if(dim._svg!==svg){dim.innerHTML=svg;dim._svg=svg;}setVar(dim,'opacity',op.toFixed(3));
     R.render(S,cam);
   };}
 (async function(){const root=document.getElementById("liveG");
