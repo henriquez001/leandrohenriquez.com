@@ -4,13 +4,16 @@ function HOME(root){
   const H=()=>innerHeight;
   // transition with the real module shapes, then open the project page
   const tr=root.querySelector('#jTr');MODCELLS.forEach((c,i)=>tr.insertAdjacentHTML('beforeend',`<svg viewBox="${c.v}" preserveAspectRatio="none" style="transition-delay:${(i%3+Math.floor(i/3))*45}ms"><path d="${c.d}"/></svg>`));
+  addEventListener('pageshow',()=>tr.classList.remove('go'));
   function toProject(){const go=()=>{location.href='lavori/oopar/';};if(RM){go();return;}tr.classList.add('go');setTimeout(go,470);}
   // nav
   root.querySelectorAll('.jnav a').forEach(a=>a.onclick=()=>{const s=root.querySelector('#'+a.dataset.to);root.scrollTo({top:s.offsetTop-20,behavior:RM?'auto':'smooth'});});
   // hero letters + email letters (kinetic, as liked)
   let hero=[];root.querySelectorAll('.kin').forEach(k=>hero=hero.concat(splitLetters(k)));
   const mailEl=root.querySelector('#jMail'),mail=splitLetters(mailEl);
-  const cp=root.querySelector('#jCopied');mailEl.onclick=()=>{try{navigator.clipboard.writeText('henriquez.leandro.a@gmail.com').then(()=>{cp.style.opacity=1;setTimeout(()=>cp.style.opacity=0,1400);},()=>{});}catch(e){}};
+  const cp=root.querySelector('#jCopied');const ADDR='henriquez.leandro.a@gmail.com',ok=()=>{cp.style.opacity=1;setTimeout(()=>cp.style.opacity=0,1400);};
+  const legacy=()=>{const t=document.createElement('textarea');t.value=ADDR;t.setAttribute('readonly','');t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();let done=false;try{done=document.execCommand('copy');}catch(e){}t.remove();if(done)ok();else location.href='mailto:'+ADDR;};
+  mailEl.onclick=()=>{if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(ADDR).then(ok,legacy);else legacy();};
   // index with mouse-follow preview
   const idx=root.querySelector('#jIdx'),peek=makePeek(root,320);
   const who=['tesi · Firenze','prodotto · in vendita','con GanzoDesign','con GanzoDesign','kit + packaging','in team','personalizzabile','sostenibilità','1° premio','con Bottega Ind.'];
@@ -36,7 +39,7 @@ function HOME(root){
       const a=kins[0].getBoundingClientRect(),b=kins[1].getBoundingClientRect();const key=[a.left,a.top,b.right,b.bottom].map(Math.round).join();
       if(key!==qKey){qKey=key;const hr=root.querySelector('#jHero').getBoundingClientRect();
         q.innerHTML=dimH(b.left-hr.left,b.right-hr.left,b.bottom-hr.top+34,'industrial designer — 10 progetti','#111')+dimH(a.left-hr.left,a.right-hr.left,a.top-hr.top-26,'design specialist in Elica dal 2022',accOf());}}
-    const ms=secs.findIndex(o=>st+vh*.5>=o.top&&st+vh*.5<o.top+o.h);const label=names[ms+1]||names[0];if(secUi._t!==label){secUi._t=label;secUi.textContent=label;}
+    let ms=-1;for(let k=0;k<secs.length;k++)if(st+vh*.5>=secs[k].top)ms=k;const label=names[ms+1]||names[0];if(secUi._t!==label){secUi._t=label;secUi.textContent=label;}
     secs.forEach(o=>{const f=Math.max(0,Math.min(1,(st+vh-o.top)/(vh*.9)));setVar(o.bw,'fontVariationSettings',fvs(62+63*f,300+500*f));setVar(o.bw,'transform',`translateY(${((1-f)*10).toFixed(1)}vh)`);});
     const ftop=secs[1].top;if(Math.abs(st+vh*.5-ftop-vh*.4)<vh){const r=pic.getBoundingClientRect();const k=[r.width,r.height].map(Math.round).join();if(k!==pKey){pKey=k;const w=r.width,h=r.height;
       picQ.innerHTML=dimH(w*.14,w*.86,h-28,'300 mm','#111')+dimV(w-30,h*.22,h*.78,'195','#111');}}

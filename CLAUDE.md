@@ -2,8 +2,8 @@
 
 Portfolio di Leandro Henriquez (industrial designer, design specialist in Elica dal 2022).
 Sito statico senza build, pubblicato con GitHub Pages dal branch `main`, cartella radice.
-Dominio previsto: leandrohenriquez.com (Spaceship). Finché non è collegato, l'indirizzo è
-https://henriquez001.github.io/leandrohenriquez.com/
+Online su https://leandrohenriquez.com (dominio su Spaceship, DNS → GitHub Pages; file CNAME
+nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HANDOFF.md.
 
 ## Preferenze del proprietario (vincolanti)
 - Prima di ogni modifica visiva (layout, font, spaziature, menu, animazioni) si prepara
@@ -46,6 +46,4 @@ https://henriquez001.github.io/leandrohenriquez.com/
 - Render in alta risoluzione (le immagini attuali vengono dal PDF del portfolio, ~560 px).
 - Texture noce vera da Vitrum al posto di quella procedurale.
 - 3D più leggero su mobile.
-- Collegare il dominio: record A 185.199.108.153 / .109.153 / .110.153 / .111.153,
-  CNAME www → henriquez001.github.io, poi file CNAME e dominio in Settings → Pages.
-  A quel punto i percorsi assoluti in 404.html (`/leandrohenriquez.com/...`) vanno portati a `/`.
+- Vedi HANDOFF.md per l'elenco aggiornato.
