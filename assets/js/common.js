@@ -38,6 +38,7 @@ const IMG={cut_one:BASE+'assets/img/cut-one.png',hydra:BASE+'assets/img/hydra.jp
         .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=wRough;');};
     return m;}
 
+const OOPAR_PATTERN_REPEAT=4; // ripetizioni del pattern intorno al foro: 2 = A, 4 = B, 8 = C
 function makeRealLamp(opts){
   opts=opts||{};
   const G=new THREE.Group();
@@ -47,13 +48,36 @@ function makeRealLamp(opts){
     const lm=new THREE.LineBasicMaterial({color:0xffffff});const wm=new THREE.MeshBasicMaterial({color:0xffffff,wireframe:true,transparent:true,opacity:.12});
     geos.forEach(g=>{G.add(new THREE.LineSegments(new THREE.EdgesGeometry(g,20),lm));G.add(new THREE.Mesh(g,wm));});
     G.userData.sphere=G.children[0];return G;}
+  // inner lining (part 2): cylindrical UVs around Z, z in [-.86,.86], seam fixed per triangle
+  geos[2]=(g=>{const n=g.toNonIndexed(),P=n.attributes.position,c=P.count,uv=new Float32Array(c*2);
+    for(let i=0;i<c;i++){uv[i*2]=Math.atan2(P.getY(i),P.getX(i))/(2*Math.PI)+.5;uv[i*2+1]=(P.getZ(i)+.86)/1.72;}
+    for(let t=0;t<c;t+=3){const a=uv[t*2],b=uv[t*2+2],d=uv[t*2+4];if(Math.max(a,b,d)-Math.min(a,b,d)>.5)for(let j=0;j<3;j++)if(uv[(t+j)*2]<.5)uv[(t+j)*2]+=1;}
+    n.setAttribute('uv',new THREE.BufferAttribute(uv,2));return n;})(geos[2]);
+  // outer skin (part 3) has an inner wall 2 cm inside the lining that hid it: drop those faces, keep a 14 mm walnut rim
+  geos[3]=((g3,g2)=>{const B=360,r2=new Float32Array(B).fill(9),P2=g2.attributes.position;
+    for(let i=0;i<P2.count;i++){const x=P2.getX(i),y=P2.getY(i),b=Math.floor((Math.atan2(y,x)/(2*Math.PI)+.5)*B)%B;r2[b]=Math.min(r2[b],Math.hypot(x,y));}
+    for(let b=0;b<B;b++)if(r2[b]>8){let j=1;while(r2[(b+j)%B]>8&&r2[(b-j+B)%B]>8)j++;r2[b]=Math.min(r2[(b+j)%B],r2[(b-j+B)%B]);}
+    const P=g3.attributes.position,I=g3.index.array,keep=[];
+    for(let t=0;t<I.length;t+=3){let cx=0,cy=0,cz=0;for(let j=0;j<3;j++){cx+=P.getX(I[t+j]);cy+=P.getY(I[t+j]);cz+=P.getZ(I[t+j]);}cx/=3;cy/=3;cz/=3;
+      const b=Math.floor((Math.atan2(cy,cx)/(2*Math.PI)+.5)*B)%B;if(Math.abs(cz)<.86&&Math.hypot(cx,cy)<r2[b]-.005)continue;keep.push(I[t],I[t+1],I[t+2]);}
+    const g=g3.clone();g.setIndex(keep);return g;})(geos[3],geos[2]);
+  // Madhubani pattern on the backlit lining (mirrored repeat hides the seams)
+  const K=OOPAR_PATTERN_REPEAT;
+  const tex=new THREE.TextureLoader().load(BASE+'assets/img/oopar-pattern.jpg',()=>{if(G.userData.capture)G.userData.capture();});
+  tex.encoding=THREE.sRGBEncoding;tex.wrapS=tex.wrapT=THREE.MirroredRepeatWrapping;tex.repeat.set(K,K*1.72/13);
+  const crt=new THREE.WebGLCubeRenderTarget(256,{generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter,encoding:THREE.sRGBEncoding});
   const skin=walnutMat(), body=walnutMat();
-  const mats=[new THREE.MeshStandardMaterial({color:0xffffff,metalness:1,roughness:.03}),
+  const mats=[new THREE.MeshStandardMaterial({color:0xffffff,metalness:1,roughness:.02,envMap:crt.texture,envMapIntensity:1}),
     body,
-    new THREE.MeshStandardMaterial({color:0xf6efe2,roughness:.9,side:THREE.DoubleSide,emissive:0xffe9c8,emissiveIntensity:.55}),
+    new THREE.MeshStandardMaterial({color:0xffffff,map:tex,emissiveMap:tex,roughness:.85,side:THREE.DoubleSide,emissive:0xffe9c8,emissiveIntensity:.55}),
     skin];
   geos.forEach((g,i)=>{const m=new THREE.Mesh(g,mats[i]);G.add(m);if(i===0)G.userData.sphere=m;});
   const glow=new THREE.PointLight(0xffe6c0,1.4,4);G.add(glow);
+  // chrome sphere reflects the real interior: cube camera at its centre, shot once (and again when the texture arrives)
+  const cc=new THREE.CubeCamera(.05,30,crt);G.add(cc);
+  G.userData.setupReflection=(R,S)=>{const bg=new THREE.Color(0x6f6f6a);
+    G.userData.capture=()=>{const sp=G.userData.sphere,old=S.background;sp.visible=false;S.background=bg;cc.update(R,S);S.background=old;sp.visible=true;};
+    G.userData.capture();};
   return G;
 }
 

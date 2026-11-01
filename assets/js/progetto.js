@@ -2,7 +2,7 @@
 function PROJECT(root){
   const cv=root.querySelector('#fxG'),R=mkR(cv),S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(28,1,.1,80);
   S.environment=studioEnv(R,0x6f6f6a);S.add(new THREE.AmbientLight(0xffffff,.3));const k=new THREE.DirectionalLight(0xffffff,1);k.position.set(3,5,4);S.add(k);
-  const L=makeRealLamp();S.add(L);
+  const L=makeRealLamp();S.add(L);L.updateMatrixWorld(true);L.userData.setupReflection(R,S);
   // camera stops: yaw, pitch, dist — object always at the centre
   const K=[{y:35,p:18,d:11.5},{y:0,p:4,d:10.5},{y:10,p:6,d:7.6},{y:-62,p:16,d:9.4},{y:-150,p:10,d:9.8}];
   const big=[...root.querySelectorAll('#gBig b')],dim=root.querySelector('#gDim'),tour=root.querySelector('.tour');
