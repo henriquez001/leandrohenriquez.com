@@ -34,8 +34,10 @@ function scheda(p,P){
 }
 function immagine(p,P){
   const amb=P&&P.immagini&&Array.isArray(P.immagini.voci)?P.immagini.voci.find(v=>!v.scontornata):null;
-  if(amb)return {src:amb.src,alt:amb.alt,taglio:'cover'};
-  return {src:p.anteprima,alt:`${p.nome}, ${p.tipo}`,taglio:/\.(jpe?g)$/i.test(p.anteprima)?'cover':'contain'};
+  if(amb&&!p.ritaglio&&!/\.png$/i.test(p.anteprima))return {src:amb.src,alt:amb.alt,taglio:'cover'};
+  // senza sfondo: prima il ritaglio fatto per il PDF, poi l'anteprima se è già scontornata (PNG)
+  const src=p.ritaglio||p.anteprima;
+  return {src,alt:`${p.nome}, ${p.tipo}`,taglio:/\.(jpe?g)$/i.test(src)?'cover':'contain'};
 }
 
 // Profilo: gli stessi dati della sezione Studio del sito (index.html).
@@ -101,7 +103,6 @@ a{color:inherit;text-decoration:none}
 figure{flex:1 1 0;min-height:60mm;margin-top:8mm;display:flex;align-items:center;justify-content:center;overflow:hidden}
 figure img{display:block;width:100%;height:100%}
 figure.cover img{object-fit:cover}
-figure.contain{background:#F6F4EF}
 figure.contain img{object-fit:contain;padding:10mm}
 .desc{margin-top:6mm;max-width:170mm;font-size:9.5pt;line-height:1.5;flex:none}
 .spec{display:grid;grid-template-columns:1fr 1fr;column-gap:6mm;margin-top:6mm;flex:none}
