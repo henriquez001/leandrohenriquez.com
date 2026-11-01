@@ -15,7 +15,10 @@ function controllaVoce(p){
   if(typeof p.pagina!=='boolean')e.push(`${p.slug}: "pagina" deve essere true o false`);
   if(typeof p.pubblicato!=='boolean')e.push(`${p.slug}: "pubblicato" deve essere true o false`);
   if(p.etichetta!==undefined&&!testo(p.etichetta,6))e.push(`${p.slug}: etichetta al massimo 6 caratteri`);
-  const note=['slug','nome','tipo','contesto','anteprima','pagina','pubblicato','etichetta'];
+  if(p.descrizione!==undefined&&!testo(p.descrizione,420))e.push(`${p.slug}: descrizione più lunga di 420 caratteri`);
+  if(p.scheda!==undefined&&!(Array.isArray(p.scheda)&&p.scheda.length<=6&&p.scheda.every(v=>v&&testo(v.voce,20)&&testo(v.valore,24))))e.push(`${p.slug}: scheda: al massimo 6 voci {voce, valore}, brevi`);
+  if(p.anno!==undefined&&!/^(19|20)\d\d$/.test(String(p.anno)))e.push(`${p.slug}: anno non valido (es. 2017)`);
+  const note=['slug','nome','tipo','contesto','anteprima','pagina','pubblicato','etichetta','descrizione','anno','scheda'];
   Object.keys(p).forEach(k=>{if(!note.includes(k))e.push(`${p.slug}: campo sconosciuto "${k}"`);});
   return e;
 }
