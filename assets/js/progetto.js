@@ -1,10 +1,30 @@
-/* hl. — pagina progetto */
-function PROJECT(root){
+/* hl. — pagina progetto, guidata dai dati in lavori/<progetto>/progetto.json */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// builds the page text from the JSON; the markup matches progetto.css
+function renderProject(root,D){
+  const pad=n=>String(n).padStart(2,'0');
+  root.querySelector('#gBig').innerHTML=D.tappe.map((t,i)=>`<b data-s="${i}"${t.parola.stile?` class="${esc(t.parola.stile)}"`:''}>${esc(t.parola.testo)}</b>`).join('');
+  root.querySelector('.ui.tr').innerHTML=`${esc(D.contatore)}<br>${esc(D.etichetta)}`;
+  root.querySelector('.tour').innerHTML=`<section class="s intro"><div class="meta">${D.intro.map(x=>`<span>${esc(x)}</span>`).join('')}</div></section>`+
+    D.tappe.slice(1).map((t,i)=>`<section class="s"><div class="cap"><div class="n">${esc(t.didascalia.n)}</div><h3>${esc(t.didascalia.titolo)}</h3><p>${esc(t.didascalia.testo)}</p></div><div class="idx">${pad(i+1)}</div></section>`).join('');
+  const k=(a,b)=>`<div class="k"><span>${esc(a)}</span><span>${esc(b)}</span></div>`;
+  let h='';
+  if(D.scheda)h+=`<section class="sec">${k('Scheda',D.scheda.nota)}<div class="spec">${D.scheda.voci.map(v=>`<div><small>${esc(v.voce)}</small><b>${esc(v.valore)}${v.unita?`<i>${esc(v.unita)}</i>`:''}</b></div>`).join('')}</div></section>`;
+  if(D.immagini)h+=`<section class="sec">${k('Immagini',D.immagini.nota)}<div class="gal">${D.immagini.voci.map(v=>{const img=`<img src="${esc(BASE+v.src)}" alt="${esc(v.alt)}">`;
+    return `<figure>${v.scontornata?`<div class="cut">${img}</div>`:img}<figcaption>${v.didascalia.map(x=>`<span>${esc(x)}</span>`).join('')}</figcaption></figure>`;}).join('')}</div></section>`;
+  if(D.processo)h+=`<section class="sec">${k('Processo',D.processo.nota)}<div class="proc">${D.processo.voci.map((v,i)=>`<div${v.fatto?' class="ok"':''}><span>${pad(i+1)}</span><b>${esc(v.titolo)}</b><span>${esc(v.stato)}</span></div>`).join('')}</div></section>`;
+  if(D.prossimo)h+=`<a class="next sec" id="gNext" href="${esc(BASE+D.prossimo.link)}"><div class="k" style="display:flex;justify-content:space-between;font:500 12px/1 'Roboto Mono',monospace;margin-bottom:3vh"><span>${esc(D.prossimo.etichetta)}</span><span>→</span></div><b>${esc(D.prossimo.titolo)}</b></a>`;
+  root.querySelector('.content').innerHTML=h;
+}
+function loadScript(src){return new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=ko;document.body.appendChild(s);});}
+// one builder per model; the JSON names it in modello.costruttore
+const BUILDERS={oopar:()=>makeRealLamp()};
+function PROJECT(root,D){
   const cv=root.querySelector('#fxG'),R=mkR(cv),S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(28,1,.1,80);
   S.environment=studioEnv(R,0x6f6f6a);S.add(new THREE.AmbientLight(0xffffff,.3));const k=new THREE.DirectionalLight(0xffffff,1);k.position.set(3,5,4);S.add(k);
-  const L=makeRealLamp();S.add(L);L.updateMatrixWorld(true);L.userData.setupReflection(R,S);
+  const L=BUILDERS[D.modello.costruttore]();S.add(L);L.updateMatrixWorld(true);if(L.userData.setupReflection)L.userData.setupReflection(R,S);
   // camera stops: yaw, pitch, dist — object always at the centre
-  const K=[{y:35,p:18,d:11.5},{y:0,p:4,d:10.5},{y:10,p:6,d:7.6},{y:-62,p:16,d:9.4},{y:-150,p:10,d:9.8}];
+  const K=D.tappe.map(t=>({y:t.camera.yaw,p:t.camera.pitch,d:t.camera.dist}));
   const big=[...root.querySelectorAll('#gBig b')],dim=root.querySelector('#gDim'),tour=root.querySelector('.tour');
   const bigW=big.map(()=>new Spr(.5));
   const N=K.length,prog=new Spr(.14);let yawD=0,yv=0,drag=false,lx=0,hist=[];
@@ -32,12 +52,16 @@ function PROJECT(root){
     const st=Math.round(t),near=1-Math.min(1,Math.abs(t-st)*2.2);
     big.forEach((b,j)=>{const on=j===st;bigW[j].t=on?1:0;if(RM||!on)bigW[j].x=on?1:bigW[j].x*Math.pow(.0005,dt);else bigW[j].step(dt);const w=Math.max(0,bigW[j].x);
       b.style.opacity=(Math.pow(w,3)*fade*(on?Math.max(.15,near):0)).toFixed(3);b.style.fontVariationSettings=`'wdth' ${(62+63*w).toFixed(1)},'wght' ${(300+500*w).toFixed(0)}`;b.style.transform=`translateY(${((1-w)*6).toFixed(2)}vh)`;});
-    // real dimensions from the STEP (W 300, H 195, D 200 mm; sphere Ø90)
+    // real dimensions from the model, per stop (tappe[].quote): a line between two points, or the sphere
     let svg='';const op=near*fade;
-    if(op>.02&&st===1){svg=dline(P(-1.5,-.98,0),P(1.5,-.98,0),'300 mm',46,false)+dline(P(1.5,.98,0),P(1.5,-.98,0),'195',-40,false)+dline(P(-1.5,.98,-1),P(-1.5,.98,1),'200',-38,false);}
-    if(op>.02&&st===2){const c=P(0,L.userData.sphere.position.y,0),e=P(.45,L.userData.sphere.position.y,0),r=Math.hypot(e[0]-c[0],e[1]-c[1]);
-      svg=`<circle cx="${c[0]}" cy="${c[1]}" r="${r+14}" fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="3 4"/>`+dline(P(-.45,0,0),P(.45,0,0),'Ø 90',-r-40,true);}
+    if(op>.02&&D.tappe[st].quote)for(const q of D.tappe[st].quote){
+      if(q.sfera){const sy=L.userData.sphere.position.y,c=P(0,sy,0),e=P(q.sfera,sy,0),r=Math.hypot(e[0]-c[0],e[1]-c[1]);
+        svg+=`<circle cx="${c[0]}" cy="${c[1]}" r="${r+14}" fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="3 4"/>`+dline(P(-q.sfera,0,0),P(q.sfera,0,0),esc(q.testo),-r-40,true);}
+      else svg+=dline(P(...q.da),P(...q.a),esc(q.testo),q.scosta,false);}
     dim.innerHTML=svg;dim.style.opacity=op.toFixed(3);
     R.render(S,cam);
   };}
-(function(){const root=document.getElementById("liveG");const frame=PROJECT(root);let vis=true;document.addEventListener("visibilitychange",()=>vis=!document.hidden);function loop(t){requestAnimationFrame(loop);if(vis)frame(t);}requestAnimationFrame(loop);})();
+(async function(){const root=document.getElementById("liveG");
+  const D=await fetch(root.dataset.progetto||'progetto.json').then(r=>r.json());
+  renderProject(root,D);await loadScript(BASE+D.modello.dati);
+  const frame=PROJECT(root,D);let vis=true;document.addEventListener("visibilitychange",()=>vis=!document.hidden);function loop(t){requestAnimationFrame(loop);if(vis)frame(t);}requestAnimationFrame(loop);})();

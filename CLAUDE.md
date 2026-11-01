@@ -32,6 +32,11 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
 - `assets/js/common.js` — codice condiviso (molla Spr, helper, materiale noce procedurale,
   `makeRealLamp`, forme del modulo).
 - `assets/js/home.js`, `assets/js/progetto.js` — logica delle pagine.
+- Pagine progetto guidate da dati: `lavori/<progetto>/progetto.json` contiene titolo, contatore,
+  modello (`dati` = file mesh, `costruttore` = funzione in `BUILDERS` di progetto.js), intro,
+  tappe (camera yaw/pitch/dist, parola gigante, didascalia, quote 3D), scheda, immagini,
+  processo e prossimo progetto. `index.html` del progetto è solo il guscio (meta, logo, script).
+  Per una pagina nuova: copiare la cartella `lavori/oopar/`, cambiare meta e JSON.
 - `assets/models/oopar-data.js` — mesh della lampada Oopar convertita da lampada.stp
   (OpenCASCADE, base64). La home non carica three.js né il modello.
 - `assets/js/three.min.js` — three.js r128, locale.
