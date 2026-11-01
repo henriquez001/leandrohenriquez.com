@@ -4,9 +4,10 @@ import {GitHub,Errore,b64enc} from './github.js';
 import {verificaGoogle,puoEntrare,creaSessione,chiudiSessione,leggiSessione,elencoAccessi,salvaAccessi,proprietario} from './auth.js';
 import {statistiche} from './stats.js';
 import schema from '../../tools/schema.js';
-const {SLUG,controllaVoce,controllaIndice,controllaPagina,generaIndiceJS}=schema;
+const {SLUG,controllaVoce,controllaIndice,controllaPagina,generaIndiceJS,controllaApp,controllaElencoApp,inserisciRiquadri}=schema;
 
-const INDICE='data/progetti.json',INDICE_JS='assets/js/indice.js';
+const INDICE='data/progetti.json',INDICE_JS='assets/js/indice.js',APP='data/app.json',LAB='laboratorio/index.html';
+const MAX_HTML=2*1024*1024;
 const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_IMG=8*1024*1024;
 
@@ -89,6 +90,42 @@ export function crea({fetchImpl}={}){
     const percorso=`assets/img/${slug}/${nome}.${ext}`;
     const sha=await new GitHub(env,f).commit([{percorso,base64:b64enc(by)}],`Pannello: immagine ${percorso}`,base,s.email);
     return json({base:sha,percorso},201);
+  });
+
+
+  // --- app del Laboratorio: elenco in data/app.json, riquadri in laboratorio/index.html, ogni app in app/<slug>/index.html ---
+  async function salvaApp(gh,d,base,messaggio,autore,extra=[]){
+    const html=await gh.leggi(LAB,base);if(html===null)throw new Errore(409,'Manca laboratorio/index.html');
+    return gh.commit([{percorso:APP,testo:JSON.stringify(d,null,2)+'\n'},{percorso:LAB,testo:inserisciRiquadri(html,d)},...extra],messaggio,base,autore);
+  }
+  R('GET','/api/app',async(req,env)=>{const gh=new GitHub(env,f);const base=await gh.testa();return json({base,...(await gh.leggiJSON(APP,base))});});
+  R('PUT','/api/app',async(req,env,s)=>{ // elenco intero: testi, ordine, stato, pubblicazione
+    const {base,app}=await corpo(req);const d={app};const err=controllaElencoApp(d);if(err.length)throw new Errore(422,err.join('; '));
+    const gh=new GitHub(env,f);
+    for(const a of app.filter(x=>x.stato==='pronta'&&x.pubblicato))if(!(await gh.leggi(`app/${a.slug}/index.html`,base)))throw new Errore(409,`"${a.nome}" è segnata come pronta ma il file dell'app non c'è ancora`);
+    return json({base:await salvaApp(gh,d,base,'Pannello: elenco delle app aggiornato',s.email)});
+  });
+  R('POST','/api/app',async(req,env,s)=>{ // nuova app, in fondo, "in arrivo" finché non carichi il file
+    const {base,app}=await corpo(req);const a={stato:'in-arrivo',pubblicato:false,...app};
+    const err=controllaApp(a);if(err.length)throw new Errore(422,err.join('; '));
+    const gh=new GitHub(env,f);const d=await gh.leggiJSON(APP,base);
+    if(d.app.some(x=>x.slug===a.slug))throw new Errore(409,`Esiste già un'app "${a.slug}"`);
+    d.app.push(a);return json({base:await salvaApp(gh,d,base,`Pannello: nuova app ${a.nome}`,s.email),app:a},201);
+  });
+  R('PUT','/api/app/:slug/file',async(req,env,s,{slug})=>{ // carica o sostituisce il file HTML dell'app
+    if(!SLUG.test(slug))throw new Errore(400,'Slug non valido');
+    const {base,html}=await corpo(req);
+    if(typeof html!=='string'||!/<html[\s>]/i.test(html))throw new Errore(422,'Serve una pagina HTML completa');
+    if(new TextEncoder().encode(html).length>MAX_HTML)throw new Errore(413,'File troppo grande (massimo 2 MB)');
+    const gh=new GitHub(env,f);const d=await gh.leggiJSON(APP,base);const a=d.app.find(x=>x.slug===slug);if(!a)throw new Errore(404,'App non trovata');
+    a.stato='pronta';
+    return json({base:await salvaApp(gh,d,base,`Pannello: file dell'app ${a.nome}`,s.email,[{percorso:`app/${slug}/index.html`,testo:html}])});
+  });
+  R('DELETE','/api/app/:slug',async(req,env,s,{slug})=>{ // toglie dall'elenco; il file resta nella storia del repo
+    const base=new URL(req.url).searchParams.get('base');const gh=new GitHub(env,f);const d=await gh.leggiJSON(APP,base);
+    const a=d.app.find(x=>x.slug===slug);if(!a)throw new Errore(404,'App non trovata');
+    d.app=d.app.filter(x=>x.slug!==slug);
+    return json({base:await salvaApp(gh,d,base,`Pannello: tolta l'app ${a.nome}`,s.email,[{percorso:`app/${slug}/index.html`,elimina:true}].filter(()=>a.stato==='pronta'))});
   });
 
   // --- statistiche ---

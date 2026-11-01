@@ -37,6 +37,9 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
 - `assets/js/three.min.js` — three.js r128, locale.
 - `data/progetti.json` — elenco dei lavori (fonte unica). `assets/js/indice.js` è GENERATO da lì:
   dopo una modifica a mano lancia `node tools/genera-indice.js`. Regole dei dati in `tools/schema.js`.
+- `laboratorio/` — pagina delle app (variante B scelta il 1/11/2026). Elenco in `data/app.json`; i riquadri
+  tra i segnaposto `app:inizio`/`app:fine` sono GENERATI (`node tools/genera-indice.js`). Ogni app è una
+  pagina indipendente in `app/<slug>/index.html` e mostra una versione ridotta con `?mini=1`.
 - `backend/` — pannello di gestione (Cloudflare Worker): accesso Google con elenco email, progetti,
   immagini, statistiche GoatCounter. Vedi `backend/README.md`; test con `cd backend && npm test`.
 

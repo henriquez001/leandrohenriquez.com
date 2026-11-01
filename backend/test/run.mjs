@@ -13,7 +13,7 @@ async function tokenGoogle(email,{aud=CLIENT,exp=Date.now()/1000+600,verified=tr
   return `${h}.${c}.${b64u(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',chiave,new TextEncoder().encode(h+'.'+c)))}`;
 }
 // --- GitHub finto: repo in memoria con commit e ref ---
-const files=new Map([['data/progetti.json',readFileSync(new URL('../../data/progetti.json',import.meta.url),'utf8')],['lavori/oopar/index.html','<html></html>'],['lavori/oopar/progetto.json',JSON.stringify({titolo:'Oopar',tappe:[{camera:{},parola:{testo:'Oopar'}}]})]]);
+const files=new Map([['data/progetti.json',readFileSync(new URL('../../data/progetti.json',import.meta.url),'utf8')],['lavori/oopar/index.html','<html></html>'],['data/app.json',readFileSync(new URL('../../data/app.json',import.meta.url),'utf8')],['laboratorio/index.html',readFileSync(new URL('../../laboratorio/index.html',import.meta.url),'utf8')],['app/peso-cane/index.html','<html></html>'],['lavori/oopar/progetto.json',JSON.stringify({titolo:'Oopar',tappe:[{camera:{},parola:{testo:'Oopar'}}]})]]);
 let commits={c0:{tree:'t0',files:new Map(files)}},head='c0',n=0;const blobs={},trees={};
 const R=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{'content-type':'application/json'}});
 let chiamateGC=[];
@@ -86,6 +86,17 @@ await prova('immagine: accetta PNG vero, rifiuta un file finto',async()=>{
 await prova('pagina progetto: legge e salva solo se valida',async()=>{const r=await chiama('GET','/api/progetti/oopar/pagina',{cookie:cProp});assert.equal(r.stato,200);
   assert.equal((await chiama('PUT','/api/progetti/oopar/pagina',{cookie:cProp,corpo:{base:r.dati.base,pagina:{titolo:''}}})).stato,422);
   assert.equal((await chiama('PUT','/api/progetti/oopar/pagina',{cookie:cProp,corpo:{base:r.dati.base,pagina:r.dati.pagina}})).stato,200);});
+await prova('app: nuova app in arrivo, poi file caricato e riquadro generato',async()=>{
+  let r=await chiama('GET','/api/app',{cookie:cProp});assert.equal(r.dati.app.length,2);
+  r=await chiama('POST','/api/app',{cookie:cProp,corpo:{base:r.dati.base,app:{slug:'timer',nome:'Timer',tipo:'strumento',pubblicato:true}}});assert.equal(r.stato,201,JSON.stringify(r.dati));
+  let lab=commits[head].files.get('laboratorio/index.html');assert.match(lab,/<h2>Timer<\/h2>/);assert.match(lab,/<span id="nApp">3<\/span>/);assert.doesNotMatch(lab,/app\/timer\/\?mini/);
+  const x=await chiama('PUT','/api/app/timer/file',{cookie:cProp,corpo:{base:r.dati.base,html:'non è html'}});assert.equal(x.stato,422);
+  const y=await chiama('PUT','/api/app/timer/file',{cookie:cProp,corpo:{base:r.dati.base,html:'<!doctype html><html><body>ok</body></html>'}});assert.equal(y.stato,200,JSON.stringify(y.dati));
+  const fs=commits[head].files;assert.equal(fs.get('app/timer/index.html'),'<!doctype html><html><body>ok</body></html>');assert.match(fs.get('laboratorio/index.html'),/app\/timer\/\?mini=1/);});
+await prova('app: non si segna pronta un\'app senza file',async()=>{const r=await chiama('GET','/api/app',{cookie:cProp});const a=r.dati.app;a.find(x=>x.slug==='spesa').stato='pronta';
+  assert.equal((await chiama('PUT','/api/app',{cookie:cProp,corpo:{base:r.dati.base,app:a}})).stato,409);});
+await prova('app: togliere un\'app toglie anche il suo file',async()=>{const r=await chiama('GET','/api/app',{cookie:cProp});
+  assert.equal((await chiama('DELETE','/api/app/timer?base='+r.dati.base,{cookie:cProp})).stato,200);assert.ok(!commits[head].files.has('app/timer/index.html'));assert.doesNotMatch(commits[head].files.get('laboratorio/index.html'),/Timer/);});
 await prova('statistiche: chiave GoatCounter solo lato server',async()=>{const r=await chiama('GET','/api/statistiche?giorni=30',{cookie:cProp});assert.equal(r.stato,200);
   assert.equal(r.dati.totale,459);assert.equal(r.dati.eventi[0].percorso,'apri-oopar');assert.ok(!JSON.stringify(r.dati).includes('gc-segreto'));});
 await prova('uscita cancella il cookie',async()=>{const r=await chiama('POST','/api/uscita',{cookie:cProp});assert.equal(r.cookie,'hl_sessione=');});

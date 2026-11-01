@@ -11,6 +11,8 @@ ripubblica il sito in un minuto circa.
   A ogni salvataggio rigenera anche `assets/js/indice.js`, che la home usa per l'indice dei lavori.
 - **Pagine progetto**: legge e salva `lavori/<slug>/progetto.json` (solo se la pagina HTML esiste già).
 - **Immagini**: carica PNG, JPG, WebP o AVIF fino a 8 MB in `assets/img/<slug>/`.
+- **Laboratorio**: elenco delle app in `data/app.json` (aggiungi, ordina, pubblica), carica il file HTML
+  di ogni app in `app/<slug>/index.html` e rigenera i riquadri di `laboratorio/index.html`.
 - **Statistiche**: chiede i dati a GoatCounter con la chiave segreta, che il browser non vede mai.
 
 Se nel frattempo il sito è cambiato (per esempio è stata unita una PR), il salvataggio viene rifiutato
@@ -26,6 +28,8 @@ invece di sovrascrivere: si ricarica e si riprova.
 | DELETE | `/api/progetti/:slug?base=` | chi ha accesso |
 | GET · PUT | `/api/progetti/:slug/pagina` | chi ha accesso |
 | POST | `/api/progetti/:slug/immagini` `{nome, base64}` | chi ha accesso |
+| GET · PUT · POST | `/api/app` | chi ha accesso |
+| PUT | `/api/app/:slug/file` `{html}` · DELETE `/api/app/:slug?base=` | chi ha accesso |
 | GET | `/api/statistiche?giorni=30` | chi ha accesso |
 | GET · POST · DELETE | `/api/accessi` | solo il proprietario |
 
@@ -35,7 +39,7 @@ Le richieste che modificano qualcosa devono avere l'intestazione `x-pannello: 1`
 ```
 cd backend
 npm install
-npm test          # 20 prove con GitHub, Google e GoatCounter simulati
+npm test          # 23 prove con GitHub, Google e GoatCounter simulati
 ```
 
 ## Messa online (fase "accessi", da fare insieme)

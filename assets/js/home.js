@@ -8,7 +8,7 @@ function HOME(root){
   addEventListener('pageshow',()=>tr.classList.remove('go'));
   function toProject(slug){const go=()=>{location.href='lavori/'+(slug||'oopar')+'/';};if(RM){go();return;}tr.classList.add('go');setTimeout(go,470);}
   // nav
-  root.querySelectorAll('.jnav a').forEach(a=>a.onclick=()=>{const s=root.querySelector('#'+a.dataset.to);root.scrollTo({top:s.offsetTop-20,behavior:RM?'auto':'smooth'});});
+  root.querySelectorAll('.jnav a[data-to]').forEach(a=>a.onclick=()=>{const s=root.querySelector('#'+a.dataset.to);root.scrollTo({top:s.offsetTop-20,behavior:RM?'auto':'smooth'});});
   // hero letters + email letters (kinetic, as liked)
   let hero=[];root.querySelectorAll('.kin').forEach(k=>hero=hero.concat(splitLetters(k)));
   const mailEl=root.querySelector('#jMail'),mail=splitLetters(mailEl);
