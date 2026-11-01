@@ -1,0 +1,42 @@
+/* hl. — pagina progetto */
+  /* G progetto v2 */
+  #liveG .bigw{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
+  #liveG .bigw b{position:absolute;font-family:'Archivo',sans-serif;text-transform:uppercase;font-size:24vw;line-height:.8;white-space:nowrap;font-variation-settings:'wdth' 62,'wght' 800;opacity:0;color:#111}
+  #liveG .bigw b.o{-webkit-text-stroke:1.5px #111;color:transparent}
+  #liveG .bigw b.or{color:#111}
+  #liveG canvas.fx{z-index:5}
+  #liveG svg.dim{position:fixed;inset:0;width:100vw;height:100vh;z-index:6;pointer-events:none}
+  #liveG svg.dim text{font:500 12px 'Roboto Mono',monospace;fill:#111}
+  #liveG svg.dim .acc{stroke:#111}
+  #liveG .tour .s{height:100vh;position:relative}
+  #liveG .cap{position:absolute;left:2.5vw;bottom:9vh;width:25vw;min-width:260px;z-index:8}
+  #liveG .cap .n{font:500 12px/1 'Roboto Mono',monospace;color:#6b6963;margin-bottom:10px}
+  #liveG .cap h3{font-family:'Archivo',sans-serif;text-transform:uppercase;font-variation-settings:'wdth' 62,'wght' 800;font-size:3.2vw;line-height:.9;margin-bottom:10px}
+  #liveG .cap p{font:400 15px/1.5 Inter,sans-serif;color:#3d3c39}
+  #liveG .idx{position:absolute;right:2.5vw;bottom:9vh;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 62,'wght' 300;font-size:9vw;line-height:.8;z-index:8}
+  #liveG .s.intro .meta{position:absolute;left:2.5vw;right:2.5vw;bottom:9vh;display:flex;justify-content:space-between;font:500 12px/1.4 'Roboto Mono',monospace;z-index:8}
+  #liveG .content{position:relative;z-index:9;background:#E9E6DF;padding:0 2.5vw}
+  #liveG .sec{border-top:1.5px solid #111;padding:22px 0 9vh}
+  #liveG .sec>.k{display:flex;justify-content:space-between;font:500 12px/1 'Roboto Mono',monospace;margin-bottom:5vh}
+  #liveG .spec{display:grid;grid-template-columns:repeat(4,1fr)}
+  #liveG .spec div{border-left:1px solid #b9b6ae;padding:0 16px 22px}
+  #liveG .spec div:nth-child(4n+1){border-left:0;padding-left:0}
+  #liveG .spec small{display:block;font:500 11px/1 'Roboto Mono',monospace;color:#6b6963;margin:18px 0 8px}
+  #liveG .spec b{font-family:'Archivo',sans-serif;text-transform:uppercase;font-variation-settings:'wdth' 62,'wght' 800;font-size:3.6vw;line-height:.9}
+  #liveG .spec b i{font-style:normal;color:#111}
+  #liveG .gal{display:grid;grid-template-columns:1.6fr 1fr;gap:2vw;align-items:end}
+  #liveG .gal figure{margin:0}
+  #liveG .gal img{width:100%;display:block;border-radius:6px}
+  #liveG .gal figcaption{font:500 11px/1.4 'Roboto Mono',monospace;margin-top:10px;display:flex;justify-content:space-between}
+  #liveG .gal .cut{background:#dedad1;border-radius:6px;padding:4vw;display:flex;align-items:center;justify-content:center}
+  #liveG .gal .cut img{border-radius:0}
+  #liveG .proc{display:grid;grid-template-columns:repeat(3,1fr);gap:2vw}
+  #liveG .proc div{aspect-ratio:4/3;border:1.5px dashed #9b978e;border-radius:6px;display:flex;flex-direction:column;justify-content:space-between;padding:16px;font:500 12px/1.4 'Roboto Mono',monospace}
+  #liveG .proc div.ok{border:1.5px solid #111;background:#111;color:#E9E6DF}
+  #liveG .proc div b{font-family:'Archivo',sans-serif;text-transform:uppercase;font-variation-settings:'wdth' 62,'wght' 800;font-size:2.6vw;line-height:.9}
+  #liveG .next{display:block;padding:6vh 0 10vh;cursor:pointer}
+  #liveG .next b{font-family:'Archivo',sans-serif;text-transform:uppercase;font-size:13vw;line-height:.85;white-space:nowrap;font-variation-settings:'wdth' 62,'wght' 800;transition:font-variation-settings 420ms cubic-bezier(.2,.9,.25,1),color 200ms;display:block}
+  #liveG .next:hover b{font-variation-settings:'wdth' 125,'wght' 900;color:#111}
+  
+#liveG .ui.tr{right:2.5vw;top:22px;text-align:right}#liveG .ui.tl{left:2.5vw;top:20px}
+@media (max-width:760px){#liveG .spec{grid-template-columns:1fr 1fr}#liveG .gal,#liveG .proc{grid-template-columns:1fr}#liveG .cap{width:auto;right:2.5vw;bottom:12vh}#liveG .idx{display:none}#liveG .spec b{font-size:9vw}#liveG .proc div b{font-size:7vw}#liveG .bigw b{font-size:30vw}}

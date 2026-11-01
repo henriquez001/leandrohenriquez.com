@@ -1,0 +1,18 @@
+/* hl. — stile di base */
+@font-face{font-family:'Archivo';src:url(../fonts/archivo-wdth-wght.woff2) format('woff2');font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+@font-face{font-family:'Inter';src:url(../fonts/inter-wght.woff2) format('woff2');font-weight:100 900;font-display:swap}
+@font-face{font-family:'Roboto Mono';src:url(../fonts/roboto-mono-wght.woff2) format('woff2');font-weight:100 700;font-display:swap}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#E9E6DF;color:#111;height:100%}
+body{font:16px/1.55 Inter,system-ui,sans-serif;overflow:hidden}
+a{color:inherit}
+.hlogo{height:30px;width:auto;display:inline-block;vertical-align:middle;color:currentColor}
+.live{position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;display:block}
+.live .ui{position:fixed;z-index:75;font:500 12px/1.35 'Roboto Mono',monospace;pointer-events:none}
+.live .ui.tl{display:flex;align-items:center;gap:22px;pointer-events:auto}
+.live canvas.fx{position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:70;display:block}
+.peekx{position:fixed;left:0;top:0;z-index:72;pointer-events:none;opacity:0;transition:opacity 180ms ease-out;will-change:transform}
+.peekx img{width:100%;display:block;border-radius:6px}
+.skip{position:fixed;left:-999px;top:8px;z-index:100;background:#111;color:#E9E6DF;padding:8px 12px;font:500 12px 'Roboto Mono',monospace}
+.skip:focus{left:8px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:1ms!important;animation:none!important}}
