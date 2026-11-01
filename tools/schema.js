@@ -1,0 +1,50 @@
+/* Regole dei dati dei progetti. Usate dal generatore (tools/genera-indice.js) e dal server del pannello (backend/). */
+const SLUG=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const testo=(v,max)=>typeof v==='string'&&v.trim().length>0&&v.length<=max;
+const percorso=v=>typeof v==='string'&&/^assets\/img\/[A-Za-z0-9._\/-]+\.(png|jpe?g|webp|avif|svg)$/.test(v)&&!v.includes('..');
+
+// Controlla una voce dell'indice. Restituisce un elenco di errori in italiano (vuoto se va bene).
+function controllaVoce(p){
+  const e=[];
+  if(!p||typeof p!=='object')return ['la voce non è un oggetto'];
+  if(!SLUG.test(p.slug||''))e.push(`slug non valido: "${p.slug}" (solo minuscole, numeri e trattini)`);
+  if(!testo(p.nome,40))e.push(`${p.slug}: nome mancante o più lungo di 40 caratteri`);
+  if(!testo(p.tipo,40))e.push(`${p.slug}: tipo mancante o più lungo di 40 caratteri`);
+  if(!testo(p.contesto,40))e.push(`${p.slug}: contesto mancante o più lungo di 40 caratteri`);
+  if(!percorso(p.anteprima))e.push(`${p.slug}: anteprima deve essere un'immagine in assets/img/`);
+  if(typeof p.pagina!=='boolean')e.push(`${p.slug}: "pagina" deve essere true o false`);
+  if(typeof p.pubblicato!=='boolean')e.push(`${p.slug}: "pubblicato" deve essere true o false`);
+  if(p.etichetta!==undefined&&!testo(p.etichetta,6))e.push(`${p.slug}: etichetta al massimo 6 caratteri`);
+  const note=['slug','nome','tipo','contesto','anteprima','pagina','pubblicato','etichetta'];
+  Object.keys(p).forEach(k=>{if(!note.includes(k))e.push(`${p.slug}: campo sconosciuto "${k}"`);});
+  return e;
+}
+function controllaIndice(d){
+  if(!d||!Array.isArray(d.progetti))return ['manca l\'elenco "progetti"'];
+  const e=d.progetti.flatMap(controllaVoce),visti=new Set();
+  d.progetti.forEach(p=>{if(visti.has(p.slug))e.push(`slug ripetuto: ${p.slug}`);visti.add(p.slug);});
+  if(d.progetti.length>60)e.push('troppi progetti (massimo 60)');
+  return e;
+}
+// Controllo leggero della pagina progetto (lavori/<slug>/progetto.json): solo la forma, non i valori 3D.
+function controllaPagina(D){
+  const e=[];
+  if(!D||typeof D!=='object')return ['la pagina non è un oggetto'];
+  if(!testo(D.titolo,60))e.push('titolo mancante');
+  if(!Array.isArray(D.tappe)||D.tappe.length<1)e.push('servono almeno una tappa');
+  else D.tappe.forEach((t,i)=>{if(!t.camera||!t.parola||!testo(t.parola.testo,30))e.push(`tappa ${i+1}: servono camera e parola`);
+    if(i>0&&(!t.didascalia||!testo(t.didascalia.titolo,80)))e.push(`tappa ${i+1}: manca la didascalia`);});
+  if(D.scheda&&!Array.isArray(D.scheda.voci))e.push('scheda: servono le voci');
+  if(D.immagini&&!Array.isArray(D.immagini.voci))e.push('immagini: servono le voci');
+  else if(D.immagini)D.immagini.voci.forEach((v,i)=>{if(!percorso(v.src))e.push(`immagine ${i+1}: percorso non valido`);if(!testo(v.alt,200))e.push(`immagine ${i+1}: manca il testo alternativo`);});
+  return e;
+}
+// Testo di assets/js/indice.js: solo i progetti pubblicati, nell'ordine dell'indice.
+function generaIndiceJS(dati){
+  const pubblici=dati.progetti.filter(p=>p.pubblicato).map(({slug,nome,tipo,contesto,anteprima,pagina,etichetta})=>({slug,nome,tipo,contesto,anteprima,pagina,etichetta:etichetta||''}));
+  return `/* GENERATO da data/progetti.json (tools/genera-indice.js o pannello): non modificare a mano. */
+const PROGETTI=${JSON.stringify(pubblici,null,1)};
+PROGETTI.forEach(p=>{IMG['p_'+p.slug]=BASE+p.anteprima;});
+`;
+}
+if(typeof module!=='undefined')module.exports={SLUG,controllaVoce,controllaIndice,controllaPagina,generaIndiceJS};

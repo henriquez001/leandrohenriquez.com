@@ -35,6 +35,10 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
 - `assets/models/oopar-data.js` — mesh della lampada Oopar convertita da lampada.stp
   (OpenCASCADE, base64). La home non carica three.js né il modello.
 - `assets/js/three.min.js` — three.js r128, locale.
+- `data/progetti.json` — elenco dei lavori (fonte unica). `assets/js/indice.js` è GENERATO da lì:
+  dopo una modifica a mano lancia `node tools/genera-indice.js`. Regole dei dati in `tools/schema.js`.
+- `backend/` — pannello di gestione (Cloudflare Worker): accesso Google con elenco email, progetti,
+  immagini, statistiche GoatCounter. Vedi `backend/README.md`; test con `cd backend && npm test`.
 
 ## Prestazioni dello scroll (problemi già risolti, non reintrodurli)
 - Scroll mappato direttamente, niente molle sullo scroll; scroll-snap nativo CSS.

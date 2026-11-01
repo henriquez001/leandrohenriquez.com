@@ -3,3 +3,6 @@
 Thumbs.db
 *.stp
 *.step
+backend/node_modules/
+backend/.wrangler/
+backend/.dev.vars
