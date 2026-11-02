@@ -1,0 +1,43 @@
+# Rigenera portfolio.pdf quando cambiano i progetti (anche dal pannello) e lo salva nel repo.
+# Si scarica da https://leandrohenriquez.com/portfolio.pdf
+name: Portfolio PDF
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/progetti.json
+      - assets/img/**
+      - assets/fonts/**
+      - lavori/*/progetto.json
+      - tools/genera-portfolio.js
+      - tools/schema.js
+      - favicon.svg
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: portfolio-pdf
+  cancel-in-progress: true
+jobs:
+  pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Playwright e Chromium
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/pw" playwright@1.63.0
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Genera il PDF (si ferma se qualcosa si sovrappone)
+        run: NODE_PATH="$RUNNER_TEMP/pw/node_modules" node tools/genera-portfolio.js
+      - name: Salva il PDF
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add portfolio.pdf
+          if git diff --cached --quiet; then echo "PDF invariato"; exit 0; fi
+          git commit -m "Portfolio PDF aggiornato dai progetti"
+          # se nel frattempo è arrivato un altro commit su main, ci si mette sopra (il PDF è l'unico file toccato)
+          for i in 1 2 3; do git pull --rebase origin main && git push && exit 0; sleep 5; done; exit 1

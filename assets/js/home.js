@@ -1,13 +1,14 @@
 /* hl. — home */
 function HOME(root){
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const accOf=()=>getComputedStyle(root).getPropertyValue('--ink').trim()||'#111111';
   const H=()=>innerHeight;
   // transition with the real module shapes, then open the project page
   const tr=root.querySelector('#jTr');MODCELLS.forEach((c,i)=>tr.insertAdjacentHTML('beforeend',`<svg viewBox="${c.v}" preserveAspectRatio="none" style="transition-delay:${(i%3+Math.floor(i/3))*45}ms"><path d="${c.d}"/></svg>`));
   addEventListener('pageshow',()=>tr.classList.remove('go'));
-  function toProject(){const go=()=>{location.href='lavori/oopar/';};if(RM){go();return;}tr.classList.add('go');setTimeout(go,470);}
+  function toProject(slug){const go=()=>{location.href='lavori/'+(slug||'oopar')+'/';};if(RM){go();return;}tr.classList.add('go');setTimeout(go,470);}
   // nav
-  root.querySelectorAll('.jnav a').forEach(a=>a.onclick=()=>{const s=root.querySelector('#'+a.dataset.to);root.scrollTo({top:s.offsetTop-20,behavior:RM?'auto':'smooth'});});
+  root.querySelectorAll('.jnav a[data-to]').forEach(a=>a.onclick=()=>{const s=root.querySelector('#'+a.dataset.to);root.scrollTo({top:s.offsetTop-20,behavior:RM?'auto':'smooth'});});
   // hero letters + email letters (kinetic, as liked)
   let hero=[];root.querySelectorAll('.kin').forEach(k=>hero=hero.concat(splitLetters(k)));
   const mailEl=root.querySelector('#jMail'),mail=splitLetters(mailEl);
@@ -16,11 +17,12 @@ function HOME(root){
   mailEl.onclick=()=>{if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(ADDR).then(ok,legacy);else legacy();};
   // index with mouse-follow preview
   const idx=root.querySelector('#jIdx'),peek=makePeek(root,320);
-  const who=['tesi · Firenze','prodotto · in vendita','con GanzoDesign','con GanzoDesign','kit + packaging','in team','personalizzabile','sostenibilità','1° premio','con Bottega Ind.'];
-  PROJ6.forEach((p,i)=>{const r=document.createElement('div');r.className='row';
-    r.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><b>${p[0]}</b><span>${p[1].split(' · ')[0]}<small>tipo</small></span><span>${who[i]}<small>contesto</small></span>${p[0]==='Oopar'?'<em>3D</em>':'<span>→</span>'}`;
-    r.onpointerenter=()=>peek.show(p[2]);r.onpointerleave=()=>peek.hide();if(p[0]==='Oopar')r.onclick=toProject;idx.appendChild(r);});
-  root.querySelector('#jGo').onclick=toProject;root.querySelector('#jPic').onclick=toProject;
+  // rows come from data/progetti.json (generated into assets/js/indice.js)
+  const nLav=root.querySelector('#jLav .hd b i');if(nLav)nLav.textContent=PROGETTI.length;
+  PROGETTI.forEach((p,i)=>{const r=document.createElement('div');r.className='row';
+    r.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><b>${esc(p.nome)}</b><span>${esc(p.tipo)}<small>tipo</small></span><span>${esc(p.contesto)}<small>contesto</small></span>${p.etichetta?`<em>${esc(p.etichetta)}</em>`:'<span>→</span>'}`;
+    r.onpointerenter=()=>peek.show('p_'+p.slug);r.onpointerleave=()=>peek.hide();if(p.pagina)r.onclick=()=>toProject(p.slug);idx.appendChild(r);});
+  root.querySelector('#jGo').onclick=()=>toProject('oopar');root.querySelector('#jPic').onclick=()=>toProject('oopar');
   // studio lead words: bold in as you read
   const lead=root.querySelector('#jLead');lead.innerHTML=lead.textContent.split(' ').map(w=>`<span>${w}</span>`).join(' ');const words=[...lead.querySelectorAll('span')];
   // big outline words behind sections
@@ -38,7 +40,7 @@ function HOME(root){
     if(st<vh){kinetic(hero,mx,my,dt,vh);
       const a=kins[0].getBoundingClientRect(),b=kins[1].getBoundingClientRect();const key=[a.left,a.top,b.right,b.bottom].map(Math.round).join();
       if(key!==qKey){qKey=key;const hr=root.querySelector('#jHero').getBoundingClientRect();
-        q.innerHTML=dimH(b.left-hr.left,b.right-hr.left,b.bottom-hr.top+34,'industrial designer — 10 progetti','#111')+dimH(a.left-hr.left,a.right-hr.left,a.top-hr.top-26,'design specialist in Elica dal 2022',accOf());}}
+        q.innerHTML=dimH(b.left-hr.left,b.right-hr.left,b.bottom-hr.top+34,'industrial designer — '+PROGETTI.length+' progetti','#111')+dimH(a.left-hr.left,a.right-hr.left,a.top-hr.top-26,'design specialist in Elica dal 2022',accOf());}}
     let ms=-1;for(let k=0;k<secs.length;k++)if(st+vh*.5>=secs[k].top)ms=k;const label=names[ms+1]||names[0];if(secUi._t!==label){secUi._t=label;secUi.textContent=label;}
     secs.forEach(o=>{const f=Math.max(0,Math.min(1,(st+vh-o.top)/(vh*.9)));setVar(o.bw,'fontVariationSettings',fvs(62+63*f,300+500*f));setVar(o.bw,'transform',`translateY(${((1-f)*10).toFixed(1)}vh)`);});
     const ftop=secs[1].top;if(Math.abs(st+vh*.5-ftop-vh*.4)<vh){const r=pic.getBoundingClientRect();const k=[r.width,r.height].map(Math.round).join();if(k!==pKey){pKey=k;const w=r.width,h=r.height;
