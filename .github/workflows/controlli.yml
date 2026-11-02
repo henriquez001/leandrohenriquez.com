@@ -80,6 +80,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # Lighthouse CI vuole un checkout per sapere a quale commit legare i rapporti
+      - uses: actions/checkout@v4
       - name: Lighthouse su home e Oopar
         id: lh
         uses: treosh/lighthouse-ci-action@v12
