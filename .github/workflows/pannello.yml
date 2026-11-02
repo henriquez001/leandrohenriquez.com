@@ -24,14 +24,18 @@ jobs:
       run:
         working-directory: backend
         shell: bash -eo pipefail {0}
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
       - name: Segreti presenti?
         id: pronto
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
+          # toglie spazi e a capo copiati per sbaglio nei segreti, per tutti i passi successivi
+          id=$(printf %s "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]'); tk=$(printf %s "$CLOUDFLARE_API_TOKEN" | tr -d '[:space:]')
+          echo "::add-mask::$id"; echo "::add-mask::$tk"
+          { echo "CLOUDFLARE_ACCOUNT_ID=$id"; echo "CLOUDFLARE_API_TOKEN=$tk"; } >> "$GITHUB_ENV"
           mancano=""
           [ -n "$CLOUDFLARE_API_TOKEN" ] || mancano="$mancano CLOUDFLARE_API_TOKEN"
           [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || mancano="$mancano CLOUDFLARE_ACCOUNT_ID"
@@ -53,7 +57,6 @@ jobs:
         run: |
           auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
           # mostra gli errori di Cloudflare invece di fallire in silenzio
-          CLOUDFLARE_ACCOUNT_ID=$(echo "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')
           api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces"
           echo "Account ID: ${#CLOUDFLARE_ACCOUNT_ID} caratteri (deve essere 32)"; echo "Token: ${#CLOUDFLARE_API_TOKEN} caratteri"
           chiedi(){
