@@ -39,4 +39,5 @@ jobs:
           git add portfolio.pdf
           if git diff --cached --quiet; then echo "PDF invariato"; exit 0; fi
           git commit -m "Portfolio PDF aggiornato dai progetti"
-          git push
+          # se nel frattempo è arrivato un altro commit su main, ci si mette sopra (il PDF è l'unico file toccato)
+          for i in 1 2 3; do git pull --rebase origin main && git push && exit 0; sleep 5; done; exit 1
