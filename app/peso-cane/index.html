@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Peso futuro del cane — Laboratorio hl.</title>
+<meta name="description" content="Stima del peso da adulto del tuo cane, partendo dal peso e dall'età di oggi.">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+body{overflow:auto;height:auto;font:500 13px/1.45 'Roboto Mono',ui-monospace,monospace;padding:20px max(20px,4vw) 40px}
+.k{display:flex;justify-content:space-between;gap:12px;font-size:11px;color:#5e5c57}
+h1{font:400 clamp(44px,9vw,110px)/.85 Archivo,'Arial Narrow',sans-serif;font-variation-settings:'wdth' 62,'wght' 900;text-transform:uppercase;margin:4vh 0 3vh}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:560px}
+label{display:grid;gap:6px;font-size:11px;color:#5e5c57}
+input{font:500 16px 'Roboto Mono',monospace;width:100%;border:1px solid #111;border-radius:8px;padding:10px 12px;background:#e0dcd3;color:#111}
+input:focus-visible{outline:2px solid #111;outline-offset:2px}
+.res{display:flex;align-items:baseline;gap:10px;margin-top:22px}
+.res b{font:400 clamp(72px,14vw,160px)/.85 Archivo,'Arial Narrow',sans-serif;font-variation-settings:'wdth' 62,'wght' 900;font-variant-numeric:tabular-nums}
+.bar{height:6px;background:#b9b6ae;border-radius:3px;overflow:hidden;max-width:560px;margin-top:12px}
+.bar u{display:block;height:100%;background:#111;border-radius:3px;transition:width .25s cubic-bezier(.2,.9,.25,1)}
+.nota{max-width:60ch;margin-top:3vh;font-size:11px;color:#5e5c57}
+a{color:#111}
+/* versione ridotta dentro il riquadro del Laboratorio */
+body.mini{padding:12px 2px 4px}
+body.mini h1,body.mini .nota,body.mini .top{display:none}
+body.mini .res{margin-top:12px}
+body.mini .res b{font-size:56px}
+@media (prefers-reduced-motion:reduce){.bar u{transition:none}}
+</style>
+</head>
+<body>
+<div class="k top"><a href="../../laboratorio/">← laboratorio</a><span>calcolatore</span></div>
+<h1>Peso futuro<br>del cane</h1>
+<form id="f" onsubmit="return false">
+  <label for="w">peso oggi (kg)<input id="w" type="number" inputmode="decimal" value="11.4" min="0.2" max="100" step="0.1"></label>
+  <label for="a">età (settimane)<input id="a" type="number" inputmode="numeric" value="24" min="6" max="52" step="1"></label>
+</form>
+<div class="res" aria-live="polite"><b id="r">—</b><span>kg da adulto · stima</span></div>
+<div class="bar"><u id="rb" style="width:0"></u></div>
+<div class="k" style="max-width:560px;margin-top:6px"><span id="rn"></span></div>
+<p class="nota">Stima indicativa per cani di taglia media: peso adulto ≈ peso di oggi ÷ settimane × 52. Le taglie piccole finiscono di crescere prima, le grandi dopo: per un valore preciso chiedi al veterinario.</p>
+<script>
+if(new URLSearchParams(location.search).has('mini'))document.body.classList.add('mini');
+const w=document.getElementById('w'),a=document.getElementById('a'),r=document.getElementById('r'),rb=document.getElementById('rb'),rn=document.getElementById('rn');
+function calc(){const kg=parseFloat(w.value),wk=parseFloat(a.value);
+  if(!(kg>0)||!(wk>=6&&wk<=52)){r.textContent='—';rb.style.width='0%';rn.textContent='inserisci un\'età tra 6 e 52 settimane';return;}
+  const adulto=kg/wk*52,p=Math.min(100,kg/adulto*100);
+  r.textContent=adulto.toLocaleString('it-IT',{maximumFractionDigits:1});rb.style.width=p.toFixed(0)+'%';rn.textContent='oggi è al '+p.toFixed(0)+'% del peso finale';}
+w.addEventListener('input',calc);a.addEventListener('input',calc);calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+# Mette online il pannello (Cloudflare Worker in backend/) a ogni modifica su main, o a mano da Actions.
+# Usa i segreti del repo (Settings → Secrets and variables → Actions), mai scritti nel codice:
+#   CLOUDFLARE_API_TOKEN   token Cloudflare con il modello "Edit Cloudflare Workers"
+#   CLOUDFLARE_ACCOUNT_ID  ID dell'account Cloudflare
+#   PANNELLO_OWNER_EMAIL   la tua email Google: entra sempre e gestisce gli accessi
+#   PANNELLO_GITHUB_TOKEN  token GitHub fine-grained solo per questo repo, Contents: read and write
+#   GOOGLE_CLIENT_ID       ID client OAuth di Google (tipo "Applicazione web")
+#   GOATCOUNTER_CODE, GOATCOUNTER_TOKEN   facoltativi, per le statistiche
+name: Pannello
+on:
+  push:
+    branches: [main]
+    paths: [backend/**, tools/schema.js, .github/workflows/pannello.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pannello
+  cancel-in-progress: false
+jobs:
+  online:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Segreti presenti?
+        id: pronto
+        run: |
+          mancano=""
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || mancano="$mancano CLOUDFLARE_API_TOKEN"
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || mancano="$mancano CLOUDFLARE_ACCOUNT_ID"
+          if [ -n "$mancano" ]; then
+            echo "::warning::Pannello non messo online: mancano i segreti$mancano"
+            echo "ok=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=si" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.pronto.outputs.ok == 'si'
+        with:
+          node-version: 20
+      - name: Prove
+        if: steps.pronto.outputs.ok == 'si'
+        run: npm ci && npm test
+      - name: Elenco accessi (KV)
+        if: steps.pronto.outputs.ok == 'si'
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces"
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          id=$(curl -fsS -H "$auth" "$api?per_page=100" | jq -r '.result[] | select(.title=="hl-pannello-accessi") | .id' | head -1)
+          if [ -z "$id" ]; then
+            id=$(curl -fsS -X POST -H "$auth" -H "Content-Type: application/json" -d '{"title":"hl-pannello-accessi"}' "$api" | jq -r '.result.id')
+            echo "creato lo spazio KV $id"
+          fi
+          sed -i "s/^id = \"[^\"]*\"/id = \"$id\"/" wrangler.toml
+          grep -n '^id = ' wrangler.toml
+      - name: Pubblica il Worker
+        if: steps.pronto.outputs.ok == 'si'
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOATCOUNTER_CODE: ${{ secrets.GOATCOUNTER_CODE }}
+        run: |
+          var=""
+          [ -n "$GOOGLE_CLIENT_ID" ] && var="$var --var GOOGLE_CLIENT_ID:$GOOGLE_CLIENT_ID"
+          [ -n "$GOATCOUNTER_CODE" ] && var="$var --var GOATCOUNTER_CODE:$GOATCOUNTER_CODE"
+          npx wrangler deploy $var | tee deploy.log
+          url=$(grep -Eo 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "### Pannello online: $url" >> "$GITHUB_STEP_SUMMARY"
+          echo "Aggiungi questo indirizzo alle *Origini JavaScript autorizzate* del client Google." >> "$GITHUB_STEP_SUMMARY"
+      - name: Segreti del Worker
+        if: steps.pronto.outputs.ok == 'si'
+        env:
+          OWNER_EMAIL: ${{ secrets.PANNELLO_OWNER_EMAIL }}
+          GITHUB_TOKEN_PANNELLO: ${{ secrets.PANNELLO_GITHUB_TOKEN }}
+          GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
+        run: |
+          # SESSION_SECRET si crea una volta sola, così le sessioni aperte restano valide tra un aggiornamento e l'altro
+          gia=$(npx wrangler secret list --format json 2>/dev/null | jq -r '.[].name' || true)
+          node -e '
+            const c=require("crypto"),e=process.env,g=(process.argv[1]||"").split("\n"),s={};
+            if(e.OWNER_EMAIL)s.OWNER_EMAIL=e.OWNER_EMAIL.trim().toLowerCase();
+            if(e.GITHUB_TOKEN_PANNELLO)s.GITHUB_TOKEN=e.GITHUB_TOKEN_PANNELLO.trim();
+            if(e.GOATCOUNTER_TOKEN)s.GOATCOUNTER_TOKEN=e.GOATCOUNTER_TOKEN.trim();
+            if(!g.includes("SESSION_SECRET"))s.SESSION_SECRET=c.randomBytes(48).toString("base64url");
+            require("fs").writeFileSync(process.env.RUNNER_TEMP+"/segreti.json",JSON.stringify(s));
+            console.log("segreti da scrivere:",Object.keys(s).join(", ")||"nessuno");
+          ' "$gia"
+          if [ "$(cat "$RUNNER_TEMP/segreti.json")" != "{}" ]; then npx wrangler secret bulk "$RUNNER_TEMP/segreti.json"; fi
+          rm -f "$RUNNER_TEMP/segreti.json"

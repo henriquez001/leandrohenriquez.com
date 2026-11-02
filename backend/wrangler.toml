@@ -1,0 +1,26 @@
+# Pannello di leandrohenriquez.com — Cloudflare Worker (piano gratuito)
+name = "hl-pannello"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# l'interfaccia del pannello (cartella public/) servita dallo stesso Worker
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# elenco delle email che possono entrare (lo gestisci dal pannello)
+[[kv_namespaces]]
+binding = "ACCESSI"
+id = "DA_CREARE"   # npx wrangler kv namespace create ACCESSI
+
+[vars]
+GITHUB_REPO = "henriquez001/leandrohenriquez.com"
+GITHUB_BRANCH = "main"
+# GOOGLE_CLIENT_ID = "....apps.googleusercontent.com"   (si aggiunge nella fase "accessi")
+# GOATCOUNTER_CODE = "leandrohenriquez"
+
+# Segreti, mai nel repo: npx wrangler secret put NOME
+#   OWNER_EMAIL        la tua email Google: entra sempre e gestisce gli accessi
+#   SESSION_SECRET     stringa casuale lunga (firma dei cookie)
+#   GITHUB_TOKEN       token "fine-grained" solo per questo repo, permesso Contents: read and write
+#   GOATCOUNTER_TOKEN  chiave API di GoatCounter, sola lettura

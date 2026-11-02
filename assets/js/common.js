@@ -124,7 +124,6 @@ function makePeek(root,w){const d=document.createElement('div');d.className='pee
     step(dt){px.t=mx+28;py.t=my-d.offsetHeight*.55;if(!on){px.x=px.t;py.x=py.t;}px.step(dt);py.step(dt);const tilt=RM?0:Math.max(-8,Math.min(8,px.v*.012));
       d.style.transform=`translate(${px.x.toFixed(1)}px,${py.x.toFixed(1)}px) rotate(${tilt.toFixed(2)}deg)`;}};}
 
-const PROJ6=[['ONE','macchina da caffè · tesi','cut_one'],['Hydra NR_01','case pc · in vendita','hydra'],['BaiYun','aspiratutto · ganzodesign','cut_baiyun'],['BRTW','ellittica · ganzodesign','cut_brtw'],['Green Hero','kit giardinaggio','cut_greenhero'],['Andy','apriscatole · team','cut_andy'],['Otto.1','rubinetteria','otto'],['Frank','l’essere sostenibile','cut_frank'],['Oopar','lampada · 1° premio','cut_oopar_b'],['La Fornace','packaging','fornace']];
 function kinetic(spans,mx,my,dt,H){const rs=spans.map(o=>o.el.getBoundingClientRect());spans.forEach((o,i)=>{const r=rs[i];if(r.bottom<-50||r.top>H+50)return;const d=Math.hypot(mx-(r.left+r.width/2),(my-(r.top+r.height/2))*1.4);const f=Math.max(0,1-d/(H*.55));o.w.t=62+63*f;o.g.t=250+650*f;if(RM){o.w.x=o.w.t;o.g.x=o.g.t;}else{o.w.step(dt);o.g.step(dt);}setVar(o.el,'fontVariationSettings',fvs(o.w.x,o.g.x));});}
 function splitLetters(el){const out=[];[...el.dataset.word].forEach(ch=>{const s=document.createElement('span');s.textContent=ch;el.appendChild(s);out.push({el:s,w:new Spr(.35),g:new Spr(.35)});});return out;}
 
