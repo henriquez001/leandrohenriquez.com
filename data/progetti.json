@@ -1,7 +1,7 @@
 {
   "progetti": [
     {"slug": "one", "nome": "ONE", "tipo": "macchina da caffè", "contesto": "tesi · Firenze", "anteprima": "assets/img/cut-one.png", "pagina": false, "descrizione": "Macchina da caffè sviluppata come progetto di tesi a Firenze: un corpo unico e compatto, dal concept al modello 3D.", "pubblicato": true},
-    {"slug": "hydra", "nome": "Hydra NR_01", "tipo": "case pc", "contesto": "prodotto · in vendita", "anteprima": "assets/img/hydra.jpg", "pagina": false, "descrizione": "Case per PC progettato fino alla produzione: oggi è in vendita.", "pubblicato": true},
+    {"slug": "hydra", "nome": "Hydra NR_01", "tipo": "case pc", "contesto": "prodotto · per Hydra", "anteprima": "assets/img/hydra.jpg", "pagina": false, "descrizione": "Case per PC progettato per Hydra e arrivato fino alla produzione: si usa in verticale o in orizzontale, come un banchetto.", "pubblicato": true},
     {"slug": "baiyun", "nome": "BaiYun", "tipo": "aspiratutto", "contesto": "con GanzoDesign", "anteprima": "assets/img/cut-baiyun.png", "pagina": false, "descrizione": "Aspiratutto progettato con lo studio GanzoDesign.", "pubblicato": true},
     {"slug": "brtw", "nome": "BRTW", "tipo": "ellittica", "contesto": "con GanzoDesign", "anteprima": "assets/img/cut-brtw.png", "pagina": false, "descrizione": "Ellittica per l’allenamento in casa, progettata con lo studio GanzoDesign.", "pubblicato": true},
     {"slug": "green-hero", "nome": "Green Hero", "tipo": "kit giardinaggio", "contesto": "kit + packaging", "anteprima": "assets/img/cut-greenhero.png", "pagina": false, "descrizione": "Kit per il giardinaggio pensato insieme al suo packaging: attrezzi e confezione sono un progetto solo.", "pubblicato": true},
