@@ -79,6 +79,13 @@ jobs:
           GOATCOUNTER_CODE: ${{ secrets.GOATCOUNTER_CODE }}
         run: |
           var=""
+          GOOGLE_CLIENT_ID=$(printf %s "$GOOGLE_CLIENT_ID" | tr -d '[:space:]')
+          if [ -n "$GOOGLE_CLIENT_ID" ]; then
+            # controlla solo la forma, senza stampare il valore
+            if [[ "$GOOGLE_CLIENT_ID" =~ ^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$ ]]; then echo "GOOGLE_CLIENT_ID: forma corretta (${#GOOGLE_CLIENT_ID} caratteri)"
+            elif [[ "$GOOGLE_CLIENT_ID" == GOCSPX-* ]]; then echo "::error::GOOGLE_CLIENT_ID contiene il *client secret* (GOCSPX-…), non l'ID client"; exit 1
+            else echo "::error::GOOGLE_CLIENT_ID non ha la forma 123456-abc.apps.googleusercontent.com (${#GOOGLE_CLIENT_ID} caratteri)"; exit 1; fi
+          fi
           [ -n "$GOOGLE_CLIENT_ID" ] && var="$var --var GOOGLE_CLIENT_ID:$GOOGLE_CLIENT_ID"
           [ -n "$GOATCOUNTER_CODE" ] && var="$var --var GOATCOUNTER_CODE:$GOATCOUNTER_CODE"
           npx wrangler deploy $var | tee deploy.log
