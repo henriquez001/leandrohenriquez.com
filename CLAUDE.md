@@ -54,3 +54,11 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
 - Texture noce vera da Vitrum al posto di quella procedurale.
 - 3D più leggero su mobile.
 - Vedi HANDOFF.md per l'elenco aggiornato.
+
+## Portfolio PDF
+- `portfolio.pdf` (variante A: A4 verticale, un progetto per pagina) si genera con
+  `node tools/genera-portfolio.js` da data/progetti.json (campi facoltativi `descrizione` fino a 420 caratteri, `anno`, `scheda` con al massimo 6 voci)
+  e, se esiste, da lavori/<slug>/progetto.json (scheda e immagine ambientata).
+- Lo script si ferma senza scrivere il PDF se un blocco si sovrappone o esce dai margini; i titoli
+  si riducono da soli per stare nella larghezza.
+- La GitHub Action `.github/workflows/portfolio.yml` lo rigenera a ogni modifica dei progetti su main.

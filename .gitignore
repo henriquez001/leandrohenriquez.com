@@ -6,3 +6,5 @@ Thumbs.db
 backend/node_modules/
 backend/.wrangler/
 backend/.dev.vars
+tools/.portfolio.html
+tools/portfolio-anteprima.html
