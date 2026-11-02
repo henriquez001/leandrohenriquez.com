@@ -51,10 +51,16 @@ jobs:
       - name: Elenco accessi (KV)
         if: steps.pronto.outputs.ok == 'si'
         run: |
-          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces"
           auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
           # mostra gli errori di Cloudflare invece di fallire in silenzio
-          chiedi(){ r=$(curl -sS -H "$auth" -H "Content-Type: application/json" "$@"); if [ "$(echo "$r" | jq -r .success)" != "true" ]; then echo "::error::Cloudflare: $(echo "$r" | jq -c '.errors')"; exit 1; fi; echo "$r"; }
+          CLOUDFLARE_ACCOUNT_ID=$(echo "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces"
+          echo "Account ID: ${#CLOUDFLARE_ACCOUNT_ID} caratteri (deve essere 32)"; echo "Token: ${#CLOUDFLARE_API_TOKEN} caratteri"
+          chiedi(){
+            r=$(curl -sS -w '\n%{http_code}' -H "$auth" -H "Content-Type: application/json" "$@"); codice=${r##*$'\n'}; r=${r%$'\n'*}
+            if ! echo "$r" | jq -e . >/dev/null 2>&1; then echo "::error::Cloudflare ha risposto $codice senza JSON: $(echo "$r" | head -c 200)" >&2; exit 1; fi
+            if [ "$(echo "$r" | jq -r .success)" != "true" ]; then echo "::error::Cloudflare $codice: $(echo "$r" | jq -c '.errors')" >&2; exit 1; fi
+            echo "$r"; }
           id=$(chiedi "$api?per_page=100" | jq -r '.result[] | select(.title=="hl-pannello-accessi") | .id' | head -1)
           if [ -z "$id" ]; then
             id=$(chiedi -X POST -d '{"title":"hl-pannello-accessi"}' "$api" | jq -r '.result.id')
