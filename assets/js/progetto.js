@@ -31,7 +31,10 @@ function PROJECT(root,D){
   root.addEventListener('pointerdown',e=>{if(e.target.closest('.cap,.x,.ui,.content'))return;drag=true;lx=e.clientX;hist=[];yv=0;});
   root.addEventListener('pointermove',e=>{if(!drag)return;const t=performance.now(),dx=e.clientX-lx;yawD+=dx*.45;hist.push([t,dx]);hist=hist.filter(h=>t-h[0]<80);lx=e.clientX;});
   const up=()=>{if(!drag)return;drag=false;yv=RM?0:hist.reduce((a,h)=>a+h[1],0)*.45/.08;};root.addEventListener('pointerup',up);root.addEventListener('pointercancel',up);
-  function size(){R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();}addEventListener('resize',size);size();
+  let rest=null,restKey='';
+  function size(){R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;
+    // phone (portrait): lift the object into the upper part of the screen, captions live below it
+    if(cam.aspect<1)cam.setViewOffset(innerWidth,innerHeight,0,innerHeight*.12,innerWidth,innerHeight);else cam.clearViewOffset();cam.updateProjectionMatrix();restKey='';}addEventListener('resize',size);size();
   const ease=x=>x*x*(3-2*x),cl=(x,a,b)=>Math.max(a,Math.min(b,x)),T=new THREE.Vector3(0,0,0),v=new THREE.Vector3();
   function P(x,y,z){v.set(x,y,z).project(cam);return [(v.x*.5+.5)*innerWidth,(-v.y*.5+.5)*innerHeight];}
   // quotes: straight (horizontal or vertical) lines anchored to the model's centre section.
@@ -42,7 +45,6 @@ function PROJECT(root,D){
     const t=6,tk=p=>vert?`<line x1="${p[0]-t}" y1="${p[1]}" x2="${p[0]+t}" y2="${p[1]}"/>`:`<line x1="${p[0]}" y1="${p[1]-t}" x2="${p[0]}" y2="${p[1]+t}"/>`;
     const ex=(p,q)=>`<line x1="${r(p[0])}" y1="${r(p[1])}" x2="${q[0]}" y2="${q[1]}" stroke-dasharray="2 3"/>`;
     return `<g stroke="#111" stroke-width="1.2">${ex(a,A)}${ex(b,B)}<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}"/>${tk(A)}${tk(B)}</g><text x="${Lb[0]}" y="${Lb[1]}" text-anchor="${vert?(pos.right?'start':'end'):'middle'}" dominant-baseline="middle">${esc(label)}</text>`;}
-  let rest=null,restKey='';
   function restPose(st){const key=st+'|'+innerWidth+'|'+innerHeight;if(key===restKey)return rest;
     const sp=cam.position.clone(),sq=cam.quaternion.clone(),s=K[st],d=s.d*(cam.aspect<1?1.7:1),yr=s.y*Math.PI/180,pr=s.p*Math.PI/180;
     cam.position.set(d*Math.cos(pr)*Math.sin(yr),d*Math.sin(pr),d*Math.cos(pr)*Math.cos(yr));cam.lookAt(T);cam.updateMatrixWorld();
