@@ -1,6 +1,20 @@
 {
   "app": [
-    { "slug": "peso-cane", "nome": "Peso futuro del cane", "tipo": "calcolatore", "descrizione": "Quanto peserà da adulto, partendo dal peso e dall'età di oggi.", "stato": "pronta", "pubblicato": true },
-    { "slug": "spesa", "nome": "Spesa", "tipo": "lista", "descrizione": "La lista della spesa, sempre a portata di telefono.", "stato": "in-arrivo", "pubblicato": true }
+    {
+      "slug": "peso-cane",
+      "nome": "Peso futuro del cane",
+      "tipo": "calcolatore",
+      "descrizione": "Quanto peserà da adulto, partendo dal peso e dall'età di oggi.",
+      "stato": "pronta",
+      "pubblicato": true
+    },
+    {
+      "slug": "spesa",
+      "nome": "Spesa",
+      "tipo": "lista",
+      "descrizione": "La lista della spesa, sempre a portata di telefono.",
+      "stato": "in-arrivo",
+      "pubblicato": false
+    }
   ]
 }
