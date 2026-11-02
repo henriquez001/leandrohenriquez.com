@@ -1,0 +1,130 @@
+# Controlli automatici di leandrohenriquez.com (gratis, su GitHub Actions).
+# Se qualcosa non va apre una issue "Controlli: …": GitHub ti avvisa via email.
+# Quando torna tutto a posto la issue si chiude da sola.
+name: Controlli del sito
+
+on:
+  schedule:
+    - cron: "17 * * * *"      # ogni ora: il sito risponde?
+    - cron: "40 5 * * *"      # ogni mattina: link rotti
+    - cron: "10 6 * * 1"      # ogni lunedì: velocità
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: controlli-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SITO: https://leandrohenriquez.com
+
+jobs:
+  raggiungibile:
+    name: Sito raggiungibile
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Le pagine principali rispondono con HTTPS valido
+        run: |
+          set -u
+          errori=0
+          for p in / /lavori/oopar/; do
+            codice=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 --retry 2 --retry-delay 10 "$SITO$p" || echo 000)
+            echo "$SITO$p → $codice"
+            [ "$codice" = "200" ] || errori=1
+          done
+          # la versione senza HTTPS deve portare a HTTPS
+          dest=$(curl -sS -o /dev/null -w '%{redirect_url}' --max-time 20 "http://leandrohenriquez.com/" || true)
+          echo "http:// → $dest"
+          case "$dest" in https://*) ;; *) echo "::warning::http non porta a https (spunta Enforce HTTPS in Settings → Pages)";; esac
+          # il certificato scade tra meno di 14 giorni?
+          fine=$(echo | openssl s_client -servername leandrohenriquez.com -connect leandrohenriquez.com:443 2>/dev/null | openssl x509 -noout -enddate | cut -d= -f2)
+          echo "certificato valido fino a: $fine"
+          if [ -n "$fine" ] && [ $(( ($(date -d "$fine" +%s) - $(date +%s)) / 86400 )) -lt 14 ]; then echo "::error::il certificato HTTPS scade a breve"; errori=1; fi
+          exit $errori
+
+  link:
+    name: Link rotti
+    if: github.event_name != 'schedule' || github.event.schedule == '40 5 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: File generati aggiornati
+        run: |
+          if [ -f tools/genera-indice.js ]; then
+            node tools/genera-indice.js
+            git diff --exit-code || { echo "::error::file generati non aggiornati: lancia node tools/genera-indice.js"; exit 1; }
+          fi
+      - name: Controllo dei link (interni ed esterni)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress --max-retries 3 --timeout 20
+            --root-dir ${{ github.workspace }}
+            --exclude 'linkedin\.com' --exclude 'instagram\.com'
+            --exclude-path backend --exclude-path node_modules
+            './**/*.html'
+          fail: true
+
+  velocita:
+    name: Velocità
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '10 6 * * 1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Lighthouse su home e Oopar
+        id: lh
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://leandrohenriquez.com/
+            https://leandrohenriquez.com/lavori/oopar/
+          runs: 2
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+      - name: Punteggi
+        env:
+          RIS: ${{ steps.lh.outputs.manifest }}
+          LINK: ${{ steps.lh.outputs.links }}
+        run: |
+          node -e '
+            const m=JSON.parse(process.env.RIS).filter(r=>r.isRepresentativeRun);let male=false;
+            let out="| pagina | prestazioni | accessibilità | SEO |\n|---|---|---|---|\n";
+            for(const r of m){const s=r.summary,p=x=>Math.round(x*100);out+=`| ${r.url} | ${p(s.performance)} | ${p(s.accessibility)} | ${p(s.seo)} |\n`;if(s.performance<0.5||s.accessibility<0.8)male=true;}
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY,out+"\nRapporti completi: "+process.env.LINK+"\n");console.log(out);
+            if(male){console.log("::error::prestazioni sotto 50 o accessibilità sotto 80");process.exit(1);}'
+
+  avviso:
+    name: Avviso
+    needs: [raggiungibile, link, velocita]
+    if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          ESITI: ${{ toJSON(needs) }}
+        with:
+          script: |
+            const esiti=JSON.parse(process.env.ESITI);
+            const nomi={raggiungibile:'Sito raggiungibile',link:'Link rotti',velocita:'Velocità'};
+            const run=`${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            for(const [k,v] of Object.entries(esiti)){
+              if(v.result==='skipped'||v.result==='cancelled')continue;
+              const titolo=`Controlli: ${nomi[k]}`;
+              const aperte=(await github.rest.issues.listForRepo({...context.repo,state:'open',labels:'controlli',per_page:50})).data.filter(i=>i.title===titolo);
+              if(v.result==='failure'){
+                const testo=`Il controllo **${nomi[k]}** non è passato.\n\nDettagli: ${run}`;
+                if(aperte.length)await github.rest.issues.createComment({...context.repo,issue_number:aperte[0].number,body:'Ancora non passa. '+run});
+                else await github.rest.issues.create({...context.repo,title:titolo,body:testo,labels:['controlli']});
+              }else if(v.result==='success'){
+                for(const i of aperte){await github.rest.issues.createComment({...context.repo,issue_number:i.number,body:'Tornato a posto. '+run});await github.rest.issues.update({...context.repo,issue_number:i.number,state:'closed',state_reason:'completed'});}
+              }
+            }
