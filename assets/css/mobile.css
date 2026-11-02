@@ -1,0 +1,37 @@
+/* hl. — telefono (≤ 760 px) */
+@media (max-width:760px){
+  /* barre in alto e in basso (variante A "pieno", scelta il 2/11): tengono logo, etichetta e orologio staccati dal contenuto */
+  .live::before,.live::after{content:"";position:fixed;left:0;right:0;z-index:19;pointer-events:none;background:#E9E6DF}
+  .live::before{top:0;height:calc(64px + env(safe-area-inset-top));box-shadow:0 1px 0 rgba(17,17,17,.12)}
+  .live::after{bottom:0;height:calc(48px + env(safe-area-inset-bottom));box-shadow:0 -1px 0 rgba(17,17,17,.12)}
+  #liveG::after{display:none}
+  .live .ui.tl{top:calc(17px + env(safe-area-inset-top))}
+  /* i titoli di sezione non finiscono sotto la barra */
+  #liveJ section.sx{scroll-margin-top:72px}
+  /* home: scritte pensate per il mouse */
+  #liveJ .hd span{display:none}
+  #liveJ .row{min-height:48px;grid-template-columns:9vw 1fr auto}
+  /* nomi a misura della riga (variante C, scelta il 2/11): la dimensione la calcola home.js; si accendono solo di peso */
+  #liveJ .row b{overflow:hidden;font-variation-settings:'wdth' 62,'wght' 400;padding:.04em 0}
+  #liveJ .row:hover b{font-variation-settings:'wdth' 62,'wght' 850}
+  #liveJ .feat .pic svg{display:none}
+  #liveJ footer.f{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+  /* pagina progetto: didascalie leggibili e staccate dall'oggetto */
+  #liveG .cap{left:16px;right:16px;bottom:calc(28px + env(safe-area-inset-bottom));min-width:0}
+  #liveG .cap h3{font-size:34px}
+  #liveG .cap p{font-size:15px}
+  #liveG .s.intro .meta{flex-direction:column;gap:6px;left:16px;right:16px;bottom:calc(28px + env(safe-area-inset-bottom))}
+  #liveG .content{padding:0 16px}
+  #liveG .sec>.k{margin-bottom:24px}
+}
+/* indice lavori senza mouse (variante 2, scelta il 2/11): comanda lo scroll, l'anteprima si aggancia sotto la riga attiva */
+@media (hover:none){
+  /* il peso segue lo scroll direttamente, senza transizione */
+  #liveJ .row b,#liveJ .row:hover b{transition:none}
+  #liveJ .row:hover b{font-variation-settings:'wdth' 62,'wght' 400}
+  #liveJ .peekt{position:absolute;right:0;top:0;width:46vw;max-width:340px;aspect-ratio:1;z-index:3;pointer-events:none;opacity:0;transition:opacity 180ms ease-out,transform 260ms cubic-bezier(.2,.9,.25,1)}
+  #liveJ .peekt img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 180ms ease-out}
+  #liveJ .peekt img.on{opacity:1}
+  #liveJ .peekt small{position:absolute;left:0;right:0;bottom:-16px;text-align:right;font:500 10px/1 'Roboto Mono',monospace}
+}
+@media (hover:none) and (prefers-reduced-motion:reduce){#liveJ .peekt,#liveJ .peekt img{transition:none}}

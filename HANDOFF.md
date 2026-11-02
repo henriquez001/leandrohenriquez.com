@@ -50,8 +50,7 @@ Il modello di pagina è `lavori/oopar/` + `assets/js/progetto.js` (camera a tapp
 giganti, quote SVG, scheda, immagini, processo, prossimo progetto). Per convertire uno STEP:
 OCP (OpenCASCADE) → `BRepMesh_IncrementalMesh(shape, 0.05, False, 0.06, True)` →
 posizioni float32 + indici uint16 per parte, in base64 (vedi formato in oopar-data.js).
-Oggi `progetto.js` è scritto per Oopar (testi, tappe, quote): per più progetti va reso
-guidato da dati (un JSON per progetto).
+`progetto.js` è guidato da dati: ogni progetto ha il suo `progetto.json` (vedi CLAUDE.md).
 
 ## Come provare in locale
 `python3 -m http.server` nella cartella del repo → http://localhost:8000

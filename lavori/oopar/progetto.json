@@ -1,0 +1,79 @@
+{
+  "titolo": "Oopar",
+  "contatore": "09 / 10",
+  "etichetta": "oopar lamp",
+  "modello": {
+    "dati": "assets/models/oopar-data.js",
+    "costruttore": "oopar"
+  },
+  "intro": ["Lampada da tavolo", "1° premio Pending Cultures", "trascina per ruotare ↔ · scorri ↓"],
+  "tappe": [
+    {
+      "camera": { "yaw": 35, "pitch": 18, "dist": 11.5 },
+      "parola": { "testo": "Oopar" }
+    },
+    {
+      "camera": { "yaw": 0, "pitch": 4, "dist": 10.5 },
+      "parola": { "testo": "300 mm", "stile": "o" },
+      "didascalia": { "n": "01 — MISURE", "titolo": "Un occhio di 30 cm", "testo": "300 × 195 × 200 mm: le quote vengono direttamente dal modello Rhino." },
+      "quote": [
+        { "verso": "o", "da": [-1.5, 0.22, 0], "a": [1.5, 0.22, 0], "testo": "300 mm", "scosta": 46, "rif": [[0, -0.975, 0]] },
+        { "verso": "v", "da": [0, 0.975, 0], "a": [0, -0.975, 0], "testo": "195", "scosta": 40, "rif": [[1.5, 0.22, -1], [1.5, 0.22, 1]] }
+      ]
+    },
+    {
+      "camera": { "yaw": 10, "pitch": 6, "dist": 7.6 },
+      "parola": { "testo": "Ø 90", "stile": "or" },
+      "didascalia": { "n": "02 — LA SFERA", "titolo": "Ø 90, sospesa", "testo": "Una sfera cromata di 90 mm fluttua nel campo magnetico e riflette la luce del corpo." },
+      "quote": [
+        { "sfera": 0.45, "testo": "Ø 90", "scosta": 40 }
+      ]
+    },
+    {
+      "camera": { "yaw": -62, "pitch": 16, "dist": 9.4 },
+      "parola": { "testo": "Noce" },
+      "didascalia": { "n": "03 — IL CORPO", "titolo": "Noce, nel pieno", "testo": "Il guscio a occhio, con i fianchi concavi, nasce dall’incrocio tra cultura italiana e indiana." },
+      "quote": [
+        { "verso": "o", "da": [-1.5, 0.22, -1], "a": [-1.5, 0.22, 1], "testo": "200", "scosta": 40, "rif": [[0, -0.975, 0.8], [0, -0.975, -0.8], [-1.5, 0.22, 1], [-1.5, 0.22, -1]] }
+      ]
+    },
+    {
+      "camera": { "yaw": -150, "pitch": 10, "dist": 9.8 },
+      "parola": { "testo": "Luce", "stile": "o" },
+      "didascalia": { "n": "04 — LA LUCE", "titolo": "Dalla fascia interna", "testo": "La luce esce dalla fascia dentro il tunnel e si riflette sulla sfera." }
+    }
+  ],
+  "scheda": {
+    "nota": "dal file lampada.stp",
+    "voci": [
+      { "voce": "larghezza", "valore": "300", "unita": "mm" },
+      { "voce": "altezza", "valore": "195", "unita": "mm" },
+      { "voce": "profondità", "valore": "200", "unita": "mm" },
+      { "voce": "sfera", "valore": "Ø 90", "unita": "mm" },
+      { "voce": "corpo", "valore": "Noce" },
+      { "voce": "sfera", "valore": "Cromo" },
+      { "voce": "parti", "valore": "4" },
+      { "voce": "premio", "valore": "1° Pending ", "unita": "Cultures" }
+    ]
+  },
+  "immagini": {
+    "nota": "render dal portfolio",
+    "voci": [
+      { "src": "assets/img/oopar.jpg", "alt": "Oopar Lamp su un tavolo in marmo", "didascalia": ["Ambientata", "render"] },
+      { "src": "assets/img/cut-oopar.png", "alt": "Oopar Lamp scontornata", "didascalia": ["Il decoro originale", "render"], "scontornata": true }
+    ]
+  },
+  "processo": {
+    "nota": "cosa c’è e cosa manca",
+    "voci": [
+      { "titolo": "Schizzi", "stato": "da fornire" },
+      { "titolo": "Modello Rhino", "stato": "lampada.stp ✓", "fatto": true },
+      { "titolo": "Render Vitrum", "stato": "da fare insieme" }
+    ]
+  },
+  "prossimo": {
+    "etichetta": "Prossimo progetto — 10 / 10",
+    "titolo": "La Fornace →",
+    "link": "#lavori"
+  }
+}
