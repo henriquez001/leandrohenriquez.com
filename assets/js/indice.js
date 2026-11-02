@@ -13,7 +13,7 @@ const PROGETTI=[
   "slug": "hydra",
   "nome": "Hydra NR_01",
   "tipo": "case pc",
-  "contesto": "prodotto · in vendita",
+  "contesto": "prodotto · per Hydra",
   "anteprima": "assets/img/hydra.jpg",
   "pagina": false,
   "etichetta": ""
