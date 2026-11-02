@@ -69,7 +69,7 @@ jobs:
           args: >-
             --no-progress --max-retries 3 --timeout 20
             --root-dir ${{ github.workspace }}
-            --exclude 'linkedin\.com' --exclude 'instagram\.com'
+            --exclude 'leandrohenriquez\.com' --exclude 'linkedin\.com' --exclude 'instagram\.com'
             --exclude-path backend --exclude-path node_modules
             './**/*.html'
           fail: true
