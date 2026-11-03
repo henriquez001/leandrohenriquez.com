@@ -32,6 +32,9 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   - Telefono: pulsante **"menu"** che apre un foglio a tutto schermo.
   - Desktop: **barre piene** in alto e in basso, come sul telefono; sotto i 1000 px niente
     "industrial designer / macerata, it".
+  - Telefono, nome in home **"a misura"**: ogni riga riempie la larghezza (calcolo in `fitHero`,
+    home.js), LEANDRO peso 800 e HENRIQUEZ 300, senza cinetica. Scartate: manifesto a 4 righe,
+    cognome in verticale, nome con Oopar quotata.
 - Link e titoli sono semantici (`<a href>`, `h1` nascosto, titoli di sezione `role="heading"`):
   le righe con pagina sono `<a>`, quelle senza restano `<div>`.
 
