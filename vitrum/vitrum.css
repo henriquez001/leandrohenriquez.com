@@ -1,0 +1,136 @@
+/* Vitrum · vetrina, variante B "Camera oscura" (scelta da Leandro il 3/11/2026).
+   Colori, raggi e molla sono quelli dell'app (apps/web/src/styles.css del repo Vitrum):
+   isole nere attaccate al bordo con raggio 20 e raccordo rovesciato 14, tab a pillola
+   #262626, accento bianco #ededeb. */
+@font-face{font-family:'Urbanist';src:url(../assets/fonts/urbanist-latin-600-normal.woff2) format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Urbanist';src:url(../assets/fonts/urbanist-latin-700-normal.woff2) format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url(../assets/fonts/ibm-plex-sans-latin-400-normal.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url(../assets/fonts/ibm-plex-sans-latin-500-normal.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url(../assets/fonts/ibm-plex-sans-latin-600-normal.woff2) format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url(../assets/fonts/ibm-plex-mono-latin-400-normal.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url(../assets/fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2');font-weight:500;font-display:swap}
+
+:root{
+  --app:#0a0a0a; --chrome:#000; --panel:#121212; --raised:#1b1b1b; --pill:#262626; --line:#1f1f1f;
+  --text:#ededeb; --muted:#9a9a96; --accent:#ededeb; --accent-text:#111;
+  --f-ui:'IBM Plex Sans',system-ui,sans-serif; --f-brand:'Urbanist','IBM Plex Sans',system-ui,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,monospace;
+  --pad:clamp(20px,5vw,72px);
+  /* Una sola molla, come in Vitrum: smorzamento 1, risposta 0,35 s (apple-motion § 4). */
+  --spring:500ms linear(0,.075,.227,.39,.536,.656,.75,.821,.873,.911,.938,.957,.971,.98,.986,.991,.994,.996,.997,.998,1);
+  --hover:120ms ease-out; --press:100ms ease-out;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{background:var(--app);color:var(--text);font:16px/1.55 var(--f-ui);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+ul,ol{list-style:none}
+:focus-visible{outline:2px solid #6aa0ff;outline-offset:2px;border-radius:6px}
+
+.in{padding-left:max(var(--pad),env(safe-area-inset-left,0px));padding-right:max(var(--pad),env(safe-area-inset-right,0px));max-width:1440px;margin:0 auto}
+h2{font:700 clamp(30px,4.4vw,56px)/1.02 var(--f-brand);letter-spacing:-.02em;text-wrap:balance}
+h3{font:600 18px/1.25 var(--f-brand)}
+.eb{font:500 11.5px var(--f-ui);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.lead{font-size:clamp(16px,1.5vw,19px);color:var(--muted);max-width:52ch}
+section{padding-block:clamp(56px,8vw,120px)}
+.sec-h{display:grid;gap:12px;margin-bottom:clamp(28px,4vw,48px)}
+
+/* Pulsanti a pillola: 44 px di altezza sul web (HIG accessibility, area minima). */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 22px;border-radius:22px;font:600 15px var(--f-ui);background:var(--accent);color:var(--accent-text);border:0;cursor:pointer;transition:transform var(--press),filter var(--hover)}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:scale(.97)}
+.btn.alt{background:var(--raised);color:var(--text)}
+.btn.sm{height:32px;padding:0 16px;font-size:13.5px;border-radius:16px}
+.btn.full{width:100%}
+.btn svg{width:16px;height:16px;flex:none}
+.ctas{display:flex;flex-wrap:wrap;gap:10px}
+
+/* Isole in alto */
+.bar{position:fixed;inset:0 0 auto;height:0;z-index:10}
+.notch{position:absolute;top:0;background:var(--chrome);color:var(--text);display:flex;align-items:center;gap:4px;height:calc(48px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) 8px 0;box-shadow:0 8px 28px rgba(0,0,0,.32)}
+.notch.c{left:50%;transform:translateX(-50%);border-radius:0 0 20px 20px}
+.notch.l{left:0;border-radius:0 0 20px 0;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:16px}
+.notch.r{right:0;border-radius:0 0 0 20px;padding-right:max(8px,env(safe-area-inset-right,0px))}
+.notch::before,.notch::after{content:"";position:absolute;top:0;width:14px;height:14px;pointer-events:none}
+.notch.c::before,.notch.r::before{left:-14px;background:radial-gradient(circle at 0 100%,transparent 13.5px,#000 14px)}
+.notch.c::after,.notch.l::after{right:-14px;background:radial-gradient(circle at 100% 100%,transparent 13.5px,#000 14px)}
+.notch.l::before,.notch.r::after{display:none}
+.notch .t{height:32px;display:inline-flex;align-items:center;padding:0 13px;border-radius:16px;font:500 13.5px var(--f-ui);color:var(--muted);transition:color var(--hover),background-color var(--hover);white-space:nowrap}
+.notch .t:hover{color:var(--text)}
+.notch .t[aria-current]{background:var(--pill);color:var(--text)}
+.wm{display:inline-flex;align-items:center;gap:8px;font:600 17px var(--f-brand);letter-spacing:.01em}
+.wm svg{width:22px;height:22px;color:var(--text)}
+@media (max-width:860px){.notch.c{display:none}}
+
+/* Apertura: render a tutto schermo, testo in basso a sinistra, pannello Render a destra */
+.hero{position:relative;min-height:min(92vh,880px);display:grid;align-items:end;padding:0;overflow:hidden}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,10,10,.82) 0%,rgba(10,10,10,.35) 48%,rgba(10,10,10,0) 70%),linear-gradient(180deg,rgba(10,10,10,0) 45%,var(--app) 100%);pointer-events:none}
+.hero-txt{position:relative;z-index:1;width:100%;padding-top:120px;padding-bottom:clamp(36px,5vw,72px);display:grid;gap:18px}
+.hero h1{font:700 clamp(46px,8.4vw,120px)/.92 var(--f-brand);letter-spacing:-.035em;max-width:11ch}
+.panel{position:absolute;z-index:2;right:max(var(--pad),env(safe-area-inset-right,0px));top:clamp(84px,9vw,120px);width:260px;background:var(--chrome);border-radius:20px;padding:16px;display:grid;gap:12px;box-shadow:0 8px 28px rgba(0,0,0,.32);font-size:13px}
+.panel .hd{display:flex;justify-content:space-between;font:600 15px var(--f-ui)}
+.panel .hd span{color:var(--muted)}
+.panel .eb{font-size:10.5px}
+.seg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);background:var(--panel);border-radius:16px;padding:2px}
+.seg .th{position:absolute;top:2px;bottom:2px;left:2px;width:calc((100% - 4px)/3);background:var(--pill);border-radius:14px;transform:translateX(100%);transition:transform var(--spring)}
+.seg button{position:relative;z-index:1;border:0;background:transparent;color:var(--muted);height:30px;font:500 12.5px var(--f-ui);cursor:pointer;border-radius:14px;transition:color var(--hover)}
+.seg button[aria-pressed="true"]{color:var(--text);font-weight:600}
+.panel .row{display:flex;justify-content:space-between;font:12.5px var(--f-mono);color:var(--muted)}
+.panel .row b{color:var(--text);font-weight:500}
+@media (max-width:860px){.panel{display:none}.hero::after{background:linear-gradient(180deg,rgba(10,10,10,.15) 0%,rgba(10,10,10,.78) 45%,var(--app) 100%)}}
+
+/* Passi: sono i cinque passi dell'app, nell'ordine dell'isola */
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.step{background:var(--panel);border-radius:20px;padding:20px;display:grid;gap:8px;align-content:start;min-width:0}
+.step .n{font:500 12px var(--f-mono);color:var(--muted)}
+.step p{font-size:14px;color:var(--muted)}
+.ui{margin-top:12px;border-radius:24px;overflow:hidden;border:1px solid var(--line)}
+@media (max-width:1000px){.steps{grid-template-columns:1fr 1fr}}
+@media (max-width:540px){.steps{grid-template-columns:1fr}}
+
+/* Galleria */
+.gal{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.gal figure{border-radius:20px;overflow:hidden;position:relative;background:var(--panel)}
+.gal figure:first-child{grid-row:span 2}
+.gal img{width:100%;height:100%;object-fit:cover}
+.gal figcaption{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.72);color:var(--text);font:500 12px var(--f-ui);padding:5px 10px;border-radius:12px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.more{margin-top:18px;font-weight:500}
+.more a{color:var(--muted);transition:color var(--hover)}
+.more a:hover{color:var(--text)}
+@media (max-width:720px){.gal{grid-template-columns:1fr}.gal figure:first-child{grid-row:auto}}
+
+/* Funzioni */
+.feats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.feat{background:var(--panel);border-radius:20px;overflow:hidden;display:grid;align-content:start;min-width:0}
+.feat img{aspect-ratio:16/10;object-fit:cover;width:100%}
+.feat div{padding:14px 16px 18px;display:grid;gap:6px}
+.feat p{font-size:14px;color:var(--muted)}
+@media (max-width:1000px){.feats{grid-template-columns:1fr 1fr}}
+@media (max-width:540px){.feats{grid-template-columns:1fr}}
+
+/* Formati */
+.fmt{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fmt>div{background:var(--panel);border-radius:20px;padding:24px;display:grid;gap:14px;align-content:start}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips li{height:30px;display:inline-flex;align-items:center;padding:0 12px;border-radius:15px;background:var(--raised);font:500 13px var(--f-mono)}
+.note{font-size:14px;color:var(--muted)}
+@media (max-width:720px){.fmt{grid-template-columns:1fr}}
+
+/* Scarica */
+.dl{border-radius:28px;background:var(--chrome);padding:clamp(28px,5vw,64px);display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:center}
+.dl-txt{display:grid;gap:18px}
+.spec{font-size:14px}
+.spec div{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--line)}
+.spec dt{color:var(--muted)}
+.spec dd{text-align:right}
+@media (max-width:760px){.dl{grid-template-columns:1fr}}
+
+.foot{padding:28px max(var(--pad),env(safe-area-inset-right,0px)) calc(40px + env(safe-area-inset-bottom,0px)) max(var(--pad),env(safe-area-inset-left,0px));display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted);max-width:1440px;margin:0 auto}
+.foot a{color:var(--text)}
+
+/* Riduci movimento: niente molla né scorrimento animato (apple-motion § 14). */
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:0s!important}}
+/* Riduci trasparenza: didascalie piene. */
+@media (prefers-reduced-transparency:reduce){.gal figcaption{background:#000;backdrop-filter:none;-webkit-backdrop-filter:none}}
