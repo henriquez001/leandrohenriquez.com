@@ -11,7 +11,18 @@ function HOME(root){
   const plain=e=>!(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button>0);
   const openLink=(slug)=>e=>{if(!plain(e))return;e.preventDefault();toProject(slug);};
   // nav: scorre alla sezione e ci porta anche il focus della tastiera
-  root.querySelectorAll('.jnav a[data-to]').forEach(a=>a.onclick=e=>{e.preventDefault();const s=root.querySelector('#'+a.dataset.to);root.scrollTo({top:s.offsetTop-20,behavior:RM?'auto':'smooth'});s.focus({preventScroll:true});});
+  root.querySelectorAll('.jnav a[data-to],.msheet a[data-to]').forEach(a=>a.onclick=e=>{e.preventDefault();const s=root.querySelector('#'+a.dataset.to),go=()=>{root.scrollTo({top:s.offsetTop-20,behavior:RM?'auto':'smooth'});s.focus({preventScroll:true});};
+    // dal menu del telefono: prima si chiude (e si sblocca lo scroll), poi si scorre al frame dopo
+    if(root.classList.contains('menu-open')){setMenu(false);requestAnimationFrame(go);}else go();});
+  // menu del telefono: il pulsante apre e chiude il foglio, Esc lo chiude, Tab resta dentro finché è aperto
+  const mbtn=root.querySelector('#jMenu'),sheetLinks=[...root.querySelectorAll('.msheet a')];
+  function setMenu(open,back){if(root.classList.contains('menu-open')===open)return;root.classList.toggle('menu-open',open);mbtn.setAttribute('aria-expanded',open);mbtn.textContent=open?'chiudi':'menu';
+    if(open)sheetLinks[0].focus({preventScroll:true});else if(back)mbtn.focus({preventScroll:true});}
+  mbtn.onclick=()=>setMenu(!root.classList.contains('menu-open'),true);
+  root.addEventListener('keydown',e=>{if(!root.classList.contains('menu-open'))return;if(e.key==='Escape'){setMenu(false,true);return;}
+    if(e.key!=='Tab')return;const f=[mbtn,...sheetLinks],i=f.indexOf(document.activeElement);
+    if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus();}else if(!e.shiftKey&&(i<0||i===f.length-1)){e.preventDefault();f[0].focus();}});
+  matchMedia('(min-width:761px)').addEventListener('change',m=>{if(m.matches)setMenu(false);});
   // hero letters + email letters (kinetic, as liked)
   let hero=[];root.querySelectorAll('.kin').forEach(k=>hero=hero.concat(splitLetters(k)));
   const mailEl=root.querySelector('#jMail'),mail=splitLetters(mailEl);
@@ -25,7 +36,7 @@ function HOME(root){
   const nLav=root.querySelector('#jLav .hd b i');if(nLav)nLav.textContent=PROGETTI.length;
   // con la pagina la riga è un link vero; senza pagina resta un div
   PROGETTI.forEach((p,i)=>{const r=document.createElement(p.pagina?'a':'div');r.className='row';if(p.pagina)r.href='lavori/'+p.slug+'/';
-    r.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><b>${esc(p.nome)}</b><span>${esc(p.tipo)}<small>tipo</small></span><span>${esc(p.contesto)}<small>contesto</small></span>${p.etichetta?`<em>${esc(p.etichetta)}</em>`:'<span>→</span>'}`;
+    r.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><b>${esc(p.nome)}</b><span>${esc(p.tipo)}<small>tipo</small></span><span>${esc(p.contesto)}<small>contesto</small></span>${p.etichetta?`<em>${esc(p.etichetta)}</em>`:p.pagina?'<span>→</span>':'<span></span>'}`;
     if(!TOUCH){r.onpointerenter=()=>peek.show('p_'+p.slug);r.onpointerleave=()=>peek.hide();}if(p.pagina)r.onclick=openLink(p.slug);idx.appendChild(r);});
   // telefono (≤ 760 px, variante C del 2/11): ogni nome riempie la sua riga anche quando è acceso (peso 850), al massimo 24vw
   const rowNames=[...idx.querySelectorAll('.row b')];let nKey='';
