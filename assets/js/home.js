@@ -45,6 +45,14 @@ function HOME(root){
     rowNames.forEach(n=>{n.style.transition='none';n.style.fontSize='100px';n.style.fontVariationSettings="'wdth' 62,'wght' 850";});
     rowNames.forEach(n=>{n._fs=Math.min(innerWidth*.24,100*(n.clientWidth-2)/n.scrollWidth);});
     rowNames.forEach(n=>{n.style.fontSize=n._fs.toFixed(1)+'px';n.style.fontVariationSettings='';n.style.transition='';n._v='';});}
+  // telefono (≤ 760 px, variante A del 3/11): nome "a misura", ogni riga riempie la larghezza, LEANDRO peso 800 e HENRIQUEZ 300, senza cinetica
+  const kinEls=[...root.querySelectorAll('.kin')],kinW=["'wdth' 62,'wght' 800","'wdth' 62,'wght' 300"];let hKey='';
+  function fitHero(){const k=innerWidth+'|'+(document.fonts?document.fonts.status:'');if(k===hKey)return false;hKey=k;
+    // la cache di setVar va svuotata, così tornando sopra i 760 px la cinetica riscrive i pesi
+    if(innerWidth>760){kinEls.forEach(el=>el.style.fontSize='');hero.forEach(o=>o.el._fontVariationSettings='');return false;}
+    kinEls.forEach((el,i)=>{const sp=[...el.children];sp.forEach(s=>{s.style.fontVariationSettings=kinW[i];s._fontVariationSettings='';});el.style.fontSize='100px';
+      const w=sp.reduce((a,s)=>a+s.getBoundingClientRect().width,0);el.style.fontSize=(100*(el.clientWidth-1)/w).toFixed(1)+'px';});
+    return true;}
   // senza mouse comanda lo scroll: la riga sulla linea di fuoco (36% dello schermo) si accende e l'anteprima si aggancia sotto
   const tIdx=TOUCH?(()=>{const rows=[...idx.querySelectorAll('.row')],nm=rows.map(r=>r.querySelector('b'));
     const pv=document.createElement('div');pv.className='peekt';pv.innerHTML=PROGETTI.map(p=>`<img alt="${esc(p.nome)}" decoding="async">`).join('')+'<small></small>';idx.appendChild(pv);
@@ -74,7 +82,7 @@ function HOME(root){
   const ck=[root.querySelector('#jClock'),root.querySelector('#jClock2')];let sec=-1,last=performance.now(),qKey='',pKey='';root._redraw=()=>{qKey='';pKey='';};
   return function(now){const dt=Math.min(.033,(now-last)/1000);last=now;const vh=H(),st=root.scrollTop;
     const s=Math.floor(Date.now()/1000);if(s!==sec){sec=s;const t=new Date().toLocaleTimeString('it-IT',{timeZone:'Europe/Rome',hour:'2-digit',minute:'2-digit',second:'2-digit'});ck[0].textContent='macerata '+t;ck[1].textContent=t;}
-    if(st<vh){kinetic(hero,mx,my,dt,vh);
+    if(st<vh){if(fitHero())qKey='';if(innerWidth>760)kinetic(hero,mx,my,dt,vh);
       const a=kins[0].getBoundingClientRect(),b=kins[1].getBoundingClientRect();const key=[a.left,a.top,b.right,b.bottom].map(Math.round).join();
       if(key!==qKey){qKey=key;const hr=root.querySelector('#jHero').getBoundingClientRect();
         q.innerHTML=dimH(b.left-hr.left,b.right-hr.left,b.bottom-hr.top+34,'industrial designer — '+PROGETTI.length+' progetti','#111')+dimH(a.left-hr.left,a.right-hr.left,a.top-hr.top-26,'design specialist in Elica dal 2022',accOf());}}

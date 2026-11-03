@@ -6,6 +6,9 @@
   .live::after{bottom:0;height:calc(48px + env(safe-area-inset-bottom));box-shadow:0 -1px 0 rgba(17,17,17,.12)}
   #liveG::after{display:none}
   .live .ui.tl{top:calc(17px + env(safe-area-inset-top))}
+  /* nome "a misura" (variante A, scelta il 3/11): lettere attaccate, la dimensione la calcola home.js */
+  #liveJ .kin{justify-content:flex-start;white-space:nowrap}
+  #liveJ .kin+.kin{margin-top:1.2vw}
   /* i titoli di sezione non finiscono sotto la barra */
   #liveJ section.sx{scroll-margin-top:72px}
   /* home: scritte pensate per il mouse */
