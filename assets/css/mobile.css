@@ -14,6 +14,18 @@
   /* nomi a misura della riga (variante C, scelta il 2/11): la dimensione la calcola home.js; si accendono solo di peso */
   #liveJ .row b{overflow:hidden;font-variation-settings:'wdth' 62,'wght' 400;padding:.04em 0}
   #liveJ .row:hover b{font-variation-settings:'wdth' 62,'wght' 850}
+  #liveJ div.row:hover b{font-variation-settings:'wdth' 62,'wght' 400}
+  /* menu (variante A "pulsante menu", scelta il 3/11): foglio a tutto schermo che parte dal pulsante ed esce per la stessa strada */
+  #liveJ .mbtn{display:block;position:fixed;right:calc(2.5vw - 8px);top:calc(10px + env(safe-area-inset-top));z-index:76;min-width:44px;min-height:44px;padding:0 8px;background:none;border:0;color:#111;font:500 12px/1 'Roboto Mono',monospace;cursor:pointer}
+  #liveJ .mbtn:focus-visible{font-weight:700}
+  #liveJ .msheet{display:flex;flex-direction:column;position:fixed;inset:0;z-index:74;background:#E9E6DF;padding:calc(76px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));opacity:0;visibility:hidden;transform:translateY(-12px);transform-origin:top right;transition:opacity 220ms ease-out,transform 260ms cubic-bezier(.2,.9,.25,1),visibility 0s 260ms}
+  #liveJ.menu-open{overflow:hidden}
+  #liveJ.menu-open .msheet{opacity:1;visibility:visible;transform:none;transition:opacity 220ms ease-out,transform 260ms cubic-bezier(.2,.9,.25,1),visibility 0s}
+  #liveJ.menu-open .ui.tl{z-index:76}
+  #liveJ .msheet a{font-family:'Archivo',sans-serif;text-transform:uppercase;font-size:56px;line-height:1;text-decoration:none;color:#111;border-top:1px solid #111;padding:8px 0;font-variation-settings:'wdth' 62,'wght' 300}
+  #liveJ .msheet a:last-of-type{border-bottom:1px solid #111}
+  #liveJ .msheet a:active,#liveJ .msheet a:focus-visible{font-variation-settings:'wdth' 62,'wght' 850}
+  #liveJ .msheet small{margin-top:auto;font:500 12px/1.4 'Roboto Mono',monospace}
   #liveJ .feat .pic svg{display:none}
   #liveJ footer.f{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
   /* pagina progetto: didascalie leggibili e staccate dall'oggetto */

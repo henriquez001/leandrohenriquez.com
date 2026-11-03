@@ -25,6 +25,15 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   tecnica; il contenuto sotto (scheda, immagini, processo, prossimo progetto).
 - Transizione verso un progetto: forme piene del modulo "hl.".
 - Logo: monogramma "hl." (favicon.svg, inline nelle pagine).
+- Scelte del 3/11/2026 (anteprima con varianti affiancate):
+  - Focus da tastiera **come l'hover**, senza contorno né barra (righe e "Oopar in 3D" si allargano,
+    menu e link in grassetto, email più pesante).
+  - Righe senza pagina **attenuate**: nome #7D7A73, nessuna freccia, nessuna etichetta "in arrivo".
+  - Telefono: pulsante **"menu"** che apre un foglio a tutto schermo.
+  - Desktop: **barre piene** in alto e in basso, come sul telefono; sotto i 1000 px niente
+    "industrial designer / macerata, it".
+- Link e titoli sono semantici (`<a href>`, `h1` nascosto, titoli di sezione `role="heading"`):
+  le righe con pagina sono `<a>`, quelle senza restano `<div>`.
 
 ## Struttura
 - `index.html` (home, `data-base=""`) e `lavori/<progetto>/index.html` (`data-base="../../"`).

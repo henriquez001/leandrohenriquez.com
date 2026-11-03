@@ -22,9 +22,19 @@
   #liveJ .idx{position:relative;z-index:1;margin-top:5vh}
   #liveJ .row{display:grid;grid-template-columns:6vw 1fr 18vw 16vw 3vw;align-items:center;border-top:1px solid #111;cursor:pointer;background:#E9E6DF}
   #liveJ .row:last-child{border-bottom:1px solid #111}
+  #liveJ a.row,#liveJ a.go,#liveJ a.mail{color:inherit;text-decoration:none}
   #liveJ .row i{font:500 12px/1 'Roboto Mono',monospace;font-style:normal}
   #liveJ .row b{font-family:'Archivo',sans-serif;text-transform:uppercase;font-size:7.4vw;line-height:.92;white-space:nowrap;font-variation-settings:'wdth' 62,'wght' 300;transition:font-variation-settings 420ms cubic-bezier(.2,.9,.25,1),color 200ms}
   #liveJ .row:hover b{font-variation-settings:'wdth' 125,'wght' 900;color:var(--hover);background:var(--hl)}
+  /* righe senza pagina (variante "attenuata", scelta il 3/11): nome grigio 3,44:1, nessun simbolo, nessuna reazione al passaggio */
+  #liveJ div.row{cursor:default}
+  #liveJ div.row b,#liveJ div.row:hover b{color:#7D7A73}
+  @media (min-width:761px){#liveJ div.row:hover b{font-variation-settings:'wdth' 62,'wght' 300}}
+  /* focus da tastiera (variante "come l'hover", scelta il 3/11): stesso cambio di larghezza e peso del mouse, senza contorno */
+  #liveJ a:focus-visible,#liveJ button:focus-visible{outline:none}
+  #liveJ a.row:focus-visible b,#liveJ a.go:focus-visible b{font-variation-settings:'wdth' 125,'wght' 900;color:var(--hover);background:var(--hl)}
+  #liveJ .jnav a:focus-visible,#liveJ .row3 a:focus-visible,#liveJ footer.f a:focus-visible{font-weight:700}
+  #liveJ a.mail:focus-visible span{font-variation-settings:'wdth' 62,'wght' 800!important}
   #liveJ .row span{font:500 12px/1.35 'Roboto Mono',monospace}
   #liveJ .row span small{display:block;color:#6b6963;font-size:11px}
   #liveJ .row em{font:500 11px/1 'Roboto Mono',monospace;font-style:normal;justify-self:end;background:var(--acc);color:var(--on);padding:5px 7px;border-radius:4px}
@@ -63,6 +73,16 @@
   #liveJ .row3 a{color:#111}
   #liveJ footer.f{display:flex;justify-content:space-between;align-items:end;padding:16vh 2.5vw 4vh;font:500 12px/1 'Roboto Mono',monospace;position:relative;z-index:1}
   #liveJ footer.f .hlogo{height:12vw;width:auto}
+  /* barre piene anche su desktop (variante A, scelta il 3/11, come quella del telefono del 2/11) */
+  @media (min-width:761px){
+    #liveJ::before,#liveJ::after{content:"";position:fixed;left:0;right:0;z-index:19;pointer-events:none;background:#E9E6DF}
+    #liveJ::before{top:0;height:64px;box-shadow:0 1px 0 rgba(17,17,17,.12)}
+    #liveJ::after{bottom:0;height:52px;box-shadow:0 -1px 0 rgba(17,17,17,.12)}
+    #liveJ section.sx{scroll-margin-top:80px}}
+  /* tra 761 e 1000 px "industrial designer / macerata, it" finirebbe sopra il menu */
+  @media (max-width:1000px){#liveJ .ui.tr{display:none}}
+  /* menu del telefono: fuori dal telefono non esiste */
+  #liveJ .mbtn,#liveJ .msheet{display:none}
   #liveJ .tr{position:fixed;inset:0;z-index:90;pointer-events:none;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
   #liveJ .tr svg{width:100%;height:100%;transform:scale(0);transition:transform 380ms cubic-bezier(.65,0,.35,1)}
   #liveJ .tr svg path{fill:var(--acc)}

@@ -7,22 +7,37 @@ function HOME(root){
   const tr=root.querySelector('#jTr');MODCELLS.forEach((c,i)=>tr.insertAdjacentHTML('beforeend',`<svg viewBox="${c.v}" preserveAspectRatio="none" style="transition-delay:${(i%3+Math.floor(i/3))*45}ms"><path d="${c.d}"/></svg>`));
   addEventListener('pageshow',()=>tr.classList.remove('go'));
   function toProject(slug){const go=()=>{location.href='lavori/'+(slug||'oopar')+'/';};if(RM){go();return;}tr.classList.add('go');setTimeout(go,470);}
-  // nav
-  root.querySelectorAll('.jnav a[data-to]').forEach(a=>a.onclick=()=>{const s=root.querySelector('#'+a.dataset.to);root.scrollTo({top:s.offsetTop-20,behavior:RM?'auto':'smooth'});});
+  // i link restano veri (tastiera, nuova scheda con ctrl/cmd): la transizione solo sul clic semplice
+  const plain=e=>!(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button>0);
+  const openLink=(slug)=>e=>{if(!plain(e))return;e.preventDefault();toProject(slug);};
+  // nav: scorre alla sezione e ci porta anche il focus della tastiera
+  root.querySelectorAll('.jnav a[data-to],.msheet a[data-to]').forEach(a=>a.onclick=e=>{e.preventDefault();const s=root.querySelector('#'+a.dataset.to),go=()=>{root.scrollTo({top:s.offsetTop-20,behavior:RM?'auto':'smooth'});s.focus({preventScroll:true});};
+    // dal menu del telefono: prima si chiude (e si sblocca lo scroll), poi si scorre al frame dopo
+    if(root.classList.contains('menu-open')){setMenu(false);requestAnimationFrame(go);}else go();});
+  // menu del telefono: il pulsante apre e chiude il foglio, Esc lo chiude, Tab resta dentro finché è aperto
+  const mbtn=root.querySelector('#jMenu'),sheetLinks=[...root.querySelectorAll('.msheet a')];
+  function setMenu(open,back){if(root.classList.contains('menu-open')===open)return;root.classList.toggle('menu-open',open);mbtn.setAttribute('aria-expanded',open);mbtn.textContent=open?'chiudi':'menu';
+    if(open)sheetLinks[0].focus({preventScroll:true});else if(back)mbtn.focus({preventScroll:true});}
+  mbtn.onclick=()=>setMenu(!root.classList.contains('menu-open'),true);
+  root.addEventListener('keydown',e=>{if(!root.classList.contains('menu-open'))return;if(e.key==='Escape'){setMenu(false,true);return;}
+    if(e.key!=='Tab')return;const f=[mbtn,...sheetLinks],i=f.indexOf(document.activeElement);
+    if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus();}else if(!e.shiftKey&&(i<0||i===f.length-1)){e.preventDefault();f[0].focus();}});
+  matchMedia('(min-width:761px)').addEventListener('change',m=>{if(m.matches)setMenu(false);});
   // hero letters + email letters (kinetic, as liked)
   let hero=[];root.querySelectorAll('.kin').forEach(k=>hero=hero.concat(splitLetters(k)));
   const mailEl=root.querySelector('#jMail'),mail=splitLetters(mailEl);
-  const cp=root.querySelector('#jCopied');const ADDR='henriquez.leandro.a@gmail.com',ok=()=>{cp.style.opacity=1;setTimeout(()=>cp.style.opacity=0,1400);};
+  const cp=root.querySelector('#jCopied');const ADDR='henriquez.leandro.a@gmail.com',ok=()=>{cp.textContent='indirizzo copiato ✓';cp.style.opacity=1;setTimeout(()=>cp.style.opacity=0,1400);};
   const legacy=()=>{const t=document.createElement('textarea');t.value=ADDR;t.setAttribute('readonly','');t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();let done=false;try{done=document.execCommand('copy');}catch(e){}t.remove();if(done)ok();else location.href='mailto:'+ADDR;};
-  mailEl.onclick=()=>{if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(ADDR).then(ok,legacy);else legacy();};
+  mailEl.onclick=e=>{if(!plain(e))return;e.preventDefault();if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(ADDR).then(ok,legacy);else legacy();};
   // index with mouse-follow preview
   const TOUCH=matchMedia('(hover: none)').matches;
   const idx=root.querySelector('#jIdx'),peek=makePeek(root,320);
   // rows come from data/progetti.json (generated into assets/js/indice.js)
   const nLav=root.querySelector('#jLav .hd b i');if(nLav)nLav.textContent=PROGETTI.length;
-  PROGETTI.forEach((p,i)=>{const r=document.createElement('div');r.className='row';
-    r.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><b>${esc(p.nome)}</b><span>${esc(p.tipo)}<small>tipo</small></span><span>${esc(p.contesto)}<small>contesto</small></span>${p.etichetta?`<em>${esc(p.etichetta)}</em>`:'<span>→</span>'}`;
-    if(!TOUCH){r.onpointerenter=()=>peek.show('p_'+p.slug);r.onpointerleave=()=>peek.hide();}if(p.pagina)r.onclick=()=>toProject(p.slug);idx.appendChild(r);});
+  // con la pagina la riga è un link vero; senza pagina resta un div
+  PROGETTI.forEach((p,i)=>{const r=document.createElement(p.pagina?'a':'div');r.className='row';if(p.pagina)r.href='lavori/'+p.slug+'/';
+    r.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><b>${esc(p.nome)}</b><span>${esc(p.tipo)}<small>tipo</small></span><span>${esc(p.contesto)}<small>contesto</small></span>${p.etichetta?`<em>${esc(p.etichetta)}</em>`:p.pagina?'<span>→</span>':'<span></span>'}`;
+    if(!TOUCH){r.onpointerenter=()=>peek.show('p_'+p.slug);r.onpointerleave=()=>peek.hide();}if(p.pagina)r.onclick=openLink(p.slug);idx.appendChild(r);});
   // telefono (≤ 760 px, variante C del 2/11): ogni nome riempie la sua riga anche quando è acceso (peso 850), al massimo 24vw
   const rowNames=[...idx.querySelectorAll('.row b')];let nKey='';
   function sizeNames(){const k=innerWidth+'|'+(document.fonts?document.fonts.status:'');if(k===nKey)return;nKey=k;
@@ -44,7 +59,7 @@ function HOME(root){
         [best,best+1,best-1].forEach(j=>{if(im[j]&&!im[j].src)im[j].src=IMG['p_'+PROGETTI[j].slug];});
         im.forEach((x,i)=>x.classList.toggle('on',i===best));cap.textContent=PROGETTI[best].tipo+' · '+PROGETTI[best].contesto;
         pv.style.transform=`translateY(${rows[best].offsetTop+rows[best].offsetHeight+6}px)`;pv.style.opacity=1;}};})():null;
-  root.querySelector('#jGo').onclick=()=>toProject('oopar');root.querySelector('#jPic').onclick=()=>toProject('oopar');
+  root.querySelector('#jGo').onclick=openLink('oopar');root.querySelector('#jPic').onclick=()=>toProject('oopar');
   // studio lead words: bold in as you read
   const lead=root.querySelector('#jLead');lead.innerHTML=lead.textContent.split(' ').map(w=>`<span>${w}</span>`).join(' ');const words=[...lead.querySelectorAll('span')];
   // big outline words behind sections
