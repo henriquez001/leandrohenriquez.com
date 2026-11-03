@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vitrum — foto di prodotto dal tuo CAD</title>
+<meta name="description" content="Vitrum è un programma per Windows che trasforma il file del tuo CAD in una foto di prodotto: materiali veri, luci da studio e render con Cycles.">
+<meta property="og:title" content="Vitrum — foto di prodotto dal tuo CAD">
+<meta property="og:description" content="Un programma per Windows che trasforma il file del tuo CAD in una foto di prodotto. Di Leandro Henriquez.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://leandrohenriquez.com/vitrum/">
+<meta property="og:image" content="https://leandrohenriquez.com/vitrum/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="canonical" href="https://leandrohenriquez.com/vitrum/">
+<link rel="icon" href="img/icona.png" type="image/png">
+<link rel="preload" href="../assets/fonts/urbanist-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="img/oopar-tre-quarti.webp" as="image">
+<link rel="stylesheet" href="vitrum.css">
+</head>
+<body>
+<header class="bar">
+  <a class="notch l" href="#top" aria-label="Vitrum, torna all'inizio"><span class="wm"><svg viewBox="0 0 200 200" aria-hidden="true"><g transform="translate(8,6) scale(.9)"><path d="M131 92 L216 70" stroke="#FF3B5C" stroke-width="6.5" stroke-linecap="round"/><path d="M131 92 L216 82" stroke="#FF8A2A" stroke-width="6.5" stroke-linecap="round"/><path d="M131 92 L216 94" stroke="#FFD23F" stroke-width="6.5" stroke-linecap="round"/><path d="M131 92 L216 106" stroke="#2FD08A" stroke-width="6.5" stroke-linecap="round"/><path d="M131 92 L216 118" stroke="#2F7BFF" stroke-width="6.5" stroke-linecap="round"/><path d="M131 92 L216 130" stroke="#7B3FF2" stroke-width="6.5" stroke-linecap="round"/><path d="M-6 62 L59 83" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><path d="M48 50 H152 L100 155 Z" fill="none" stroke="currentColor" stroke-width="10" stroke-linejoin="round"/></g></svg>Vitrum</span></a>
+  <nav class="notch c" aria-label="Sezioni">
+    <a class="t" href="#top" aria-current="true">Vitrum</a><a class="t" href="#come">Come funziona</a><a class="t" href="#render">Render</a><a class="t" href="#funzioni">Funzioni</a><a class="t" href="#formati">Formati</a>
+  </nav>
+  <div class="notch r"><a class="btn sm" href="#scarica"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M0 2.2 6.5 1.3v6.2H0zM7.3 1.2 16 0v7.5H7.3zM0 8.3h6.5v6.3L0 13.7zM7.3 8.3H16V16l-8.7-1.2z"/></svg>Scarica</a></div>
+</header>
+
+<main>
+  <section class="hero" id="top" aria-labelledby="titolo">
+    <img class="hero-img" src="img/oopar-tre-quarti.webp" width="2400" height="1600" alt="La lampada Oopar in noce, cromo e motivo Madhubani, renderizzata con Vitrum">
+    <div class="panel" role="group" aria-label="Pannello Render, da provare">
+      <div class="hd">Render <span aria-hidden="true">×</span></div>
+      <span class="eb">Qualità</span>
+      <div class="seg" id="qualita">
+        <span class="th" aria-hidden="true"></span>
+        <button type="button" aria-pressed="false" data-tempo="~6 min">Veloce</button><button type="button" aria-pressed="true" data-tempo="~25 min">Buona</button><button type="button" aria-pressed="false" data-tempo="~2 h">Alta</button>
+      </div>
+      <div class="row"><span>3000 × 2000</span><b id="tempo">~25 min</b></div>
+      <a class="btn sm full" href="#render">Avvia render</a>
+    </div>
+    <div class="in hero-txt">
+      <span class="eb">Programma per Windows · Cycles</span>
+      <h1 id="titolo">Foto di prodotto dal tuo CAD.</h1>
+      <p class="lead">Apri lo STEP, scegli materiali, luci e inquadratura. Vitrum fa il resto, con il motore di render di Blender.</p>
+      <div class="ctas"><a class="btn" href="#scarica"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M0 2.2 6.5 1.3v6.2H0zM7.3 1.2 16 0v7.5H7.3zM0 8.3h6.5v6.3L0 13.7zM7.3 8.3H16V16l-8.7-1.2z"/></svg>Scarica per Windows</a><a class="btn alt" href="#render">Guarda i render</a></div>
+    </div>
+  </section>
+
+  <section id="come" aria-labelledby="t-come"><div class="in">
+    <div class="sec-h"><span class="eb">Come funziona</span><h2 id="t-come">Cinque passi, gli stessi dell'isola in alto.</h2></div>
+    <ol class="steps">
+      <li class="step"><span class="n">1 / 5</span><h3>Scena</h3><p>Apri il file del CAD. Il prodotto si appoggia da solo sul fondale, in millimetri, con le parti già divise.</p></li>
+      <li class="step"><span class="n">2 / 5</span><h3>Materiali</h3><p>Più di settanta materiali veri, stampe e loghi che seguono le curve, e un editor a nodi.</p></li>
+      <li class="step"><span class="n">3 / 5</span><h3>Luci</h3><p>Set fotografici pronti, beauty dish e ombrello, profili IES e set atmosfera colorati.</p></li>
+      <li class="step"><span class="n">4 / 5</span><h3>Fotocamere</h3><p>Obiettivi in mm e inquadrature pronte: Tre quarti, Macro, Radente, Eroe.</p></li>
+      <li class="step"><span class="n">5 / 5</span><h3>Animazione</h3><p>Il video come fila di momenti: giro, esploso, passaggio di luce. Esce in MP4.</p></li>
+    </ol>
+    <figure class="ui"><img src="img/vitrum-render.webp" width="1600" height="1000" loading="lazy" alt="Vitrum con il pannello Render aperto a destra e la coda dei render a sinistra"></figure>
+  </div></section>
+
+  <section id="render" aria-labelledby="t-render"><div class="in">
+    <div class="sec-h"><span class="eb">Render · Oopar</span><h2 id="t-render">Fatto con Vitrum, senza ritocchi.</h2><p class="lead">La lampada Oopar: noce, cromo e un rivestimento con motivo Madhubani. 3000 × 2000 px, qualità Buona, circa 25 minuti a immagine.</p></div>
+    <div class="gal">
+      <figure><img src="img/oopar-tre-quarti.webp" width="2400" height="1600" loading="lazy" alt="Oopar vista di tre quarti"><figcaption>Tre quarti · 85 mm</figcaption></figure>
+      <figure><img src="img/oopar-frontale.webp" width="1200" height="800" loading="lazy" alt="Oopar vista frontale"><figcaption>Frontale</figcaption></figure>
+      <figure><img src="img/oopar-dettaglio.webp" width="1200" height="800" loading="lazy" alt="Oopar, dettaglio della sfera cromata e del motivo"><figcaption>Dettaglio</figcaption></figure>
+    </div>
+    <p class="more"><a href="../lavori/oopar/">Il progetto Oopar →</a></p>
+  </div></section>
+
+  <section id="funzioni" aria-labelledby="t-funzioni"><div class="in">
+    <div class="sec-h"><span class="eb">Funzioni</span><h2 id="t-funzioni">Quello che serve a un designer, niente di più.</h2></div>
+    <div class="feats">
+      <article class="feat"><img src="img/formati.webp" width="640" height="400" loading="lazy" alt=""><div><h3>Collegato al CAD</h3><p>Salvi di nuovo dal CAD e Vitrum rilegge il file. Materiali, luci e fotocamere restano.</p></div></article>
+      <article class="feat"><img src="img/varianti.webp" width="640" height="400" loading="lazy" alt=""><div><h3>Varianti in serie</h3><p>Ogni combinazione di materiali diventa una variante con il suo codice articolo, fotografata in coda.</p></div></article>
+      <article class="feat"><img src="img/giro.webp" width="640" height="400" loading="lazy" alt=""><div><h3>Giro per il web</h3><p>Il prodotto ruota come su un piatto e Vitrum prepara la cartella da mettere sul sito.</p></div></article>
+      <article class="feat"><img src="img/stampe.webp" width="640" height="400" loading="lazy" alt=""><div><h3>Stampe</h3><p>Loghi e decori che si avvolgono su superfici piane, cilindriche o curve.</p></div></article>
+      <article class="feat"><img src="img/materiali.webp" width="640" height="400" loading="lazy" alt=""><div><h3>Materiali veri</h3><p>Legni da impiallacciature fotografate, metalli, plastiche, tessuti, vetri e liquidi.</p></div></article>
+      <article class="feat"><img src="img/luci-studio.webp" width="640" height="400" loading="lazy" alt=""><div><h3>Luci da studio</h3><p>Beauty dish, ombrello, bandiere e cartoncini nel riflesso, come su un set vero.</p></div></article>
+      <article class="feat"><img src="img/animazione.webp" width="640" height="400" loading="lazy" alt=""><div><h3>Animazione</h3><p>Ricette pronte e una linea del tempo per video di prodotto in PNG e MP4.</p></div></article>
+      <article class="feat"><img src="img/chat.webp" width="640" height="400" loading="lazy" alt=""><div><h3>Chiedi a Claude</h3><p>Descrivi la scena e Claude la prepara con i comandi di Vitrum. Ogni passo si annulla.</p></div></article>
+    </div>
+  </div></section>
+
+  <section id="formati" aria-labelledby="t-formati"><div class="in">
+    <div class="sec-h"><span class="eb">Formati</span><h2 id="t-formati">Entra il tuo CAD, esce la foto.</h2></div>
+    <div class="fmt">
+      <div><h3>Apre</h3><ul class="chips"><li>STEP</li><li>IGES</li><li>BREP</li><li>Rhino .3dm</li><li>FreeCAD</li><li>3MF</li><li>OBJ</li><li>STL</li><li>PLY</li><li>FBX</li><li>glTF</li><li>USD</li><li>Alembic</li><li>Blender</li></ul><p class="note">Per SolidWorks, Inventor e SketchUp Vitrum ti dice da dove esportare.</p></div>
+      <div><h3>Salva</h3><ul class="chips"><li>PNG</li><li>JPEG</li><li>TIFF 16 bit</li><li>EXR</li><li>MP4</li><li>Giro per il web</li></ul><p class="note">Formati pronti per negozio online, sito senza sfondo, social verticale e miniatura.</p></div>
+    </div>
+  </div></section>
+
+  <section id="scarica" aria-labelledby="t-scarica"><div class="in"><div class="dl">
+    <div class="dl-txt"><span class="eb">Scarica</span><h2 id="t-scarica">Vitrum per Windows</h2><p class="lead">Si installa come un programma qualsiasi e si aggiorna da solo.</p>
+      <div class="ctas"><a class="btn" id="scarica-link" href="#scarica"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M0 2.2 6.5 1.3v6.2H0zM7.3 1.2 16 0v7.5H7.3zM0 8.3h6.5v6.3L0 13.7zM7.3 8.3H16V16l-8.7-1.2z"/></svg>Scarica per Windows</a></div></div>
+    <dl class="spec"><div><dt>Sistema</dt><dd>Windows 10 e 11, 64 bit</dd></div><div><dt>Motore di render</dt><dd>Cycles</dd></div><div><dt>Unità</dt><dd>millimetri</dd></div><div><dt>Lingue</dt><dd>italiano, inglese</dd></div><div><dt>Versione</dt><dd>0.1</dd></div></dl>
+  </div></div></section>
+</main>
+
+<footer class="foot"><span>Vitrum è un progetto di <a href="../">Leandro Henriquez</a></span><span><a href="../">leandrohenriquez.com</a> · <a href="../privacy/">privacy</a></span></footer>
+<script src="vitrum.js" defer></script>
+</body>
+</html>
