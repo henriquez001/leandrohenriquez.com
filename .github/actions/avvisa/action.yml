@@ -1,0 +1,41 @@
+# Manda una notifica push ai dispositivi del proprietario attraverso il pannello.
+# Il pannello riconosce le Actions di questo repo dal token OIDC di GitHub: nessun segreto condiviso.
+# Il job che la usa deve avere "permissions: id-token: write".
+# Indirizzo del pannello: variabile del repo PANNELLO_URL se c'è, altrimenti lo chiede a Cloudflare.
+name: Avvisa sul telefono
+description: Notifica push al proprietario del pannello
+inputs:
+  titolo: {required: true, description: Titolo della notifica}
+  testo: {required: false, default: '', description: Testo}
+  link: {required: false, default: '', description: Indirizzo da aprire toccando la notifica}
+  pannello: {required: false, default: '', description: Indirizzo del pannello}
+  cloudflare-token: {required: false, default: ''}
+  cloudflare-account: {required: false, default: ''}
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        TITOLO: ${{ inputs.titolo }}
+        TESTO: ${{ inputs.testo }}
+        LINK: ${{ inputs.link }}
+        PANNELLO: ${{ inputs.pannello }}
+        CF_TOKEN: ${{ inputs.cloudflare-token }}
+        CF_ACCOUNT: ${{ inputs.cloudflare-account }}
+      run: |
+        # un avviso non riuscito non deve far fallire il workflow
+        set -u
+        url=$(printf %s "$PANNELLO" | tr -d '[:space:]')
+        if [ -z "$url" ] && [ -n "$CF_TOKEN" ] && [ -n "$CF_ACCOUNT" ]; then
+          sotto=$(curl -sS -H "Authorization: Bearer $(printf %s "$CF_TOKEN" | tr -d '[:space:]')" \
+            "https://api.cloudflare.com/client/v4/accounts/$(printf %s "$CF_ACCOUNT" | tr -d '[:space:]')/workers/subdomain" | jq -r '.result.subdomain // empty')
+          [ -n "$sotto" ] && url="https://hl-pannello.$sotto.workers.dev"
+        fi
+        if [ -z "$url" ]; then echo "::notice::Nessun indirizzo del pannello: avviso non mandato"; exit 0; fi
+        if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then echo "::warning::Manca permissions id-token: write: avviso non mandato"; exit 0; fi
+        tok=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=hl-pannello" | jq -r '.value // empty')
+        corpo=$(jq -nc --arg t "$TITOLO" --arg x "$TESTO" --arg u "$LINK" '{titolo:$t,testo:$x,url:$u}')
+        codice=$(curl -sS -o /tmp/avviso.json -w '%{http_code}' -X POST "${url%/}/api/notifica" \
+          -H "authorization: Bearer $tok" -H 'x-pannello: 1' -H 'content-type: application/json' -d "$corpo" || echo 000)
+        echo "pannello → $codice $(cat /tmp/avviso.json 2>/dev/null)"
+        exit 0

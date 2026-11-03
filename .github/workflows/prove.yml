@@ -1,0 +1,19 @@
+# Prove del pannello su ogni pull request che tocca il backend: niente segreti, GitHub e Google sono simulati.
+name: Prove del pannello
+on:
+  pull_request:
+    paths: [backend/**, tools/schema.js, .github/workflows/prove.yml]
+permissions:
+  contents: read
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci && npm test

@@ -144,7 +144,7 @@ main{padding:24px 28px 80px;max-width:1100px;width:100%;outline:none}
   .menu .logo,.menu .io .lbl{display:none}
   .menu nav{flex-direction:row;flex:1;gap:2px}
   .menu nav a{margin:0;flex:1;text-align:center;padding:10px 2px;min-height:44px;font-size:12px}
-  .menu .io{margin:0}.menu .io button{min-height:44px;font-size:12px}
+  .menu .io{margin:0;grid-auto-flow:column;gap:10px}.menu .io button{min-height:44px;font-size:12px}
   main{padding:18px 16px 110px}
   .hd h1{font-size:44px}
   .cards{grid-template-columns:1fr}
