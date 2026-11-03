@@ -21,33 +21,35 @@
 <body>
 <main class="live" id="liveJ">
     <div class="ui tl"><svg class="hlogo" role="img" aria-label="hl." xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg></div>
-  <nav class="jnav"><a data-to="jLav">lavori</a><a data-to="jStu">studio</a><a href="laboratorio/">laboratorio</a><a data-to="jCon">contatti</a></nav>
+  <a class="skip" href="#jLav">vai ai lavori</a>
+  <nav class="jnav" aria-label="principale"><a href="#jLav" data-to="jLav">lavori</a><a href="#jStu" data-to="jStu">studio</a><a href="laboratorio/">laboratorio</a><a href="#jCon" data-to="jCon">contatti</a></nav>
   <div class="ui tr">industrial designer<br>macerata, it</div>
-  <div class="ui bl" id="jSec">(00) home</div>
-  <div class="ui br" id="jClock">macerata —:—</div>
+  <div class="ui bl" id="jSec" aria-hidden="true">(00) home</div>
+  <div class="ui br" id="jClock" aria-hidden="true">macerata —:—</div>
   <section class="hero" id="jHero">
-    <div class="kin" data-word="LEANDRO"></div><div class="kin" data-word="HENRIQUEZ"></div>
-    <svg class="q" id="jQ"></svg>
+    <h1 class="sr">Leandro Henriquez, industrial designer</h1>
+    <div class="kin" data-word="LEANDRO" aria-hidden="true"></div><div class="kin" data-word="HENRIQUEZ" aria-hidden="true"></div>
+    <svg class="q" id="jQ" aria-hidden="true"></svg>
   </section>
-  <section class="sx" id="jLav"><div class="bw">Lavori</div>
-    <div class="hd"><b>Lavori <i>10</i></b><span>passa sopra: il progetto ti segue · clicca Oopar per il 3D</span></div>
+  <section class="sx" id="jLav" tabindex="-1"><div class="bw" aria-hidden="true">Lavori</div>
+    <div class="hd"><b role="heading" aria-level="2">Lavori <i>10</i></b><span>passa sopra: il progetto ti segue · clicca Oopar per il 3D</span></div>
     <div class="idx" id="jIdx"></div></section>
-  <section class="sx" id="jFeat"><div class="bw">Oopar</div>
-    <div class="hd"><b>In evidenza</b><span>09 / 10 — lampada da tavolo</span></div>
+  <section class="sx" id="jFeat"><div class="bw" aria-hidden="true">Oopar</div>
+    <div class="hd"><b role="heading" aria-level="2">In evidenza</b><span>09 / 10 — lampada da tavolo</span></div>
     <div class="feat"><div class="pic" id="jPic"><img src="assets/img/cut-oopar.png" alt="Oopar Lamp"><svg id="jPicQ"></svg></div>
       <div class="spec"><div><small>larghezza</small><b>300<i>mm</i></b></div><div><small>altezza</small><b>195<i>mm</i></b></div><div><small>sfera</small><b>Ø 90<i>mm</i></b></div><div><small>corpo</small><b>Noce</b></div><div><small>premio</small><b>1° Pending <i>Cultures</i></b></div><div><small>modello</small><b>Rhino <i>3D</i></b></div>
-        <div class="go" id="jGo"><span>apri il progetto</span><b>Oopar in 3D →</b></div></div></div></section>
-  <section class="sx" id="jStu"><div class="bw">Studio</div>
-    <div class="hd"><b>Studio</b><span>chi sono, in una scheda</span></div>
+        <a class="go" id="jGo" href="lavori/oopar/"><span>apri il progetto</span><b>Oopar in 3D →</b></a></div></div></section>
+  <section class="sx" id="jStu" tabindex="-1"><div class="bw" aria-hidden="true">Studio</div>
+    <div class="hd"><b role="heading" aria-level="2">Studio</b><span>chi sono, in una scheda</span></div>
     <p class="lead4" id="jLead">Disegno oggetti che si usano bene: elettrodomestici, prodotti e packaging, dal primo schizzo al modello 3D.</p>
     <div class="st4"><div><small>ruolo</small><b>Design <i>Specialist</i></b></div><div><small>dove</small><b>Elica S.p.A.</b></div><div><small>dal</small><b>2022</b></div><div><small>base</small><b>Macerata</b></div>
       <div><small>formazione</small><b>Firenze <i>109/110</i></b></div><div><small>ora</small><b>Magistrale</b></div><div><small>con</small><b>Bottega Ind. · Ganzo</b></div><div><small>strumenti</small><b>Rhino · <i>Vitrum</i></b></div></div></section>
-  <section class="sx" id="jCon"><div class="bw">Contatti</div>
-    <div class="hd"><b>Contatti</b><span>clicca l’indirizzo per copiarlo</span></div>
-    <div class="mail" id="jMail" data-word="henriquez.leandro.a@gmail.com"></div>
+  <section class="sx" id="jCon" tabindex="-1"><div class="bw" aria-hidden="true">Contatti</div>
+    <div class="hd"><b role="heading" aria-level="2">Contatti</b><span>clicca l’indirizzo per copiarlo</span></div>
+    <a class="mail" id="jMail" href="mailto:henriquez.leandro.a@gmail.com" aria-label="henriquez.leandro.a@gmail.com, copia l’indirizzo" data-word="henriquez.leandro.a@gmail.com"></a>
     <div class="row3"><div>ora a Macerata<b id="jClock2">—</b></div><div>dove<b>43.30° N<br>13.45° E</b></div><div>altrove<b><a href="https://www.linkedin.com/in/leandro-henriquez-57730515b/" target="_blank" rel="noopener">LinkedIn ↗</a><br><a href="https://www.instagram.com/henriquez_leandro/" target="_blank" rel="noopener">Instagram ↗</a><br><a href="portfolio.pdf" target="_blank" rel="noopener">Portfolio PDF ↓</a></b></div></div></section>
   <footer class="f"><svg class="hlogo" role="img" aria-label="hl." xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg><span>© 2026 Leandro Henriquez — leandrohenriquez.com · <a href="privacy/">privacy</a></span></footer>
-  <div class="tr" id="jTr"></div><div class="copied" id="jCopied">indirizzo copiato ✓</div>
+  <div class="tr" id="jTr"></div><div class="copied" id="jCopied" role="status" aria-live="polite"></div>
 </main>
 <script src="assets/js/common.js"></script>
 <script src="assets/js/indice.js"></script>
