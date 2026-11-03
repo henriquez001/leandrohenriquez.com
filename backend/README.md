@@ -14,6 +14,13 @@ ripubblica il sito in un minuto circa.
 - **Laboratorio**: elenco delle app in `data/app.json` (aggiungi, ordina, pubblica), carica il file HTML
   di ogni app in `app/<slug>/index.html` e rigenera i riquadri di `laboratorio/index.html`.
 - **Statistiche**: chiede i dati a GoatCounter con la chiave segreta, che il browser non vede mai.
+- **App installabile**: manifest e service worker (`public/sw.js`): il pannello si aggiunge alla schermata Home
+  e si apre a tutto schermo. Il service worker salva solo l'interfaccia, mai le risposte di `/api/`.
+- **Notifiche push**: dal pulsante "notifiche" ognuno iscrive i propri dispositivi (su iPhone solo con il
+  pannello aggiunto alla Home). Gli avvisi del sito vanno al proprietario: un controllo di "Controlli del
+  sito" che smette di passare o torna a posto, il PDF del portfolio che non si rigenera. Le Actions si
+  fanno riconoscere con il token OIDC di GitHub (audience `hl-pannello`), quindi non serve un segreto
+  condiviso; l'avviso parte dalla action `.github/actions/avvisa`.
 
 Se nel frattempo il sito è cambiato (per esempio è stata unita una PR), il salvataggio viene rifiutato
 invece di sovrascrivere: si ricarica e si riprova.
@@ -31,6 +38,9 @@ invece di sovrascrivere: si ricarica e si riprova.
 | GET · PUT · POST | `/api/app` | chi ha accesso |
 | PUT | `/api/app/:slug/file` `{html}` · DELETE `/api/app/:slug?base=` | chi ha accesso |
 | GET | `/api/statistiche?giorni=30` | chi ha accesso |
+| GET · POST · DELETE | `/api/push` (chiave pubblica · iscrivi `{iscrizione}` · togli `{endpoint}`) | chi ha accesso |
+| POST | `/api/push/prova` | chi ha accesso (ai propri dispositivi) |
+| POST | `/api/notifica` `{titolo, testo, url}` | GitHub Actions di questo repo (token OIDC) |
 | GET · POST · DELETE | `/api/accessi` | solo il proprietario |
 
 Le richieste che modificano qualcosa devono avere l'intestazione `x-pannello: 1` e arrivare dalla stessa origine.
@@ -56,6 +66,6 @@ La fa da sola la GitHub Action `.github/workflows/pannello.yml` a ogni modifica 
 | `GOOGLE_CLIENT_ID` | ID client OAuth di tipo "Applicazione web"; origine autorizzata = indirizzo del pannello |
 | `GOATCOUNTER_CODE`, `GOATCOUNTER_TOKEN` | facoltativi, per le statistiche |
 
-`SESSION_SECRET` viene generato la prima volta e poi lasciato com'è. Senza i segreti Cloudflare l'Action
+`SESSION_SECRET` e `VAPID_JWK` (chiave delle notifiche) vengono generati la prima volta e poi lasciati come sono. La variabile del repo `PANNELLO_URL` è facoltativa: se manca, gli avvisi delle Actions ricavano l'indirizzo `*.workers.dev` da Cloudflare. Senza i segreti Cloudflare l'Action
 si ferma con un avviso, senza errori. Il dominio `pannello.leandrohenriquez.com` si può collegare dopo
 (Cloudflare → Workers → Domini, più un record CNAME su Spaceship).

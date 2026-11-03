@@ -3,6 +3,9 @@
 <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#E9E6DF">
 <title>Pannello — hl.</title>
 <link rel="icon" href="https://leandrohenriquez.com/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="hl."><meta name="mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="pannello.css">
 </head>
 <body>
@@ -25,7 +28,7 @@
       <a href="#statistiche" data-s="statistiche">statistiche</a>
       <a href="#accessi" data-s="accessi" id="voceAccessi" hidden>accessi</a>
     </nav>
-    <div class="io"><span id="ioEmail" class="lbl"></span><button id="esci" type="button">esci</button></div>
+    <div class="io"><span id="ioEmail" class="lbl"></span><button id="notifiche" type="button" aria-pressed="false" hidden>notifiche</button><button id="esci" type="button">esci</button></div>
   </aside>
   <main id="main" tabindex="-1"></main>
 </div>

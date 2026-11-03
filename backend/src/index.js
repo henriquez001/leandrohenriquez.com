@@ -3,6 +3,7 @@
 import {GitHub,Errore,b64enc} from './github.js';
 import {verificaGoogle,puoEntrare,creaSessione,chiudiSessione,leggiSessione,elencoAccessi,salvaAccessi,proprietario} from './auth.js';
 import {statistiche} from './stats.js';
+import {chiaveServer,iscrivi,disiscrivi,invia,verificaActions} from './push.js';
 import schema from '../../tools/schema.js';
 const {SLUG,controllaVoce,controllaIndice,controllaPagina,generaIndiceJS,controllaApp,controllaElencoApp,inserisciRiquadri}=schema;
 
@@ -130,6 +131,20 @@ export function crea({fetchImpl}={}){
 
   // --- statistiche ---
   R('GET','/api/statistiche',async(req,env)=>json(await statistiche(env,new URL(req.url).searchParams.get('giorni'),f)));
+
+  // --- notifiche push: ognuno iscrive i propri dispositivi; gli avvisi del sito vanno al proprietario ---
+  R('GET','/api/push',async(req,env)=>json({chiave:(await chiaveServer(env)).pub}));
+  R('POST','/api/push',async(req,env,s)=>{const {iscrizione,dispositivo}=await corpo(req);await iscrivi(env,s.email,iscrizione,dispositivo);return json({ok:true},201);});
+  R('DELETE','/api/push',async(req,env,s)=>{const {endpoint}=await corpo(req);await disiscrivi(env,s.email,endpoint);return json({ok:true});});
+  R('POST','/api/push/prova',async(req,env,s)=>{
+    const r=await invia(env,{titolo:'hl. · prova',testo:'Le notifiche del pannello arrivano su questo dispositivo.',url:'/'},{chi:x=>x.email===s.email,f});
+    if(!r.inviate)throw new Errore(404,'Nessun dispositivo iscritto ha ricevuto la prova');return json(r);
+  });
+  // dalle GitHub Actions di questo repo (token OIDC con audience "hl-pannello")
+  R('POST','/api/notifica',async(req,env)=>{
+    await verificaActions((req.headers.get('authorization')||'').replace(/^Bearer\s+/i,''),env,f);
+    const m=await corpo(req);return json(await invia(env,m,{chi:x=>x.email===proprietario(env),f}));
+  },{libera:true});
 
   // --- accessi: solo il proprietario li vede e li cambia ---
   R('GET','/api/accessi',async(req,env)=>json({proprietario:proprietario(env),elenco:await elencoAccessi(env)}),{soloProprietario:true});

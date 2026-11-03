@@ -15,6 +15,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  id-token: write   # per l'avviso sul telefono se la generazione fallisce
 concurrency:
   group: portfolio-pdf
   cancel-in-progress: true
@@ -41,3 +42,13 @@ jobs:
           git commit -m "Portfolio PDF aggiornato dai progetti"
           # se nel frattempo è arrivato un altro commit su main, ci si mette sopra (il PDF è l'unico file toccato)
           for i in 1 2 3; do git pull --rebase origin main && git push && exit 0; sleep 5; done; exit 1
+      - name: Avvisa sul telefono
+        if: failure()
+        uses: ./.github/actions/avvisa
+        with:
+          titolo: 'Portfolio PDF non aggiornato'
+          testo: 'La generazione si è fermata: di solito un blocco esce dai margini.'
+          link: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          pannello: ${{ vars.PANNELLO_URL }}
+          cloudflare-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          cloudflare-account: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,4 +1,5 @@
 # Mette online il pannello (Cloudflare Worker in backend/) a ogni modifica su main, o a mano da Actions.
+# SESSION_SECRET e VAPID_JWK (chiave delle notifiche push) li crea il workflow la prima volta.
 # Usa i segreti del repo (Settings → Secrets and variables → Actions), mai scritti nel codice:
 #   CLOUDFLARE_API_TOKEN   token Cloudflare con il modello "Edit Cloudflare Workers"
 #   CLOUDFLARE_ACCOUNT_ID  ID dell'account Cloudflare
@@ -107,6 +108,8 @@ jobs:
             if(e.GITHUB_TOKEN_PANNELLO)s.GITHUB_TOKEN=e.GITHUB_TOKEN_PANNELLO.trim();
             if(e.GOATCOUNTER_TOKEN)s.GOATCOUNTER_TOKEN=e.GOATCOUNTER_TOKEN.trim();
             if(!g.includes("SESSION_SECRET"))s.SESSION_SECRET=c.randomBytes(48).toString("base64url");
+            // chiave delle notifiche push: una volta sola, altrimenti i telefoni iscritti smetterebbero di ricevere
+            if(!g.includes("VAPID_JWK"))s.VAPID_JWK=JSON.stringify(c.generateKeyPairSync("ec",{namedCurve:"P-256"}).privateKey.export({format:"jwk"}));
             require("fs").writeFileSync(process.env.RUNNER_TEMP+"/segreti.json",JSON.stringify(s));
             console.log("segreti da scrivere:",Object.keys(s).join(", ")||"nessuno");
           ' "$gia"

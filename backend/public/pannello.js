@@ -44,8 +44,41 @@ $('#esci').addEventListener('click',async()=>{await api('POST','/api/uscita').ca
 async function avvia(){
   $('#accesso').hidden=true;$('#app').hidden=false;
   $('#ioEmail').textContent=stato.io.email;$('#voceAccessi').hidden=!stato.io.proprietario;
-  vai();
+  vai();statoNotifiche();
 }
+
+// ---------- app installabile e notifiche push ----------
+// se il service worker non si registra (es. navigazione privata) il pannello funziona lo stesso, senza notifiche
+const swReg='serviceWorker' in navigator?navigator.serviceWorker.register('/sw.js').catch(()=>null):Promise.resolve(null);
+const pushOk=()=>'PushManager' in window&&'Notification' in window;
+const ub64u=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4)),c=>c.charCodeAt(0));
+const iscrizioneAttuale=async()=>{const r=await swReg;return r?r.pushManager.getSubscription():null;};
+const nomeDispositivo=()=>{const u=navigator.userAgent;
+  return (/iPhone|iPad/.test(u)?'iPhone':/Android/.test(u)?'Android':/Windows/.test(u)?'Windows':/Mac/.test(u)?'Mac':'browser')+' · '+(/Edg\//.test(u)?'Edge':/Chrome\//.test(u)?'Chrome':/Firefox\//.test(u)?'Firefox':/Safari\//.test(u)?'Safari':'altro');};
+// Su iPhone le notifiche esistono solo con il pannello aggiunto alla schermata Home: lì il pulsante compare da solo.
+async function statoNotifiche(){
+  const b=$('#notifiche');if(!pushOk()||!(await swReg)){b.hidden=true;return;}
+  const s=await iscrizioneAttuale().catch(()=>null);
+  b.hidden=false;b.setAttribute('aria-pressed',!!s);b.textContent=s?'notifiche ✓':'notifiche';
+  b.title=s?'Notifiche attive su questo dispositivo: tocca per disattivarle':'Ricevi qui gli avvisi del sito';
+}
+$('#notifiche').addEventListener('click',async()=>{
+  const b=$('#notifiche');b.disabled=true;
+  try{
+    const s=await iscrizioneAttuale();
+    if(s){
+      if(!confirm('Smettere di ricevere le notifiche su questo dispositivo?'))return;
+      await api('DELETE','/api/push',{endpoint:s.endpoint}).catch(()=>{});await s.unsubscribe();avviso('Notifiche disattivate su questo dispositivo.');
+    }else{
+      if(await Notification.requestPermission()!=='granted')throw new Error('Permesso negato: si riattiva dalle impostazioni del browser.');
+      const {chiave}=await api('GET','/api/push');
+      const n=await (await navigator.serviceWorker.ready).pushManager.subscribe({userVisibleOnly:true,applicationServerKey:ub64u(chiave)});
+      await api('POST','/api/push',{iscrizione:n.toJSON(),dispositivo:nomeDispositivo()});
+      await api('POST','/api/push/prova');avviso('Notifiche attive: tra poco arriva una prova.');
+    }
+  }catch(e){avviso(e.message,true);}
+  finally{b.disabled=false;statoNotifiche();}
+});
 window.addEventListener('hashchange',vai);
 function vai(){
   if(!stato.io)return;

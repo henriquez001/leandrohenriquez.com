@@ -17,8 +17,41 @@ const files=new Map([['data/progetti.json',readFileSync(new URL('../../data/prog
 let commits={c0:{tree:'t0',files:new Map(files)}},head='c0',n=0;const blobs={},trees={};
 const R=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{'content-type':'application/json'}});
 let chiamateGC=[];
+// --- notifiche: chiave VAPID del server, telefono finto (chiavi ECDH + auth) e GitHub Actions finto (OIDC) ---
+const vapid=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);
+const vapidPub=b64u(new Uint8Array(await crypto.subtle.exportKey('raw',vapid.publicKey)));
+const ua=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+const uaPub=new Uint8Array(await crypto.subtle.exportKey('raw',ua.publicKey)),authUA=crypto.getRandomValues(new Uint8Array(16));
+const EP='https://fcm.googleapis.com/fcm/send/telefono-1';let ricevuti=[],rispostaPush=201;
+const hk=async(salt,ikm,info,n)=>new Uint8Array(await crypto.subtle.deriveBits({name:'HKDF',hash:'SHA-256',salt,info},await crypto.subtle.importKey('raw',ikm,'HKDF',false,['deriveBits']),n*8));
+async function decifra(by){ // come fa il browser che riceve (RFC 8291)
+  const te=new TextEncoder(),cat=(...a)=>new Uint8Array(Buffer.concat(a.map(x=>Buffer.from(x))));
+  const sale=by.slice(0,16),idlen=by[20],asPub=by.slice(21,21+idlen),dati=by.slice(21+idlen);
+  const as=await crypto.subtle.importKey('raw',asPub,{name:'ECDH',namedCurve:'P-256'},false,[]);
+  const cond=new Uint8Array(await crypto.subtle.deriveBits({name:'ECDH',public:as},ua.privateKey,256));
+  const ikm=await hk(authUA,cond,cat(te.encode('WebPush: info\0'),uaPub,asPub),32);
+  const cek=await hk(sale,ikm,te.encode('Content-Encoding: aes128gcm\0'),16),nonce=await hk(sale,ikm,te.encode('Content-Encoding: nonce\0'),12);
+  const chiaro=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:nonce},await crypto.subtle.importKey('raw',cek,'AES-GCM',false,['decrypt']),dati));
+  assert.equal(chiaro.at(-1),2,'delimitatore dell\'ultimo record');return JSON.parse(new TextDecoder().decode(chiaro.slice(0,-1)));
+}
+async function servizioPush(url,opt){
+  const v=/^vapid t=([^,]+), k=(.+)$/.exec(opt.headers.authorization);assert.ok(v,'intestazione VAPID');assert.equal(v[2],vapidPub);
+  const [h,c,s]=v[1].split('.');assert.equal(JSON.parse(Buffer.from(c,'base64url')).aud,'https://fcm.googleapis.com');
+  assert.ok(await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},vapid.publicKey,Buffer.from(s,'base64url'),new TextEncoder().encode(h+'.'+c)),'firma VAPID');
+  assert.equal(opt.headers['content-encoding'],'aes128gcm');
+  ricevuti.push(await decifra(new Uint8Array(opt.body)));return new Response(null,{status:rispostaPush});
+}
+const kpGH=await crypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
+const jwkGH={...(await crypto.subtle.exportKey('jwk',kpGH.publicKey)),kid:'g1',alg:'RS256',use:'sig'};
+async function tokenActions({repository='o/r',aud='hl-pannello'}={}){
+  const h=b64u(JSON.stringify({alg:'RS256',kid:'g1',typ:'JWT'})),c=b64u(JSON.stringify({iss:'https://token.actions.githubusercontent.com',aud,repository,exp:Date.now()/1000+300}));
+  return `${h}.${c}.${b64u(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',kpGH.privateKey,new TextEncoder().encode(h+'.'+c)))}`;
+}
 async function finto(url,opt={}){
-  url=String(url);const m=opt.method||'GET',b=opt.body?JSON.parse(opt.body):null;
+  url=String(url);
+  if(url.startsWith('https://fcm.googleapis.com/'))return servizioPush(url,opt);
+  if(url==='https://token.actions.githubusercontent.com/.well-known/jwks')return R({keys:[jwkGH]});
+  const m=opt.method||'GET',b=opt.body?JSON.parse(opt.body):null;
   if(url==='https://www.googleapis.com/oauth2/v3/certs')return R({keys:[jwk]});
   if(url.includes('goatcounter.com')){chiamateGC.push(url);assert.equal(opt.headers.authorization,'Bearer gc-segreto');
     if(url.includes('stats/total'))return R({total:459,total_unique:330,stats:[{day:'2026-10-31',daily:12}]});
@@ -39,6 +72,7 @@ async function finto(url,opt={}){
 }
 const kv=new Map();
 const env={GITHUB_REPO:'o/r',GITHUB_TOKEN:'gh-segreto',OWNER_EMAIL:OWNER,SESSION_SECRET:'s'.repeat(40),GOOGLE_CLIENT_ID:CLIENT,GOATCOUNTER_CODE:'demo',GOATCOUNTER_TOKEN:'gc-segreto',
+  VAPID_JWK:JSON.stringify(await crypto.subtle.exportKey('jwk',vapid.privateKey)),
   ACCESSI:{get:async k=>kv.get(k)??null,put:async(k,v)=>{kv.set(k,v);}}};
 const app=crea({fetchImpl:finto});
 const O='https://pannello.test';
@@ -99,5 +133,23 @@ await prova('app: togliere un\'app toglie anche il suo file',async()=>{const r=a
   assert.equal((await chiama('DELETE','/api/app/timer?base='+r.dati.base,{cookie:cProp})).stato,200);assert.ok(!commits[head].files.has('app/timer/index.html'));assert.doesNotMatch(commits[head].files.get('laboratorio/index.html'),/Timer/);});
 await prova('statistiche: chiave GoatCounter solo lato server',async()=>{const r=await chiama('GET','/api/statistiche?giorni=30',{cookie:cProp});assert.equal(r.stato,200);
   assert.equal(r.dati.totale,459);assert.equal(r.dati.eventi[0].percorso,'apri-oopar');assert.ok(!JSON.stringify(r.dati).includes('gc-segreto'));});
+const iscrizione={endpoint:EP,keys:{p256dh:b64u(uaPub),auth:b64u(authUA)}};
+await prova('notifiche: iscrizione verso un servizio sconosciuto rifiutata',async()=>{
+  const r=await chiama('POST','/api/push',{cookie:cProp,corpo:{iscrizione:{...iscrizione,endpoint:'https://cattivo.example/push'}}});assert.equal(r.stato,422);});
+await prova('notifiche: la prova arriva cifrata e firmata al telefono iscritto',async()=>{
+  assert.equal((await chiama('GET','/api/push',{cookie:cProp})).dati.chiave,vapidPub);
+  assert.equal((await chiama('POST','/api/push',{cookie:cProp,corpo:{iscrizione,dispositivo:'Android · Chrome'}})).stato,201);
+  const r=await chiama('POST','/api/push/prova',{cookie:cProp});assert.equal(r.stato,200,JSON.stringify(r.dati));assert.equal(r.dati.inviate,1);
+  assert.equal(ricevuti.at(-1).titolo,'hl. · prova');});
+await prova('notifiche dalle Actions: solo con il token OIDC di questo repository',async()=>{
+  const avviso={titolo:'Controlli: Link rotti',testo:'Il controllo non è passato.',url:'https://github.com/o/r/actions/runs/1'};
+  const ok=await chiama('POST','/api/notifica',{corpo:avviso,intest:{authorization:'Bearer '+await tokenActions()}});assert.equal(ok.stato,200,JSON.stringify(ok.dati));
+  assert.equal(ricevuti.at(-1).titolo,'Controlli: Link rotti');
+  assert.equal((await chiama('POST','/api/notifica',{corpo:avviso,intest:{authorization:'Bearer '+await tokenActions({repository:'altro/r'})}})).stato,403);
+  assert.equal((await chiama('POST','/api/notifica',{corpo:avviso,intest:{authorization:'Bearer '+await tokenActions({aud:'altro'})}})).stato,401);
+  assert.equal((await chiama('POST','/api/notifica',{corpo:avviso})).stato,401);});
+await prova('notifiche: un\'iscrizione scaduta (410) viene tolta',async()=>{
+  rispostaPush=410;assert.equal((await chiama('POST','/api/push/prova',{cookie:cProp})).stato,404);
+  assert.deepEqual(JSON.parse(kv.get('push')),[]);rispostaPush=201;});
 await prova('uscita cancella il cookie',async()=>{const r=await chiama('POST','/api/uscita',{cookie:cProp});assert.equal(r.cookie,'hl_sessione=');});
 console.log(`\n${ok} prove superate`);
