@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: File generati aggiornati
         run: |
           if [ -f tools/genera-indice.js ]; then
@@ -81,7 +81,7 @@ jobs:
     timeout-minutes: 10
     steps:
       # Lighthouse CI vuole un checkout per sapere a quale commit legare i rapporti
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Lighthouse su home e Oopar
         id: lh
         uses: treosh/lighthouse-ci-action@v12
@@ -114,10 +114,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: .github/actions
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         id: esito
         env:
           ESITI: ${{ toJSON(needs) }}
