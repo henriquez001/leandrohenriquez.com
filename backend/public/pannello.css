@@ -43,6 +43,7 @@ a{color:inherit}
 .menu nav a{text-decoration:none;color:var(--mute);border-radius:6px;padding:7px 8px;margin:0 -8px;min-height:32px}
 .menu nav a[aria-current="page"]{background:var(--ink);color:var(--paper)}
 @media (hover:hover){.menu nav a:not([aria-current]):hover{color:var(--ink);background:#e0dcd3}}
+.menu nav .ic,.menu nav .tel{display:none}
 .menu .io{margin-top:auto;display:grid;gap:6px;word-break:break-all}
 .menu .io button{text-align:left;text-decoration:underline;min-height:32px}
 main{padding:24px 28px 80px;max-width:1100px;width:100%;outline:none}
@@ -117,6 +118,7 @@ main{padding:24px 28px 80px;max-width:1100px;width:100%;outline:none}
 .acc{display:grid;max-width:760px}
 .acc>div{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border-top:1px solid var(--rule);padding:10px 0;min-height:52px}
 .acc>div:last-child{border-bottom:1px solid var(--rule)}
+.acc .btn{text-decoration:none;min-height:44px}
 .acc b{font:400 22px/.95 var(--D);font-variation-settings:"wdth" 62,"wght" 700;overflow-wrap:anywhere}
 .aggiungi{display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;margin-top:18px;max-width:760px}
 .aggiungi input{border:1px solid var(--ink);border-radius:8px;padding:8px 10px;min-height:36px;background:var(--card);width:100%}
@@ -145,9 +147,17 @@ main{padding:24px 28px 80px;max-width:1100px;width:100%;outline:none}
   .app{grid-template-columns:1fr}
   .menu{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;z-index:10;flex-direction:row;align-items:center;gap:8px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--rule);background:var(--paper)}
   .menu .logo,.menu .io .lbl{display:none}
-  .menu nav{flex-direction:row;flex:1;gap:2px}
-  .menu nav a{margin:0;flex:1;text-align:center;padding:10px 2px;min-height:44px;font-size:12px}
-  .menu .io{margin:0;grid-auto-flow:column;gap:10px}.menu .io button{min-height:44px;font-size:12px}
+  /* barra in basso: solo icone in celle uguali (variante B senza testi, 4/11); accessi, notifiche ed esci stanno in "tu" */
+  .menu nav{flex:1;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+  .menu nav a{margin:0;padding:0;min-height:48px;display:grid;place-items:center;border-radius:0;color:var(--mute)}
+  .menu nav a[aria-current="page"]{background:none;color:var(--paper)}
+  .menu nav a[data-s="accessi"]{display:none}
+  .menu nav .ic,.menu nav .tel{display:grid}
+  .menu nav .ic{width:56px;height:32px;padding:5px 17px;border-radius:999px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform 100ms ease-out,background-color 160ms ease-out}
+  .menu nav a[aria-current="page"] .ic{background:var(--ink)}
+  .menu nav a:active .ic{transform:scale(.92)}
+  .menu nav .tx{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .menu .io{display:none}
   main{padding:18px 16px 110px}
   .hd h1{font-size:44px}
   .scarica{justify-items:start}.scarica .btn{min-height:44px}
