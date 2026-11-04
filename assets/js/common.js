@@ -1,6 +1,8 @@
 /* hl. — codice condiviso */
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const BASE=document.documentElement.dataset.base||'';
+// evento per GoatCounter (es. "email-copiata"): il pannello lo mostra nelle statistiche. Senza count.js non fa nulla.
+function conta(nome){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path:nome,title:nome,event:true});}catch(e){}}
 const IMG={cut_one:BASE+'assets/img/cut-one.png',hydra:BASE+'assets/img/hydra.jpg',cut_baiyun:BASE+'assets/img/cut-baiyun.png',cut_brtw:BASE+'assets/img/cut-brtw.png',cut_greenhero:BASE+'assets/img/cut-greenhero.png',cut_andy:BASE+'assets/img/cut-andy.png',otto:BASE+'assets/img/otto.jpg',cut_frank:BASE+'assets/img/cut-frank.png',cut_oopar_b:BASE+'assets/img/cut-oopar.png',fornace:BASE+'assets/img/fornace.jpg',oopar:BASE+'assets/img/oopar.jpg'};
 /* ---------- shared ---------- */
 

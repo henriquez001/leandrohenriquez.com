@@ -6,7 +6,8 @@ function HOME(root){
   // transition with the real module shapes, then open the project page
   const tr=root.querySelector('#jTr');MODCELLS.forEach((c,i)=>tr.insertAdjacentHTML('beforeend',`<svg viewBox="${c.v}" preserveAspectRatio="none" style="transition-delay:${(i%3+Math.floor(i/3))*45}ms"><path d="${c.d}"/></svg>`));
   addEventListener('pageshow',()=>tr.classList.remove('go'));
-  function toProject(slug){const go=()=>{location.href='lavori/'+(slug||'oopar')+'/';};if(RM){go();return;}tr.classList.add('go');setTimeout(go,470);}
+  root.querySelectorAll('a[href*="linkedin.com"]').forEach(a=>a.addEventListener('click',()=>conta('clic-linkedin')));
+  function toProject(slug){conta('apri-'+(slug||'oopar'));const go=()=>{location.href='lavori/'+(slug||'oopar')+'/';};if(RM){go();return;}tr.classList.add('go');setTimeout(go,470);}
   // i link restano veri (tastiera, nuova scheda con ctrl/cmd): la transizione solo sul clic semplice
   const plain=e=>!(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button>0);
   const openLink=(slug)=>e=>{if(!plain(e))return;e.preventDefault();toProject(slug);};
@@ -26,7 +27,7 @@ function HOME(root){
   // hero letters + email letters (kinetic, as liked)
   let hero=[];root.querySelectorAll('.kin').forEach(k=>hero=hero.concat(splitLetters(k)));
   const mailEl=root.querySelector('#jMail'),mail=splitLetters(mailEl);
-  const cp=root.querySelector('#jCopied');const ADDR='henriquez.leandro.a@gmail.com',ok=()=>{cp.textContent='indirizzo copiato ✓';cp.style.opacity=1;setTimeout(()=>cp.style.opacity=0,1400);};
+  const cp=root.querySelector('#jCopied');const ADDR='henriquez.leandro.a@gmail.com',ok=()=>{conta('email-copiata');cp.textContent='indirizzo copiato ✓';cp.style.opacity=1;setTimeout(()=>cp.style.opacity=0,1400);};
   const legacy=()=>{const t=document.createElement('textarea');t.value=ADDR;t.setAttribute('readonly','');t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();let done=false;try{done=document.execCommand('copy');}catch(e){}t.remove();if(done)ok();else location.href='mailto:'+ADDR;};
   mailEl.onclick=e=>{if(!plain(e))return;e.preventDefault();if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(ADDR).then(ok,legacy);else legacy();};
   // index with mouse-follow preview
