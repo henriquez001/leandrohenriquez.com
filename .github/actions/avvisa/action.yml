@@ -24,18 +24,10 @@ runs:
         CF_ACCOUNT: ${{ inputs.cloudflare-account }}
       run: |
         # un avviso non riuscito non deve far fallire il workflow
-        set -u
-        url=$(printf %s "$PANNELLO" | tr -d '[:space:]')
-        if [ -z "$url" ] && [ -n "$CF_TOKEN" ] && [ -n "$CF_ACCOUNT" ]; then
-          sotto=$(curl -sS -H "Authorization: Bearer $(printf %s "$CF_TOKEN" | tr -d '[:space:]')" \
-            "https://api.cloudflare.com/client/v4/accounts/$(printf %s "$CF_ACCOUNT" | tr -d '[:space:]')/workers/subdomain" | jq -r '.result.subdomain // empty')
-          [ -n "$sotto" ] && url="https://hl-pannello.$sotto.workers.dev"
-        fi
-        if [ -z "$url" ]; then echo "::notice::Nessun indirizzo del pannello: avviso non mandato"; exit 0; fi
-        if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then echo "::warning::Manca permissions id-token: write: avviso non mandato"; exit 0; fi
-        tok=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=hl-pannello" | jq -r '.value // empty')
+        source "$GITHUB_ACTION_PATH/pannello.sh"
+        if [ -z "$PANNELLO_INDIRIZZO" ] || [ -z "$PANNELLO_TOKEN" ]; then echo "avviso non mandato"; exit 0; fi
         corpo=$(jq -nc --arg t "$TITOLO" --arg x "$TESTO" --arg u "$LINK" '{titolo:$t,testo:$x,url:$u}')
-        codice=$(curl -sS -o /tmp/avviso.json -w '%{http_code}' -X POST "${url%/}/api/notifica" \
-          -H "authorization: Bearer $tok" -H 'x-pannello: 1' -H 'content-type: application/json' -d "$corpo" || echo 000)
+        codice=$(curl -sS -o /tmp/avviso.json -w '%{http_code}' -X POST "$PANNELLO_INDIRIZZO/api/notifica" \
+          -H "authorization: Bearer $PANNELLO_TOKEN" -H 'x-pannello: 1' -H 'content-type: application/json' -d "$corpo" || echo 000)
         echo "pannello → $codice $(cat /tmp/avviso.json 2>/dev/null)"
         exit 0

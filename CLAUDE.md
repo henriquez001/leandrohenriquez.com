@@ -80,4 +80,7 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   e, se esiste, da lavori/<slug>/progetto.json (scheda e immagine ambientata).
 - Lo script si ferma senza scrivere il PDF se un blocco si sovrappone o esce dai margini; i titoli
   si riducono da soli per stare nella larghezza.
-- La GitHub Action `.github/workflows/portfolio.yml` lo rigenera a ogni modifica dei progetti su main.
+- La GitHub Action `.github/workflows/portfolio.yml` lo rigenera a ogni modifica dei progetti su main
+  (e dopo ogni pubblicazione del pannello) e lo carica nel pannello.
+- Il PDF è **privato** (scelta del 4/11/2026): non sta nel repo (è in `.gitignore`) né sul sito, e la home
+  non lo linka più. Si scarica solo dal pannello, sezione Progetti, dopo l'accesso (`GET /api/portfolio`).

@@ -153,5 +153,20 @@ await prova('notifiche dalle Actions: solo con il token OIDC di questo repositor
 await prova('notifiche: un\'iscrizione scaduta (410) viene tolta',async()=>{
   rispostaPush=410;assert.equal((await chiama('POST','/api/push/prova',{cookie:cProp})).stato,404);
   assert.deepEqual(JSON.parse(kv.get('push')),[]);rispostaPush=201;});
+const grezza=(metodo,percorso,{corpo,cookie,intest={}}={})=>app.fetch(new Request(O+percorso,{method:metodo,headers:{'x-pannello':'1',origin:O,...(cookie?{cookie}:{}),...intest},body:corpo}),env);
+await prova('portfolio: lo carica solo la Action di questo repo, ed è un PDF vero',async()=>{
+  assert.equal((await chiama('GET','/api/portfolio',{cookie:cProp})).stato,404);
+  const pdf=new TextEncoder().encode('%PDF-1.7\n% prova\n%%EOF\n');
+  assert.equal((await grezza('PUT','/api/portfolio',{corpo:pdf})).status,401);
+  assert.equal((await grezza('PUT','/api/portfolio',{corpo:pdf,intest:{authorization:'Bearer '+await tokenActions({repository:'altro/r'})}})).status,403);
+  assert.equal((await grezza('PUT','/api/portfolio',{corpo:new TextEncoder().encode('<html>'),intest:{authorization:'Bearer '+await tokenActions()}})).status,415);
+  const r=await grezza('PUT','/api/portfolio',{corpo:pdf,intest:{authorization:'Bearer '+await tokenActions()}});assert.equal(r.status,200);
+  assert.equal((await r.json()).byte,pdf.length);});
+await prova('portfolio: si scarica solo dopo l\'accesso',async()=>{
+  assert.equal((await grezza('GET','/api/portfolio')).status,401);
+  const r=await grezza('GET','/api/portfolio',{cookie:cProp});assert.equal(r.status,200);
+  assert.equal(r.headers.get('content-type'),'application/pdf');assert.match(r.headers.get('content-disposition'),/^attachment; filename="portfolio-leandro-henriquez-\d{4}-\d\d-\d\d\.pdf"$/);
+  assert.equal(new TextDecoder().decode(await r.arrayBuffer()).slice(0,8),'%PDF-1.7');
+  assert.equal((await chiama('GET','/api/portfolio/info',{cookie:cProp})).dati.pronto,true);});
 await prova('uscita cancella il cookie',async()=>{const r=await chiama('POST','/api/uscita',{cookie:cProp});assert.equal(r.cookie,'hl_sessione=');});
 console.log(`\n${ok} prove superate`);

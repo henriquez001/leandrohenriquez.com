@@ -11,6 +11,7 @@ const INDICE='data/progetti.json',INDICE_JS='assets/js/indice.js',APP='data/app.
 const MAX_HTML=2*1024*1024;
 const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_IMG=8*1024*1024;
+const MAX_PDF=20*1024*1024; // un valore KV arriva a 25 MB
 
 const json=(dati,stato=200,extra={})=>new Response(JSON.stringify(dati),{status:stato,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',...extra}});
 const corpo=async req=>{try{return await req.json();}catch{throw new Errore(400,'Richiesta non valida');}};
@@ -131,6 +132,23 @@ export function crea({fetchImpl}={}){
 
   // --- statistiche ---
   R('GET','/api/statistiche',async(req,env)=>json(await statistiche(env,new URL(req.url).searchParams.get('giorni'),f)));
+
+  // --- portfolio PDF: privato. Lo genera la Action "Portfolio PDF", lo scarica solo chi entra nel pannello ---
+  R('GET','/api/portfolio/info',async(req,env)=>json(JSON.parse(await env.ACCESSI.get('portfolio-info')||'null')||{pronto:false}));
+  R('GET','/api/portfolio',async(req,env)=>{
+    const pdf=await env.ACCESSI.get('portfolio','arrayBuffer');if(!pdf)throw new Errore(404,'Il portfolio non è ancora stato generato');
+    const info=JSON.parse(await env.ACCESSI.get('portfolio-info')||'{}');
+    return new Response(pdf,{headers:{'content-type':'application/pdf','content-disposition':`attachment; filename="portfolio-leandro-henriquez-${String(info.aggiornato||'').slice(0,10)||'pdf'}.pdf"`,'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
+  });
+  R('PUT','/api/portfolio',async(req,env)=>{ // dalla Action, con il token OIDC di questo repo
+    const a=await verificaActions((req.headers.get('authorization')||'').replace(/^Bearer\s+/i,''),env,f);
+    const by=new Uint8Array(await req.arrayBuffer());
+    if(by.length>MAX_PDF)throw new Errore(413,'PDF troppo grande (massimo 20 MB)');
+    if(String.fromCharCode(...by.subarray(0,5))!=='%PDF-')throw new Errore(415,'Non è un PDF');
+    const info={pronto:true,aggiornato:new Date().toISOString(),byte:by.length,commit:String(a.sha||'').slice(0,7)};
+    await env.ACCESSI.put('portfolio',by);await env.ACCESSI.put('portfolio-info',JSON.stringify(info));
+    return json(info);
+  },{libera:true});
 
   // --- notifiche push: ognuno iscrive i propri dispositivi; gli avvisi del sito vanno al proprietario ---
   R('GET','/api/push',async(req,env)=>json({chiave:(await chiaveServer(env)).pub}));

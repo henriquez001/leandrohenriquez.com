@@ -146,13 +146,16 @@ async function salvaProgetti(elenco,msg='Salvato. Il sito si aggiorna in circa u
 async function sezioneProgetti(){await caricaProgetti();disegnaProgetti();}
 function disegnaProgetti(){
   const P=stato.progetti;
-  $('#main').innerHTML=`<div class="hd"><h1 class="D">Progetti</h1><span class="lbl">${P.filter(p=>p.pubblicato).length} pubblicati su ${P.length} · trascina per riordinare</span></div>
+  $('#main').innerHTML=`<div class="hd"><h1 class="D">Progetti</h1><span class="lbl">${P.filter(p=>p.pubblicato).length} pubblicati su ${P.length} · trascina per riordinare<span id="pdfBox" hidden> · <a href="/api/portfolio" id="pdf" download>portfolio PDF ↓</a></span></span></div>
   <div class="cards" id="cards">${P.map((p,i)=>`<article class="c${p.pubblicato?'':' off'}" draggable="true" data-i="${i}">
     <button class="apri" type="button" aria-label="Modifica ${esc(p.nome)}"></button>
     <div class="im">${imgTag(p.anteprima,p.nome)}</div>
     <div class="tx"><span class="lbl">${nn(i)} · ${esc(p.tipo)}</span><b>${esc(p.nome)}${p.etichetta?`<span class="tag">${esc(p.etichetta)}</span>`:''}</b>
     <div class="ft"><span class="lbl">${p.pubblicato?esc(p.contesto):'nascosto'}</span><span class="swHit"><button type="button" class="sw" role="switch" aria-checked="${p.pubblicato}" aria-label="Pubblicato: ${esc(p.nome)}" data-i="${i}"></button></span></div></div>
   </article>`).join('')}<button class="nuovo" type="button" id="nuovoP">+ nuovo progetto</button></div>`;
+  // il portfolio PDF è privato: si scarica da qui (lo genera la Action "Portfolio PDF")
+  api('GET','/api/portfolio/info').then(d=>{const a=$('#pdf');if(!a||!d.pronto)return;
+    a.textContent=`portfolio PDF ↓ ${new Date(d.aggiornato).toLocaleDateString('it-IT',{day:'numeric',month:'short'})} · ${(d.byte/1048576).toFixed(1)} MB`;$('#pdfBox').hidden=false;}).catch(()=>{});
   $$('#cards .apri').forEach(b=>b.addEventListener('click',()=>modificaProgetto(+b.closest('.c').dataset.i)));
   $$('#cards .sw').forEach(s=>s.addEventListener('click',async e=>{
     e.stopPropagation();const i=+s.dataset.i,el=stato.progetti.map(p=>({...p}));el[i].pubblicato=!el[i].pubblicato;

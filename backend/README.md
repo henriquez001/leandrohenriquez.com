@@ -41,6 +41,8 @@ invece di sovrascrivere: si ricarica e si riprova.
 | GET · POST · DELETE | `/api/push` (chiave pubblica · iscrivi `{iscrizione}` · togli `{endpoint}`) | chi ha accesso |
 | POST | `/api/push/prova` | chi ha accesso (ai propri dispositivi) |
 | POST | `/api/notifica` `{titolo, testo, url}` | GitHub Actions di questo repo (token OIDC) |
+| GET | `/api/portfolio` (il PDF) · `/api/portfolio/info` | chi ha accesso |
+| PUT | `/api/portfolio` (corpo: il PDF) | GitHub Actions di questo repo (token OIDC) |
 | GET · POST · DELETE | `/api/accessi` | solo il proprietario |
 
 Le richieste che modificano qualcosa devono avere l'intestazione `x-pannello: 1` e arrivare dalla stessa origine.
