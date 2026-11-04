@@ -4,6 +4,7 @@ import {GitHub,Errore,b64enc} from './github.js';
 import {verificaGoogle,puoEntrare,creaSessione,chiudiSessione,leggiSessione,elencoAccessi,salvaAccessi,proprietario} from './auth.js';
 import {statistiche} from './stats.js';
 import {chiaveServer,iscrivi,disiscrivi,invia,verificaActions} from './push.js';
+import {anteprima} from './anteprima.js';
 import schema from '../../tools/schema.js';
 const {SLUG,controllaVoce,controllaIndice,controllaPagina,generaIndiceJS,controllaApp,controllaElencoApp,inserisciRiquadri}=schema;
 
@@ -12,6 +13,11 @@ const MAX_HTML=2*1024*1024;
 const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_IMG=8*1024*1024;
 const MAX_PDF=20*1024*1024; // un valore KV arriva a 25 MB
+const BOZZE='bozze-progetti',MAX_BOZZE=30;
+const VERSIONI='portfolio-versioni',MAX_VERSIONI=5,ID_VERSIONE=/^[a-z0-9]{6,20}$/;
+const slugNome=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40)||'su-misura';
+const leggiBozze=async env=>JSON.parse(await env.ACCESSI.get(BOZZE)||'{}');
+const leggiVersioni=async env=>JSON.parse(await env.ACCESSI.get(VERSIONI)||'[]');
 
 const json=(dati,stato=200,extra={})=>new Response(JSON.stringify(dati),{status:stato,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',...extra}});
 const corpo=async req=>{try{return await req.json();}catch{throw new Errore(400,'Richiesta non valida');}};
@@ -66,6 +72,37 @@ export function crea({fetchImpl}={}){
     d.progetti=d.progetti.filter(x=>x.slug!==slug);
     const sha=await gh.commit([{percorso:INDICE,testo:JSON.stringify(d,null,2)+'\n'},{percorso:INDICE_JS,testo:generaIndiceJS(d)}],`Pannello: tolto ${p.nome} dall'indice`,base,s.email);
     return json({base:sha});
+  });
+  // --- bozze dei progetti: restano nel pannello (KV) finché non le pubblichi ---
+  R('GET','/api/bozze',async(req,env)=>json({progetti:await leggiBozze(env)}));
+  R('PUT','/api/bozze/progetti/:slug',async(req,env,s,{slug})=>{
+    if(!SLUG.test(slug))throw new Errore(400,'Slug non valido');
+    const {progetto,nuovo}=await corpo(req);const p={pagina:false,pubblicato:false,...progetto,slug};
+    const err=controllaVoce(p);if(err.length)throw new Errore(422,err.join('; '));
+    const b=await leggiBozze(env);
+    if(!b[slug]&&Object.keys(b).length>=MAX_BOZZE)throw new Errore(413,`Troppe bozze aperte (massimo ${MAX_BOZZE}): pubblicane o scartane qualcuna`);
+    b[slug]={progetto:p,nuovo:!!nuovo,aggiornato:new Date().toISOString(),da:s.email};
+    await env.ACCESSI.put(BOZZE,JSON.stringify(b));return json({bozza:b[slug]});
+  });
+  R('DELETE','/api/bozze/progetti/:slug',async(req,env,s,{slug})=>{
+    const b=await leggiBozze(env);delete b[slug];await env.ACCESSI.put(BOZZE,JSON.stringify(b));return json({ok:true});
+  });
+  // pubblica un progetto (nuovo o modificato) in un commit e cancella la sua bozza
+  R('POST','/api/progetti/:slug/pubblica',async(req,env,s,{slug})=>{
+    if(!SLUG.test(slug))throw new Errore(400,'Slug non valido');
+    const {base,progetto,nuovo,posizione}=await corpo(req);
+    const gh=new GitHub(env,f);const d=await gh.leggiJSON(INDICE,base);const el=d.progetti.slice();
+    const i=el.findIndex(x=>x.slug===slug);
+    if(nuovo&&i>=0)throw new Errore(409,`Esiste già un progetto "${slug}": scegli un altro indirizzo`);
+    if(!nuovo&&i<0)throw new Errore(404,'Progetto non trovato');
+    const p={pagina:false,pubblicato:false,...progetto,slug};if(i>=0)p.pagina=el[i].pagina; // la pagina 3D la decide il repo
+    const err=controllaVoce(p);if(err.length)throw new Errore(422,err.join('; '));
+    if(i>=0)el[i]=p;else el.push(p);
+    if(Number.isInteger(posizione)&&posizione>=0&&posizione<el.length){const k=el.findIndex(x=>x.slug===slug);const [m]=el.splice(k,1);el.splice(posizione,0,m);}
+    const dd={progetti:el};const e2=controllaIndice(dd);if(e2.length)throw new Errore(422,e2.join('; '));
+    const sha=await gh.commit([{percorso:INDICE,testo:JSON.stringify(dd,null,2)+'\n'},{percorso:INDICE_JS,testo:generaIndiceJS(dd)}],i<0?`Pannello: nuovo progetto ${p.nome}`:`Pannello: ${p.nome} aggiornato`,base,s.email);
+    const b=await leggiBozze(env);if(b[slug]){delete b[slug];await env.ACCESSI.put(BOZZE,JSON.stringify(b));}
+    return json({base:sha,progetti:el});
   });
   // pagina del progetto (lavori/<slug>/progetto.json)
   R('GET','/api/progetti/:slug/pagina',async(req,env,s,{slug})=>{
@@ -136,15 +173,55 @@ export function crea({fetchImpl}={}){
   // --- portfolio PDF: privato. Lo genera la Action "Portfolio PDF", lo scarica solo chi entra nel pannello ---
   R('GET','/api/portfolio/info',async(req,env)=>json(JSON.parse(await env.ACCESSI.get('portfolio-info')||'null')||{pronto:false}));
   R('GET','/api/portfolio',async(req,env)=>{
-    const pdf=await env.ACCESSI.get('portfolio','arrayBuffer');if(!pdf)throw new Errore(404,'Il portfolio non è ancora stato generato');
-    const info=JSON.parse(await env.ACCESSI.get('portfolio-info')||'{}');
-    return new Response(pdf,{headers:{'content-type':'application/pdf','content-disposition':`attachment; filename="portfolio-leandro-henriquez-${String(info.aggiornato||'').slice(0,10)||'pdf'}.pdf"`,'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
+    const vid=new URL(req.url).searchParams.get('versione');let pdf,nome;
+    if(vid){ // una versione su misura
+      const v=(await leggiVersioni(env)).find(x=>x.id===vid);if(!v||v.stato!=='pronto')throw new Errore(404,'Questa versione del portfolio non è pronta');
+      pdf=await env.ACCESSI.get('portfolio-v-'+vid,'arrayBuffer');nome=`portfolio-leandro-henriquez-${slugNome(v.nome)}.pdf`;
+    }else{
+      pdf=await env.ACCESSI.get('portfolio','arrayBuffer');const info=JSON.parse(await env.ACCESSI.get('portfolio-info')||'{}');
+      nome=`portfolio-leandro-henriquez-${String(info.aggiornato||'').slice(0,10)||'pdf'}.pdf`;
+    }
+    if(!pdf)throw new Errore(404,'Il portfolio non è ancora stato generato');
+    return new Response(pdf,{headers:{'content-type':'application/pdf','content-disposition':`attachment; filename="${nome}"`,'cache-control':'private, no-store','x-content-type-options':'nosniff'}});
+  });
+  // versioni su misura: scegli i progetti e l'ordine, la Action "Portfolio PDF" le prepara (ne restano 5)
+  R('GET','/api/portfolio/versioni',async(req,env)=>{
+    const ora=Date.now();
+    return json({versioni:(await leggiVersioni(env)).map(v=>v.stato==='in-preparazione'&&ora-Date.parse(v.creato)>20*60e3?{...v,stato:'non-riuscito'}:v)});
+  });
+  R('POST','/api/portfolio/versioni',async(req,env,s)=>{
+    const {nome,progetti}=await corpo(req);const n=String(nome||'').trim();
+    if(!n||n.length>30)throw new Errore(422,'Dai un nome al portfolio (massimo 30 caratteri)');
+    if(!Array.isArray(progetti)||!progetti.length||progetti.length>20)throw new Errore(422,'Scegli da 1 a 20 progetti');
+    if(new Set(progetti).size!==progetti.length)throw new Errore(422,'Un progetto è scelto due volte');
+    const gh=new GitHub(env,f);const d=await gh.leggiJSON(INDICE);const noti=new Set(d.progetti.map(p=>p.slug));
+    const ignoto=progetti.find(x=>!noti.has(x));if(ignoto!==undefined)throw new Errore(422,`Progetto sconosciuto: ${ignoto}`);
+    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    await gh.avvia('portfolio.yml',{versione:id,progetti:progetti.join(',')});
+    const v={id,nome:n,progetti,stato:'in-preparazione',creato:new Date().toISOString(),da:s.email};
+    const tutte=[v,...(await leggiVersioni(env))];
+    for(const x of tutte.slice(MAX_VERSIONI))await env.ACCESSI.delete('portfolio-v-'+x.id);
+    await env.ACCESSI.put(VERSIONI,JSON.stringify(tutte.slice(0,MAX_VERSIONI)));
+    return json({versione:v},201);
+  });
+  R('DELETE','/api/portfolio/versioni/:id',async(req,env,s,{id})=>{
+    await env.ACCESSI.put(VERSIONI,JSON.stringify((await leggiVersioni(env)).filter(x=>x.id!==id)));await env.ACCESSI.delete('portfolio-v-'+id);
+    return json({ok:true});
   });
   R('PUT','/api/portfolio',async(req,env)=>{ // dalla Action, con il token OIDC di questo repo
     const a=await verificaActions((req.headers.get('authorization')||'').replace(/^Bearer\s+/i,''),env,f);
     const by=new Uint8Array(await req.arrayBuffer());
     if(by.length>MAX_PDF)throw new Errore(413,'PDF troppo grande (massimo 20 MB)');
     if(String.fromCharCode(...by.subarray(0,5))!=='%PDF-')throw new Errore(415,'Non è un PDF');
+    const vid=new URL(req.url).searchParams.get('versione');
+    if(vid){ // versione su misura chiesta dal pannello
+      if(!ID_VERSIONE.test(vid))throw new Errore(400,'Versione non valida');
+      const el=await leggiVersioni(env),v=el.find(x=>x.id===vid);if(!v)throw new Errore(404,'Versione sconosciuta (forse tolta nel frattempo)');
+      await env.ACCESSI.put('portfolio-v-'+vid,by);Object.assign(v,{stato:'pronto',aggiornato:new Date().toISOString(),byte:by.length});
+      await env.ACCESSI.put(VERSIONI,JSON.stringify(el));
+      try{await invia(env,{titolo:'Portfolio pronto',testo:`«${v.nome}», ${v.progetti.length} progetti: scaricalo dal pannello.`,url:'/#progetti'},{chi:x=>x.email===v.da,f});}catch(e){console.error(e);}
+      return json(v);
+    }
     const info={pronto:true,aggiornato:new Date().toISOString(),byte:by.length,commit:String(a.sha||'').slice(0,7)};
     await env.ACCESSI.put('portfolio',by);await env.ACCESSI.put('portfolio-info',JSON.stringify(info));
     return json(info);
@@ -179,6 +256,13 @@ export function crea({fetchImpl}={}){
 
   return {async fetch(req,env){
     const url=new URL(req.url);
+    if(url.pathname==='/anteprima')return Response.redirect(url.origin+'/anteprima/',302);
+    if(url.pathname.startsWith('/anteprima/')&&req.method==='GET'){ // il sito con le bozze, solo dopo l'accesso
+      try{
+        if(!(await leggiSessione(req,env)))return Response.redirect(url.origin+'/',302);
+        return await anteprima(url,{env,f,bozze:await leggiBozze(env),leggiIndice:()=>new GitHub(env,f).leggiJSON(INDICE)});
+      }catch(e){console.error(e);return new Response('Anteprima non disponibile',{status:502,headers:{'cache-control':'no-store'}});}
+    }
     if(!url.pathname.startsWith('/api/'))return env.ASSETS?env.ASSETS.fetch(req):new Response('Non trovato',{status:404});
     try{
       // contro richieste da altri siti: le modifiche devono arrivare dalla stessa origine e con l'intestazione del pannello

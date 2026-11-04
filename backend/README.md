@@ -41,8 +41,12 @@ invece di sovrascrivere: si ricarica e si riprova.
 | GET · POST · DELETE | `/api/push` (chiave pubblica · iscrivi `{iscrizione}` · togli `{endpoint}`) | chi ha accesso |
 | POST | `/api/push/prova` | chi ha accesso (ai propri dispositivi) |
 | POST | `/api/notifica` `{titolo, testo, url}` | GitHub Actions di questo repo (token OIDC) |
-| GET | `/api/portfolio` (il PDF) · `/api/portfolio/info` | chi ha accesso |
-| PUT | `/api/portfolio` (corpo: il PDF) | GitHub Actions di questo repo (token OIDC) |
+| GET | `/api/bozze` · PUT/DELETE `/api/bozze/progetti/:slug` `{progetto, nuovo}` | chi ha accesso (le bozze restano nel KV, il sito non cambia) |
+| POST | `/api/progetti/:slug/pubblica` `{base, progetto, nuovo, posizione}` (un commit, poi la bozza sparisce) | chi ha accesso |
+| GET | `/anteprima/…` (il sito con le bozze, `noindex`, senza GoatCounter) | chi ha accesso |
+| GET | `/api/portfolio` (il completo) · `?versione=id` (su misura) · `/api/portfolio/info` | chi ha accesso |
+| GET · POST · DELETE | `/api/portfolio/versioni` `{nome, progetti}` (avvia la Action; ne restano 5) | chi ha accesso |
+| PUT | `/api/portfolio` · `?versione=id` (corpo: il PDF) | GitHub Actions di questo repo (token OIDC) |
 | GET · POST · DELETE | `/api/accessi` | solo il proprietario |
 
 Le richieste che modificano qualcosa devono avere l'intestazione `x-pannello: 1` e arrivare dalla stessa origine.
@@ -64,7 +68,7 @@ La fa da sola la GitHub Action `.github/workflows/pannello.yml` a ogni modifica 
 | `CLOUDFLARE_API_TOKEN` | token Cloudflare, modello "Edit Cloudflare Workers" |
 | `CLOUDFLARE_ACCOUNT_ID` | ID dell'account Cloudflare |
 | `PANNELLO_OWNER_EMAIL` | email Google del proprietario |
-| `PANNELLO_GITHUB_TOKEN` | token fine-grained solo per questo repo, *Contents: read and write* |
+| `PANNELLO_GITHUB_TOKEN` | token fine-grained solo per questo repo, *Contents: read and write* e *Actions: read and write* (per i portfolio su misura) |
 | `GOOGLE_CLIENT_ID` | ID client OAuth di tipo "Applicazione web"; origine autorizzata = indirizzo del pannello |
 | `GOATCOUNTER_CODE`, `GOATCOUNTER_TOKEN` | facoltativi, per le statistiche |
 

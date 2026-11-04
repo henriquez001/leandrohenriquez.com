@@ -87,3 +87,9 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   (e dopo ogni pubblicazione del pannello) e lo carica nel pannello.
 - Il PDF è **privato** (scelta del 4/11/2026): non sta nel repo (è in `.gitignore`) né sul sito, e la home
   non lo linka più. Si scarica solo dal pannello, sezione Progetti, dopo l'accesso (`GET /api/portfolio`).
+- Portfolio **su misura** (variante 2 del 4/11): dal pannello si scelgono progetti e ordine e si dà un nome; il Worker
+  avvia `portfolio.yml` (`workflow_dispatch` con `versione` e `progetti`), lo script legge `PROGETTI=slug,slug`.
+  Restano le ultime 5 versioni più il completo; quando è pronto arriva una notifica.
+- **Bozze** dei progetti (variante A del 4/11, bozza per progetto): "salva bozza" scrive solo nel KV del pannello,
+  "pubblica" fa un commit; "anteprima ↗" apre `/anteprima/` sul pannello (il sito vero con l'indice rifatto dalle bozze).
+  Interruttori e ordine sulle schede restano immediati.

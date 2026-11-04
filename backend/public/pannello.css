@@ -75,6 +75,28 @@ main{padding:24px 28px 80px;max-width:1100px;width:100%;outline:none}
 @media (hover:hover){.c:hover{border-color:var(--ink)}.nuovo:hover{background:#e0dcd3}}
 .c .tx .lbl:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+/* bozze (variante A del 4/11): bordo tratteggiato ed etichetta, lo stato non dipende dal colore */
+.c.bz{border-style:dashed;border-color:var(--ink)}
+.c .tag.bozza{border-style:dashed}
+.drBtn.azioni{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.drBtn.azioni>#drExtra{display:contents}
+.drBtn.azioni #drElimina{margin-right:auto}
+.drBtn.azioni [data-chiudi]{display:none}
+.link{text-decoration:underline;min-height:28px;padding:0 2px}
+/* portfolio su misura (variante 2 del 4/11) */
+.pronti{display:grid;border-bottom:1px solid var(--rule)}
+.pronti>div{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;border-top:1px solid var(--rule);padding:6px 0;min-height:52px}
+.pronti>div>span:first-child{min-width:0;overflow-wrap:anywhere}
+.pronti .btn{min-width:44px;text-decoration:none}
+.scelta{list-style:none;display:grid;border-bottom:1px solid var(--rule)}
+.scelta li{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:2px;border-top:1px solid var(--rule);min-height:44px}
+.scelta input{width:20px;height:20px;margin:0 12px 0 2px;accent-color:var(--ink);cursor:pointer}
+.scelta label{cursor:pointer;padding:10px 0;overflow-wrap:anywhere}
+.scelta li.no label{color:var(--mute)}
+.scelta .su{min-width:36px;min-height:36px;border-radius:8px}
+.scelta .su[disabled]{opacity:.3;cursor:default}
+@media (hover:hover){.scelta .su:not([disabled]):hover,.link:hover{background:#e0dcd3}}
+
 /* pannello laterale (58%) */
 .velo{position:fixed;inset:0;background:rgba(17,17,17,.18);opacity:0;z-index:20}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:58%;max-width:720px;min-width:380px;background:var(--paper);border-left:1px solid var(--ink);box-shadow:-12px 0 24px rgba(0,0,0,.06);z-index:21;transform:translateX(100%);overflow:auto;overscroll-behavior:contain}
@@ -169,4 +191,6 @@ main{padding:24px 28px 80px;max-width:1100px;width:100%;outline:none}
   .aggiungi{grid-template-columns:1fr}
   .avviso{bottom:calc(72px + env(safe-area-inset-bottom))}
   .f .due{grid-template-columns:1fr}
+  .drBtn.azioni .btn{min-height:44px;flex:1 1 calc(50% - 4px)}.drBtn.azioni #drElimina{flex:0 0 auto}
+  .scelta .su{min-width:44px;min-height:44px}
 }

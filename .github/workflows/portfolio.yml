@@ -18,13 +18,24 @@ on:
   workflow_run:
     workflows: [Pannello]
     types: [completed]
+  # dal pannello: una versione su misura (progetti scelti e in ordine), caricata a parte
   workflow_dispatch:
+    inputs:
+      versione:
+        description: 'id della versione su misura (vuoto = portfolio completo)'
+        required: false
+        default: ''
+      progetti:
+        description: 'slug dei progetti, separati da virgole, in ordine'
+        required: false
+        default: ''
 permissions:
   contents: read
   id-token: write
 concurrency:
-  group: portfolio-pdf
-  cancel-in-progress: true
+  # il completo si rigenera dall'ultimo commit; le versioni su misura non si cancellano a vicenda
+  group: portfolio-pdf-${{ inputs.versione || 'completo' }}
+  cancel-in-progress: ${{ !inputs.versione }}
 jobs:
   pdf:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
@@ -39,18 +50,27 @@ jobs:
           npm install --no-save --prefix "$RUNNER_TEMP/pw" playwright@1.63.0
           "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
       - name: Genera il PDF (si ferma se qualcosa si sovrappone)
-        run: NODE_PATH="$RUNNER_TEMP/pw/node_modules" node tools/genera-portfolio.js
+        env:
+          VERSIONE: ${{ inputs.versione }}
+          PROGETTI: ${{ inputs.progetti }}
+        run: |
+          # i valori arrivano dal pannello: si controlla la forma prima di usarli
+          [[ -z "$VERSIONE" || "$VERSIONE" =~ ^[a-z0-9]{6,20}$ ]] || { echo "::error::versione non valida"; exit 1; }
+          [[ -z "$PROGETTI" || "$PROGETTI" =~ ^[a-z0-9-]+(,[a-z0-9-]+)*$ ]] || { echo "::error::elenco progetti non valido"; exit 1; }
+          NODE_PATH="$RUNNER_TEMP/pw/node_modules" node tools/genera-portfolio.js
       - name: Carica nel pannello
         env:
           PANNELLO: ${{ vars.PANNELLO_URL }}
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERSIONE: ${{ inputs.versione }}
         run: |
           source .github/actions/avvisa/pannello.sh
+          dove="$PANNELLO_INDIRIZZO/api/portfolio${VERSIONE:+?versione=$VERSIONE}"
           [ -n "$PANNELLO_INDIRIZZO" ] && [ -n "$PANNELLO_TOKEN" ] || { echo "::error::non so dove caricare il PDF"; exit 1; }
           # se il pannello si sta ancora pubblicando, riprova
           for i in 1 2 3 4; do
-            codice=$(curl -sS -o risposta.json -w '%{http_code}' -X PUT "$PANNELLO_INDIRIZZO/api/portfolio" \
+            codice=$(curl -sS -o risposta.json -w '%{http_code}' -X PUT "$dove" \
               -H "authorization: Bearer $PANNELLO_TOKEN" -H 'x-pannello: 1' -H 'content-type: application/pdf' --data-binary @portfolio.pdf || echo 000)
             echo "pannello → $codice $(cat risposta.json 2>/dev/null)"
             [ "$codice" = 200 ] && { echo "### Portfolio caricato nel pannello ($(du -h portfolio.pdf | cut -f1))" >> "$GITHUB_STEP_SUMMARY"; exit 0; }

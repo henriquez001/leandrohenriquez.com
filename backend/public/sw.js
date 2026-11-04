@@ -1,7 +1,7 @@
 /* Service worker del pannello: apre subito l'interfaccia anche con rete lenta e mostra le notifiche push.
    Le risposte di /api/ non vengono mai salvate: i dati arrivano sempre freschi dal server. */
 'use strict';
-const VERSIONE='hl-pannello-1';
+const VERSIONE='hl-pannello-2';
 const GUSCIO=['/','/pannello.css','/pannello.js','/manifest.webmanifest','/icona-192.png','/fonts/archivo-wdth-wght.woff2','/fonts/roboto-mono-wght.woff2'];
 
 self.addEventListener('install',e=>{e.waitUntil(caches.open(VERSIONE).then(c=>c.addAll(GUSCIO)).then(()=>self.skipWaiting()));});
@@ -10,7 +10,8 @@ self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.a
 // Interfaccia: prima la rete (così un aggiornamento si vede subito), la copia salvata solo se la rete manca.
 self.addEventListener('fetch',e=>{
   const u=new URL(e.request.url);
-  if(e.request.method!=='GET'||u.origin!==location.origin||u.pathname.startsWith('/api/'))return;
+  // /api/ e l'anteprima delle bozze passano sempre dalla rete e non si salvano
+  if(e.request.method!=='GET'||u.origin!==location.origin||u.pathname.startsWith('/api/')||u.pathname.startsWith('/anteprima'))return;
   e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copia=r.clone();caches.open(VERSIONE).then(c=>c.put(e.request,copia));}return r;})
     .catch(()=>caches.match(e.request,{ignoreSearch:true}).then(r=>r||caches.match('/'))));
 });
