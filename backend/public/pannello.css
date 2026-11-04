@@ -48,6 +48,9 @@ a{color:inherit}
 main{padding:24px 28px 80px;max-width:1100px;width:100%;outline:none}
 .hd{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
 .hd h1{font-size:56px}
+.hd .tit{display:grid;gap:8px}
+/* portfolio PDF (variante A del 4/11): pulsante pieno a destra, data e peso sotto */
+.scarica{display:grid;justify-items:end;gap:4px}.scarica .btn{text-decoration:none}
 
 /* schede: 2 colonne, raggio 10, immagine 86 px */
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -147,6 +150,7 @@ main{padding:24px 28px 80px;max-width:1100px;width:100%;outline:none}
   .menu .io{margin:0;grid-auto-flow:column;gap:10px}.menu .io button{min-height:44px;font-size:12px}
   main{padding:18px 16px 110px}
   .hd h1{font-size:44px}
+  .scarica{justify-items:start}.scarica .btn{min-height:44px}
   .cards{grid-template-columns:1fr}
   .drawer{width:100%;min-width:0;border-left:0}
   .drBtn{grid-template-columns:auto 1fr 1.6fr}.drBtn>span{display:none}
