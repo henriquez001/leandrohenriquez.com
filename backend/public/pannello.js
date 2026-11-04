@@ -57,10 +57,12 @@ const nomeDispositivo=()=>{const u=navigator.userAgent;
   return (/iPhone|iPad/.test(u)?'iPhone':/Android/.test(u)?'Android':/Windows/.test(u)?'Windows':/Mac/.test(u)?'Mac':'browser')+' · '+(/Edg\//.test(u)?'Edge':/Chrome\//.test(u)?'Chrome':/Firefox\//.test(u)?'Firefox':/Safari\//.test(u)?'Safari':'altro');};
 // Su iPhone le notifiche esistono solo con il pannello aggiunto alla schermata Home: lì il pulsante compare da solo.
 async function statoNotifiche(){
-  const b=$('#notifiche');if(!pushOk()||!(await swReg)){b.hidden=true;return;}
-  const s=await iscrizioneAttuale().catch(()=>null);
-  b.hidden=false;b.setAttribute('aria-pressed',!!s);b.textContent=s?'notifiche ✓':'notifiche';
+  const b=$('#notifiche'),ok=pushOk()&&!!(await swReg);
+  const s=ok?await iscrizioneAttuale().catch(()=>null):null;
+  b.hidden=!ok;b.setAttribute('aria-pressed',!!s);b.textContent=s?'notifiche ✓':'notifiche';
   b.title=s?'Notifiche attive su questo dispositivo: tocca per disattivarle':'Ricevi qui gli avvisi del sito';
+  // la stessa riga nella pagina "tu" del telefono
+  const t=$('#tuNotifiche');if(t){t.hidden=!ok;$('#tuNot').textContent=s?'disattiva':'attiva';$('#tuNotStato').textContent=s?'attive su questo dispositivo':'spente su questo dispositivo';}
 }
 $('#notifiche').addEventListener('click',async()=>{
   const b=$('#notifiche');b.disabled=true;
@@ -354,7 +356,20 @@ async function sezioneAccessi(){
     try{await api('DELETE',`/api/accessi/${encodeURIComponent(b.dataset.togli)}`);avviso('Accesso tolto.');sezioneAccessi();}catch(err){avviso(err.message,true);}}));
 }
 
-const SEZIONI={progetti:sezioneProgetti,app:sezioneApp,statistiche:sezioneStatistiche,accessi:sezioneAccessi};
+// ---------- tu (su telefono: account, notifiche, accessi, esci; su desktop stanno nel menu a sinistra) ----------
+async function sezioneTu(){
+  $('#main').innerHTML=`<div class="hd"><div class="tit"><h1 class="D">Tu</h1><span class="lbl">${esc(stato.io.email)}</span></div></div>
+  <div class="acc">
+    <div id="tuNotifiche" hidden><span><b>Notifiche</b><br><span class="lbl" id="tuNotStato"></span></span><button type="button" class="btn" id="tuNot">attiva</button></div>
+    ${stato.io.proprietario?'<div><span><b>Accessi</b><br><span class="lbl">chi può entrare nel pannello</span></span><a class="btn" href="#accessi">apri</a></div>':''}
+    <div><span><b>Esci</b><br><span class="lbl">chiude la sessione su questo dispositivo</span></span><button type="button" class="btn" id="tuEsci">esci</button></div>
+  </div>`;
+  $('#tuNot').addEventListener('click',()=>$('#notifiche').click());
+  $('#tuEsci').addEventListener('click',()=>$('#esci').click());
+  statoNotifiche();
+}
+
+const SEZIONI={progetti:sezioneProgetti,app:sezioneApp,statistiche:sezioneStatistiche,accessi:sezioneAccessi,tu:sezioneTu};
 
 // ---------- avvio ----------
 (async()=>{try{stato.io=await api('GET','/api/io');avvia();}catch{mostraAccesso();}})();
