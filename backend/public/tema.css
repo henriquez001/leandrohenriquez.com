@@ -1,0 +1,89 @@
+/* Estetica del pannello: stile D "Manifesto", identico al sito (scelta di Leandro, 6/11/2026).
+   I valori veri stanno nel tema del sito, assets/tema/tema.css, copiato in sito/tema/ a ogni pubblicazione
+   (backend/tools/copia-tema.cjs). Qui si collegano i nomi del pannello a quelli del sito:
+   per cambiare l'aspetto di sito e pannello insieme si modifica assets/tema/tema.css.
+   Qui restano solo i pochi valori propri del pannello. Nessun selettore diverso da :root. */
+:root{
+  color-scheme:light;
+
+  /* colori, dal sito */
+  --paper:var(--carta);
+  --card:var(--carta);
+  --ink:var(--inchiostro);
+  --ink-hover:var(--inchiostro-a);   /* pulsante pieno al passaggio: diventa blu */
+  --rule:var(--inchiostro);          /* le linee sono nere, come sul sito */
+  --timbro-a:var(--inchiostro-a);    /* titoli: blu sovrastampato */
+  --timbro-b:var(--inchiostro-b);    /* titoli: rosa */
+  --timbro-modo:var(--sovrastampa);
+  /* colori propri del pannello (servono a moduli e stati, il sito non li ha) */
+  --mute:#5a5852;                    /* testo secondario, 6,4:1 sulla carta */
+  --hover:#e6e2d8;                   /* fondo al passaggio */
+  --img:#e6e2d8;                     /* riquadro immagine vuoto */
+  --img-fondo:#fff;                  /* sotto le immagini in fotocopia */
+  --red:#9b1c1c;                     /* errori ed elimina, 7,3:1 sulla carta */
+  --velo:rgba(13,13,13,.28);
+
+  /* ombre: niente sfumature, solo inchiostro pieno spostato */
+  --ombra-sw:none;
+  --ombra-presa:6px 6px 0 var(--inchiostro);
+  --ombra-drawer:none;
+
+  /* caratteri, dal sito */
+  --D:var(--font-titoli);
+  --M:var(--font-mono);
+  --D-maiuscolo:var(--maiuscole-titoli);
+  --D-wdth:100;
+  --D-wght:var(--peso-titoli);
+  --D-wght-scheda:var(--peso-titoli);
+  --D-wght-voce:var(--peso-titoli);
+  --D-riga:var(--interlinea-titoli);
+  --D-spazio:var(--spaziatura-titoli);
+  --testo-peso:400;
+  --testo:var(--corpo-mono);
+  --testo-riga:1.5;
+  --etichetta-peso:var(--peso-mono);  /* pulsanti e voci di menu, maiuscolo */
+  --piccolo:11px;
+  --minimo:10px;
+
+  /* misure dei titoli (del pannello) */
+  --t-accesso:96px;
+  --t-pagina:72px;
+  --t-pagina-tel:52px;
+  --t-drawer:52px;
+  --t-hero:132px;
+  --t-hero-tel:92px;
+  --t-numero:40px;
+  --t-numero-tel:32px;
+  --t-scheda:24px;
+  --t-voce:22px;
+
+  /* manifesto, dal sito */
+  --angolo-titolo:-8deg;             /* il pannello usa uno solo degli angoli del sito (--angoli: 15 -15 0 -8) */
+  --registro-x:var(--fuori-registro-x);
+  --registro-y:var(--fuori-registro-y);
+  --registro-opacita:var(--fuori-registro-opacita);
+  --foto:var(--fotocopia);
+  --punti-passo:var(--retino-passo);
+  --punti-opacita:var(--retino-opacita);
+  --nastro-alto:var(--nastro);
+
+  /* raggi: secchi, dal sito */
+  --r-tag:var(--raggio);
+  --r-piccolo:var(--raggio);
+  --r:var(--raggio);
+  --r-scheda:var(--raggio);
+
+  /* bordi e struttura */
+  --filo:1px;                        /* linee sottili dentro moduli ed elenchi */
+  --spesso:var(--bordo);             /* bordi forti: schede, menu, barre (3px sul sito) */
+  --barra:var(--barra-alta);
+  --menu:136px;
+
+  /* movimento: pressione come sul sito, foglio laterale a molla senza rimbalzo (apple-motion § 1 e § 4) */
+  --sheet:cubic-bezier(.32,.72,0,1);
+  --dur-foglio:350ms;
+  --dur-velo:var(--durata);
+  --dur-breve:var(--durata-breve);
+  --dur-media:var(--durata);
+  --pressione:var(--scala-pressione);
+}

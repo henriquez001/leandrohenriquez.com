@@ -24,6 +24,8 @@ async function conflitto(e,ricarica){
 
 // ---------- avviso ----------
 let tAvviso;
+// titolo del pannello laterale: data-t serve alla copia blu sovrastampata (stile Manifesto)
+function titoloDr(t){const h=$('#drTitolo');h.textContent=t;h.dataset.t=t;}
 function avviso(testo,errore=false){const a=$('#avviso');a.textContent=testo;a.classList.toggle('errore',errore);a.classList.add('on');clearTimeout(tAvviso);tAvviso=setTimeout(()=>a.classList.remove('on'),errore?6000:2600);}
 
 // ---------- accesso con Google ----------
@@ -87,6 +89,7 @@ function vai(){
   let s=location.hash.slice(1)||'progetti';
   if(!SEZIONI[s]||(s==='accessi'&&!stato.io.proprietario))s='progetti';
   stato.sezione=s;
+  {const b=$('#barraSez');if(b)b.textContent=s;}
   $$('.menu nav a').forEach(a=>{if(a.dataset.s===s)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   chiudiDrawer(true);
   $('#main').innerHTML='<p class="lbl"><span class="carica"></span> carico…</p>';
@@ -98,7 +101,7 @@ let drSalva=null,drElimina=null,drPrimaFocus=null;
 // azioni: pulsanti in più accanto a quello principale, [{testo, fn(FormData, pulsante)}]; fn può restituire 'resta' per non chiudere
 function apriDrawer({n,titolo,campi,onSalva,onElimina,testoSalva='salva e pubblica',azioni=[]}){
   drPrimaFocus=document.activeElement;
-  $('#drN').textContent=n;$('#drTitolo').textContent=titolo;$('#drCampi').innerHTML=campi;$('#drErr').textContent='';
+  $('#drN').textContent=n;titoloDr(titolo);$('#drCampi').innerHTML=campi;$('#drErr').textContent='';
   $('#drSalva').textContent=testoSalva;$('#drSalva').disabled=false;
   drSalva=onSalva;drElimina=onElimina;$('#drElimina').hidden=!onElimina;
   const ex=$('#drExtra');ex.innerHTML='';$('.drBtn').classList.toggle('azioni',azioni.length>0);
@@ -164,7 +167,7 @@ function disegnaProgetti(){
     <div class="tx"><span class="lbl">${nuova?'nuovo':nn(i)} · ${esc(p.tipo)}</span><b>${esc(p.nome)}${p.etichetta?`<span class="tag">${esc(p.etichetta)}</span>`:''}${bozza?'<span class="tag bozza">bozza</span>':''}</b>
     <div class="ft">${nuova?'<span class="lbl">non ancora nell\'indice</span>':`<span class="lbl">${p.pubblicato?esc(p.contesto):'nascosto'}</span><span class="swHit"><button type="button" class="sw" role="switch" aria-checked="${p.pubblicato}" aria-label="Pubblicato: ${esc(p.nome)}" data-i="${i}"></button></span>`}</div></div>
   </article>`;
-  $('#main').innerHTML=`<div class="hd"><div class="tit"><h1 class="D">Progetti</h1><span class="lbl">${P.filter(p=>p.pubblicato).length} pubblicati su ${P.length}${nB?` · ${nB} ${nB===1?'bozza':'bozze'}`:''} · trascina per riordinare</span></div>
+  $('#main').innerHTML=`<div class="hd"><div class="tit"><h1 class="D" data-t="Progetti">Progetti</h1><span class="lbl">${P.filter(p=>p.pubblicato).length} pubblicati su ${P.length}${nB?` · ${nB} ${nB===1?'bozza':'bozze'}`:''} · trascina per riordinare</span></div>
     <div class="scarica" id="pdfBox"><button class="btn pri" type="button" id="pdfApri">↓ portfolio PDF…</button><span class="lbl" id="pdfInfo"></span></div></div>
   <div class="cards" id="cards">${P.map((p,i)=>{const b=stato.bozze[p.slug];return scheda(b?{...b.progetto,pubblicato:p.pubblicato}:p,i,{bozza:!!b});}).join('')}${bozzeNuove().map(b=>scheda(b.progetto,-1,{bozza:true,nuova:true})).join('')}<button class="nuovo" type="button" id="nuovoP">+ nuovo progetto</button></div>`;
   // il portfolio PDF è privato: si scarica da qui (variante 2 del 4/11: scegli i progetti quando lo crei)
@@ -251,7 +254,7 @@ function modificaProgetto(i,slugBozza){
       disegnaProgetti();
     }
   });
-  if(nuovo&&!b){const n=$('#drawer [name=nome]'),sl=$('#drawer [name=slug]');let toccato=false;sl.addEventListener('input',()=>toccato=true);n.addEventListener('input',()=>{if(!toccato)sl.value=slugDa(n.value);$('#drTitolo').textContent=n.value||'Nuovo';});}
+  if(nuovo&&!b){const n=$('#drawer [name=nome]'),sl=$('#drawer [name=slug]');let toccato=false;sl.addEventListener('input',()=>toccato=true);n.addEventListener('input',()=>{if(!toccato)sl.value=slugDa(n.value);titoloDr(n.value||'Nuovo');});}
   $('#fileP').addEventListener('change',async e=>{
     const file=e.target.files[0];if(!file)return;
     const slug=slugAttuale();
@@ -317,7 +320,7 @@ async function salvaApp(el,msg='Salvato. Il Laboratorio si aggiorna in circa un 
 async function sezioneApp(){await caricaApp();disegnaApp();}
 function disegnaApp(){
   const A=stato.app;
-  $('#main').innerHTML=`<div class="hd"><h1 class="D">App</h1><span class="lbl">la pagina Laboratorio del sito · trascina per riordinare</span></div>
+  $('#main').innerHTML=`<div class="hd"><h1 class="D" data-t="App">App</h1><span class="lbl">la pagina Laboratorio del sito · trascina per riordinare</span></div>
   <div class="cards" id="cards">${A.map((a,i)=>`<article class="c${a.pubblicato?'':' off'}" draggable="true" data-i="${i}">
     <button class="apri" type="button" aria-label="Modifica ${esc(a.nome)}"></button>
     <div class="tx"><span class="lbl">${nn(i)} · ${esc(a.tipo)}</span><b>${esc(a.nome)}<span class="tag${a.stato==='pronta'?' pieno':''}">${a.stato==='pronta'?'pronta':'in arrivo'}</span></b>
@@ -367,7 +370,7 @@ function modificaApp(i){
       disegnaApp();
     }
   });
-  if(nuova){const n=$('#drawer [name=nome]'),s=$('#drawer [name=slug]');let t=false;s.addEventListener('input',()=>t=true);n.addEventListener('input',()=>{if(!t)s.value=slugDa(n.value);$('#drTitolo').textContent=n.value||'Nuova';});}
+  if(nuova){const n=$('#drawer [name=nome]'),s=$('#drawer [name=slug]');let t=false;s.addEventListener('input',()=>t=true);n.addEventListener('input',()=>{if(!t)s.value=slugDa(n.value);titoloDr(n.value||'Nuova');});}
   $('#fileA').addEventListener('change',async e=>{
     const file=e.target.files[0];if(!file)return;
     if(file.size>2*1024*1024){$('#drErr').textContent='File troppo grande (massimo 2 MB).';return;}
@@ -382,7 +385,7 @@ async function sezioneStatistiche(){
   let d;
   try{d=await api('GET',`/api/statistiche?giorni=${giorni}`);}
   catch(e){
-    if(e.stato===503){$('#main').innerHTML=`<div class="hd"><h1 class="D">Statistiche</h1></div><div class="vuoto"><b>GoatCounter non è ancora collegato</b><span class="lbl">Servono il codice dell'account e una chiave API di sola lettura. Quando ci sono, qui compaiono visite, pagine, provenienza e azioni.</span></div>`;return;}
+    if(e.stato===503){$('#main').innerHTML=`<div class="hd"><h1 class="D" data-t="Statistiche">Statistiche</h1></div><div class="vuoto"><b>GoatCounter non è ancora collegato</b><span class="lbl">Servono il codice dell'account e una chiave API di sola lettura. Quando ci sono, qui compaiono visite, pagine, provenienza e azioni.</span></div>`;return;}
     throw e;
   }
   const tot=d.totale,giornate=d.perGiorno,picco=Math.max(1,...giornate.map(g=>g.visite));
@@ -390,7 +393,7 @@ async function sezioneStatistiche(){
   const ev=n=>{const r=d.eventi.find(x=>x.percorso===n);return r?r.visite:0;};
   const top=d.pagine[0];
   const data=s=>new Date(s+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'short'});
-  $('#main').innerHTML=`<div class="hd"><h1 class="D">Statistiche</h1><div class="periodo" role="group" aria-label="Periodo">${[7,30,90].map(g=>`<button type="button" aria-pressed="${g===giorni}" data-g="${g}">${g} giorni</button>`).join('')}</div></div>
+  $('#main').innerHTML=`<div class="hd"><h1 class="D" data-t="Statistiche">Statistiche</h1><div class="periodo" role="group" aria-label="Periodo">${[7,30,90].map(g=>`<button type="button" aria-pressed="${g===giorni}" data-g="${g}">${g} giorni</button>`).join('')}</div></div>
   <section class="stat">
     <div><span class="lbl">visite · ultimi ${d.periodo.giorni} giorni</span><div class="D hero">${tot}</div></div>
     <div class="chart"><svg id="barre" role="img" aria-label="Visite per giorno, picco ${picco}"></svg><div class="tip"></div></div>
@@ -411,11 +414,11 @@ async function sezioneStatistiche(){
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   let g='',xs=[],ys=[];
   giornate.forEach((x,i)=>{const h=(x.visite/picco)*(H-alto-basso),X=i*(bw+2),Y=H-basso-h,r=Math.min(4,bw/2,h);xs.push(X+bw/2);ys.push(Y);
-    g+=h>0?`<path d="M${X} ${H-basso} V${Y+r} Q${X} ${Y} ${X+r} ${Y} H${X+bw-r} Q${X+bw} ${Y} ${X+bw} ${Y+r} V${H-basso} Z" fill="#111"/>`:'';});
+    g+=h>0?`<path d="M${X} ${H-basso} V${Y+r} Q${X} ${Y} ${X+r} ${Y} H${X+bw-r} Q${X+bw} ${Y} ${X+bw} ${Y+r} V${H-basso} Z" style="fill:var(--ink)"/>`:'';});
   const pk=giornate.findIndex(x=>x.visite===picco);
-  g+=`<line x1="0" x2="${W}" y1="${H-basso}" y2="${H-basso}" stroke="#111"/>`;
-  if(pk>=0&&giornate[pk].visite>0)g+=`<line x1="${xs[pk]}" x2="${W}" y1="${ys[pk]}" y2="${ys[pk]}" stroke="#111" stroke-dasharray="2 3"/><text x="${W}" y="${ys[pk]-6}" text-anchor="end" font-family="Roboto Mono" font-size="11">picco ${picco} · ${data(giornate[pk].giorno)}</text>`;
-  if(giornate.length)g+=`<text x="0" y="${H-4}" font-family="Roboto Mono" font-size="11" fill="#5e5c57">${data(giornate[0].giorno)}</text><text x="${W}" y="${H-4}" text-anchor="end" font-family="Roboto Mono" font-size="11" fill="#5e5c57">${data(giornate.at(-1).giorno)}</text>`;
+  g+=`<line x1="0" x2="${W}" y1="${H-basso}" y2="${H-basso}" style="stroke:var(--ink)"/>`;
+  if(pk>=0&&giornate[pk].visite>0)g+=`<line x1="${xs[pk]}" x2="${W}" y1="${ys[pk]}" y2="${ys[pk]}" style="stroke:var(--ink)" stroke-dasharray="2 3"/><text x="${W}" y="${ys[pk]-6}" text-anchor="end" style="font-family:var(--M);font-size:var(--piccolo)">picco ${picco} · ${data(giornate[pk].giorno)}</text>`;
+  if(giornate.length)g+=`<text x="0" y="${H-4}" style="font-family:var(--M);font-size:var(--piccolo);fill:var(--mute)">${data(giornate[0].giorno)}</text><text x="${W}" y="${H-4}" text-anchor="end" style="font-family:var(--M);font-size:var(--piccolo);fill:var(--mute)">${data(giornate.at(-1).giorno)}</text>`;
   svg.innerHTML=g;
   const tip=svg.parentNode.querySelector('.tip');
   svg.addEventListener('pointermove',e=>{if(!xs.length)return;const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W;let i=0,b=1e9;xs.forEach((v,k)=>{if(Math.abs(v-x)<b){b=Math.abs(v-x);i=k;}});
@@ -427,7 +430,7 @@ async function sezioneStatistiche(){
 async function sezioneAccessi(){
   const d=await api('GET','/api/accessi');
   const riga=a=>`<div><span><b>${esc(a.email)}</b><br><span class="lbl">${esc(a.nota||'')}${a.aggiunta?` · aggiunta il ${esc(a.aggiunta)}`:''}</span></span><button type="button" class="btn" data-togli="${esc(a.email)}">togli</button></div>`;
-  $('#main').innerHTML=`<div class="hd"><h1 class="D">Accessi</h1><span class="lbl">solo queste email entrano nel pannello</span></div>
+  $('#main').innerHTML=`<div class="hd"><h1 class="D" data-t="Accessi">Accessi</h1><span class="lbl">solo queste email entrano nel pannello</span></div>
   <div class="acc"><div><span><b>${esc(d.proprietario)}</b><br><span class="lbl">proprietario · entra sempre</span></span><span></span></div>${d.elenco.map(riga).join('')}</div>
   <form class="aggiungi" id="formAcc"><input type="email" name="email" placeholder="email Google" required autocomplete="off" aria-label="Email Google"><input type="text" name="nota" placeholder="nota, es. chi è" maxlength="80" aria-label="Nota"><button class="btn pri" type="submit">aggiungi</button></form>
   <p class="err" id="accErr2" role="alert"></p>`;
@@ -439,7 +442,7 @@ async function sezioneAccessi(){
 
 // ---------- tu (su telefono: account, notifiche, accessi, esci; su desktop stanno nel menu a sinistra) ----------
 async function sezioneTu(){
-  $('#main').innerHTML=`<div class="hd"><div class="tit"><h1 class="D">Tu</h1><span class="lbl">${esc(stato.io.email)}</span></div></div>
+  $('#main').innerHTML=`<div class="hd"><div class="tit"><h1 class="D" data-t="Tu">Tu</h1><span class="lbl">${esc(stato.io.email)}</span></div></div>
   <div class="acc">
     <div id="tuNotifiche" hidden><span><b>Notifiche</b><br><span class="lbl" id="tuNotStato"></span></span><button type="button" class="btn" id="tuNot">attiva</button></div>
     ${stato.io.proprietario?'<div><span><b>Accessi</b><br><span class="lbl">chi può entrare nel pannello</span></span><a class="btn" href="#accessi">apri</a></div>':''}

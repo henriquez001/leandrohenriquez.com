@@ -11,3 +11,6 @@ tools/portfolio-anteprima.html
 
 # il portfolio PDF è privato: lo genera la Action e lo carica nel pannello
 portfolio.pdf
+
+# copia del tema del sito, fatta da backend/tools/copia-tema.cjs prima di pubblicare
+backend/public/sito/
