@@ -1,0 +1,48 @@
+/* hl. — TEMA: solo i valori dell'estetica (variante D "Manifesto", 6/11/2026).
+   Per cambiare l'aspetto del sito si modifica questo file e basta: struttura (assets/css/manifesto.css),
+   comportamento (assets/js/manifesto.js) e dati (data/progetti.json, pannello) non vanno toccati.
+   Il pannello copia questo file a ogni pubblicazione e usa le stesse variabili.
+   Regole: solo variabili su :root, nessun selettore, nessun url() (i caratteri sono in caratteri.css). */
+:root{
+  /* colori */
+  --carta:#f3f0e8;            /* fondo */
+  --inchiostro:#0d0d0d;       /* testo e barre (17,1:1 sulla carta) */
+  --inchiostro-a:#1d3bff;     /* primo colore sovrastampato, blu (5,9:1 sulla carta) */
+  --inchiostro-b:#ff3c8e;     /* secondo colore, rosa: solo titoli enormi (2,9:1) */
+  --sovrastampa:multiply;     /* come si fondono gli inchiostri */
+
+  /* caratteri (le famiglie sono dichiarate in caratteri.css) */
+  --font-titoli:'Inter Tight',system-ui,sans-serif;
+  --font-testo:'Inter Tight',system-ui,sans-serif;
+  --font-mono:'Space Mono',ui-monospace,monospace;
+  --peso-titoli:900;
+  --peso-leggero:200;
+  --peso-mono:700;
+  --interlinea-titoli:.8;
+  --spaziatura-titoli:-.06em;
+  --maiuscole-titoli:uppercase;
+  --corpo-mono:12px;
+
+  /* struttura visibile */
+  --barra-alta:42px;          /* barra in alto, piena */
+  --bordo:3px;                /* filetti e bordi */
+  --nastro:22px;              /* spessore delle barre nere inclinate */
+  --raggio:0;                 /* angoli: secchi */
+
+  /* manifesto */
+  --angoli:15 -15 0 -8;       /* inclinazione dei titoli, in gradi, a turno per ogni progetto */
+  --angoli-telefono:.5;       /* sul telefono gli angoli si riducono a questa frazione */
+  --parallasse:60;            /* quanto scorrono gli strati, in vh (0 = fermi) */
+  --fotocopia:grayscale(1) contrast(3.2) brightness(1.05);
+  --fuori-registro-x:9px;
+  --fuori-registro-y:6px;
+  --fuori-registro-opacita:.75;
+  --retino-passo:7px;
+  --retino-opacita:.12;
+
+  /* movimento (apple-motion § 1: la pressione risponde subito) */
+  --durata-breve:100ms;
+  --durata:160ms;
+  --curva:ease-out;
+  --scala-pressione:.97;
+}

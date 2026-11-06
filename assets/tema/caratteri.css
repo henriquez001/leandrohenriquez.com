@@ -1,0 +1,4 @@
+/* hl. — caratteri del tema (file locali, licenza OFL in assets/fonts). Cambiando carattere: aggiungi qui il file e cambia --font-* in tema.css */
+@font-face{font-family:'Inter Tight';src:url(../fonts/inter-tight-latin-wght-normal.woff2) format('woff2');font-weight:100 900;font-display:swap}
+@font-face{font-family:'Space Mono';src:url(../fonts/space-mono-latin-400-normal.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Space Mono';src:url(../fonts/space-mono-latin-700-normal.woff2) format('woff2');font-weight:700;font-display:swap}
