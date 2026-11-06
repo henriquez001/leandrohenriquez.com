@@ -2,7 +2,7 @@
    Qui solo posizioni e regole di composizione: ogni colore, carattere, spessore, angolo e durata
    viene da assets/tema/tema.css. Per cambiare l'aspetto modifica il tema, non questo file. */
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-snap-type:y mandatory;background:var(--carta)}
+html{scroll-snap-type:y proximity;background:var(--carta)}
 body{background:var(--carta);color:var(--inchiostro);font:16px/1.5 var(--font-testo);-webkit-font-smoothing:antialiased}
 a{color:inherit}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
