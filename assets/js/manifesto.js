@@ -8,7 +8,7 @@ const L=(d,cls,style,inner)=>`<div class="lay ${cls}" data-d="${d}" style="${sty
 // le regole numeriche vengono dal tema (assets/tema/tema.css): angoli, riduzione sul telefono, parallasse
 const CS=getComputedStyle(document.documentElement),num=(k,d)=>{const v=parseFloat(CS.getPropertyValue(k));return isNaN(v)?d:v;};
 const ANG=(CS.getPropertyValue('--angoli').trim().split(/\s+/).map(Number).filter(n=>!isNaN(n))),ANGS=ANG.length?ANG:[0],
-  ANGT=num('--angoli-telefono',.5),PAR=num('--parallasse',60);
+  ANGT=num('--angoli-telefono',.5);
 M.innerHTML=PROGETTI.map((p,i)=>{const a=ANGS[i%ANGS.length],r=i%2,c=r?'var(--inchiostro-b)':'var(--inchiostro-a)',c2=r?'var(--inchiostro-a)':'var(--inchiostro-b)',n=esc(p.nome),
   fit=+(92/(.62*p.nome.length)).toFixed(1),long=p.nome.length>7,s=Math.min(23,fit),sp=Math.min(24,fit),img=BASE+p.anteprima,link=p.pagina?`lavori/${p.slug}/`:'';
   return `<section class="ps" id="p-${p.slug}" aria-labelledby="t-${p.slug}">
@@ -38,17 +38,11 @@ const setM=on=>{sh.classList.toggle('on',on);mb.setAttribute('aria-expanded',on)
 mb.addEventListener('click',()=>setM(!sh.classList.contains('on')));sh.addEventListener('click',e=>{if(e.target.closest('a'))setM(false);});
 addEventListener('keydown',e=>{if(e.key==='Escape')setM(false);});
 
-// profondità: gli strati scorrono a velocità diverse (parallasse, niente deformazioni).
-// Dove il browser lo sa fare (animation-timeline), la parallasse la calcola il compositore in CSS: niente lavoro a ogni fotogramma.
-// Altrimenti si aggiorna solo quando si scorre, e solo nelle schermate vicine.
+// profondità: gli strati scorrono a velocità diverse (parallasse, niente deformazioni), tutta in CSS con animation-timeline
+// (manifesto.css): la calcola il compositore insieme allo scroll. Dove il browser non la supporta (Firefox, Safari prima del 26)
+// gli strati restano fermi: una parallasse via script resterebbe indietro rispetto allo scroll e farebbe tremare la pagina.
 const S=[...document.querySelectorAll('.ps')],cnt=document.getElementById('cnt');
 S.forEach(s=>s.querySelectorAll('.lay').forEach(l=>l.style.setProperty('--d',l.dataset.d||0)));
-const RMQ=matchMedia('(prefers-reduced-motion: reduce)');
-const CSSPAR=window.CSS&&CSS.supports('animation-timeline','view()');
-if(!CSSPAR&&PAR){const LAY=S.map(s=>[...s.querySelectorAll('.lay')].map(l=>({l,d:+l.dataset.d,v:''})));let req=0;
-  const frame=()=>{req=0;if(RMQ.matches)return;const H=innerHeight,R=S.map(s=>s.getBoundingClientRect().top/H);
-    R.forEach((o,k)=>{if(o>1.2||o<-1.2)return;LAY[k].forEach(x=>{const v=`translateY(${(o*x.d*-PAR).toFixed(1)}vh)`;if(v!==x.v){x.v=v;x.l.style.transform=v;}});});};
-  addEventListener('scroll',()=>{if(!req)req=requestAnimationFrame(frame);},{passive:true});addEventListener('resize',frame);frame();}
 // contatore in alto: cambia quando una schermata occupa più di metà vista
 let last='';const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const sec=e.target,
   t=sec.dataset.n||(sec.id.startsWith('p-')?pad(S.indexOf(sec)-1)+'/'+PROGETTI.length:'');if(t!==last){last=t;cnt.textContent=t;}}),{threshold:.5});
