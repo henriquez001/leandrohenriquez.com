@@ -9,7 +9,7 @@ Tutto l'aspetto della home sta in questa cartella. Il resto del sito non va tocc
 
 Cosa NON è tema (e quindi resta com'è anche cambiando estetica):
 - `assets/css/manifesto.css` — struttura e posizioni, legge solo variabili del tema.
-- `assets/js/manifesto.js` — comportamento; legge dal tema `--angoli`, `--angoli-telefono`, `--parallasse`.
+- `assets/js/manifesto.js` — comportamento; legge dal tema `--angoli` e `--angoli-telefono`; `--parallasse` lo usa manifesto.css (animation-timeline).
 - `data/progetti.json` e `assets/js/indice.js` (generato) — i dati, gestiti dal pannello.
 
 Esempi: per i titoli dritti `--angoli:0`; per fermare gli strati `--parallasse:0`;
