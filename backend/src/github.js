@@ -14,6 +14,13 @@ export class GitHub{
     if(!r.ok){const t=await r.text();throw new Errore(502,`GitHub ha risposto ${r.status}: ${t.slice(0,200)}`);}
     return r.json();
   }
+  // Avvia una GitHub Action (workflow_dispatch). Al token serve il permesso "Actions: read and write".
+  async avvia(workflow,inputs){
+    const r=await this.f(`${API}/repos/${this.repo}/actions/workflows/${workflow}/dispatches`,{method:'POST',headers:{authorization:`Bearer ${this.token}`,accept:'application/vnd.github+json','user-agent':'hl-pannello','x-github-api-version':'2022-11-28','content-type':'application/json'},body:JSON.stringify({ref:this.branch,inputs})});
+    if(r.ok)return;
+    if(r.status===403||r.status===404)throw new Errore(403,'Il token GitHub del pannello non può avviare le Actions: serve il permesso "Actions: read and write".');
+    throw new Errore(502,`GitHub ha risposto ${r.status}`);
+  }
   async testa(){const ref=await this.req('GET',`git/ref/heads/${this.branch}`,null,{nullSe404:false});return ref.object.sha;}
   // Legge un file alla versione indicata (o all'ultima). Restituisce il testo o null.
   async leggi(percorso,ref){const j=await this.req('GET',`contents/${encodeURI(percorso)}?ref=${encodeURIComponent(ref||this.branch)}`);return j?b64dec(j.content):null;}

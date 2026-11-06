@@ -5,7 +5,7 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelecto
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nn=i=>String(i+1).padStart(2,'0');
 const slugDa=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
-const stato={io:null,sezione:null,progetti:null,app:null,base:{},anteprime:{}};
+const stato={io:null,sezione:null,progetti:null,bozze:{},app:null,base:{},anteprime:{}};
 
 // ---------- rete ----------
 class ErroreApi extends Error{constructor(s,m){super(m);this.stato=s;}}
@@ -95,11 +95,16 @@ function vai(){
 
 // ---------- pannello laterale ----------
 let drSalva=null,drElimina=null,drPrimaFocus=null;
-function apriDrawer({n,titolo,campi,onSalva,onElimina,testoSalva='salva e pubblica'}){
+// azioni: pulsanti in più accanto a quello principale, [{testo, fn(FormData, pulsante)}]; fn può restituire 'resta' per non chiudere
+function apriDrawer({n,titolo,campi,onSalva,onElimina,testoSalva='salva e pubblica',azioni=[]}){
   drPrimaFocus=document.activeElement;
   $('#drN').textContent=n;$('#drTitolo').textContent=titolo;$('#drCampi').innerHTML=campi;$('#drErr').textContent='';
   $('#drSalva').textContent=testoSalva;$('#drSalva').disabled=false;
   drSalva=onSalva;drElimina=onElimina;$('#drElimina').hidden=!onElimina;
+  const ex=$('#drExtra');ex.innerHTML='';$('.drBtn').classList.toggle('azioni',azioni.length>0);
+  azioni.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='btn';b.textContent=a.testo;ex.appendChild(b);
+    b.addEventListener('click',async()=>{const t=b.textContent;b.disabled=true;$('#drErr').textContent='';
+      try{if(await a.fn(new FormData($('#drForm')),b)!=='resta')chiudiDrawer();}catch(err){$('#drErr').textContent=err.message;}finally{b.disabled=false;b.textContent=t;}});});
   const d=$('#drawer'),v=$('#velo');d.hidden=false;v.hidden=false;
   requestAnimationFrame(()=>requestAnimationFrame(()=>{d.classList.add('aperto');v.classList.add('aperto');}));
   setTimeout(()=>{const p=$('input,textarea',d);if(p)p.focus({preventScroll:true});},60);
@@ -118,7 +123,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#drawer').hidde
 $('#drForm').addEventListener('submit',async e=>{
   e.preventDefault();if(!drSalva)return;const b=$('#drSalva'),t=b.textContent;
   b.disabled=true;b.innerHTML='<span class="carica"></span> salvo…';$('#drErr').textContent='';
-  try{await drSalva(new FormData($('#drForm')));chiudiDrawer();}
+  try{if(await drSalva(new FormData($('#drForm')))!=='resta')chiudiDrawer();}
   catch(err){$('#drErr').textContent=err.message;}
   finally{b.disabled=false;b.textContent=t;}
 });
@@ -140,31 +145,41 @@ const imgTag=(p,alt)=>`<img src="${esc(urlImg(p))}" alt="${esc(alt)}" class="${/
 function leggiFile(file){return new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>ko(new Error('File non leggibile'));r.readAsDataURL(file);});}
 
 // ---------- progetti ----------
-async function caricaProgetti(){const d=await api('GET','/api/progetti');stato.base.progetti=d.base;stato.progetti=d.progetti;}
+async function caricaProgetti(){
+  const [d,b]=await Promise.all([api('GET','/api/progetti'),api('GET','/api/bozze').catch(()=>({progetti:{}}))]);
+  stato.base.progetti=d.base;stato.progetti=d.progetti;stato.bozze=b.progetti||{};
+}
+// le bozze di progetti nuovi, che non sono ancora nell'indice
+const bozzeNuove=()=>Object.entries(stato.bozze).filter(([slug])=>!stato.progetti.some(p=>p.slug===slug)).map(([slug,b])=>({slug,...b}));
 async function salvaProgetti(elenco,msg='Salvato. Il sito si aggiorna in circa un minuto.'){
   try{const d=await api('PUT','/api/progetti',{base:stato.base.progetti,progetti:elenco});stato.base.progetti=d.base;stato.progetti=elenco;avviso(msg);}
   catch(e){if(await conflitto(e,async()=>{await caricaProgetti();disegnaProgetti();}))throw new Error('Dati ricaricati: riprova.');throw e;}
 }
 async function sezioneProgetti(){await caricaProgetti();disegnaProgetti();}
 function disegnaProgetti(){
-  const P=stato.progetti;
-  $('#main').innerHTML=`<div class="hd"><div class="tit"><h1 class="D">Progetti</h1><span class="lbl">${P.filter(p=>p.pubblicato).length} pubblicati su ${P.length} · trascina per riordinare</span></div>
-    <div class="scarica" id="pdfBox" hidden><a class="btn pri" href="/api/portfolio" download>↓ scarica portfolio PDF</a><span class="lbl" id="pdfInfo"></span></div></div>
-  <div class="cards" id="cards">${P.map((p,i)=>`<article class="c${p.pubblicato?'':' off'}" draggable="true" data-i="${i}">
-    <button class="apri" type="button" aria-label="Modifica ${esc(p.nome)}"></button>
+  const P=stato.progetti,nB=Object.keys(stato.bozze).length;
+  const scheda=(p,i,{bozza=false,nuova=false}={})=>`<article class="c${p.pubblicato||nuova?'':' off'}${bozza?' bz':''}"${nuova?` data-bozza="${esc(p.slug)}"`:` draggable="true" data-i="${i}"`}>
+    <button class="apri" type="button" aria-label="Modifica ${esc(p.nome)}${bozza?' (bozza)':''}"></button>
     <div class="im">${imgTag(p.anteprima,p.nome)}</div>
-    <div class="tx"><span class="lbl">${nn(i)} · ${esc(p.tipo)}</span><b>${esc(p.nome)}${p.etichetta?`<span class="tag">${esc(p.etichetta)}</span>`:''}</b>
-    <div class="ft"><span class="lbl">${p.pubblicato?esc(p.contesto):'nascosto'}</span><span class="swHit"><button type="button" class="sw" role="switch" aria-checked="${p.pubblicato}" aria-label="Pubblicato: ${esc(p.nome)}" data-i="${i}"></button></span></div></div>
-  </article>`).join('')}<button class="nuovo" type="button" id="nuovoP">+ nuovo progetto</button></div>`;
-  // il portfolio PDF è privato: si scarica da qui (lo genera la Action "Portfolio PDF")
-  // (variante A del 4/11: pulsante pieno nell'intestazione, compare solo quando il PDF c'è)
-  api('GET','/api/portfolio/info').then(d=>{const b=$('#pdfBox');if(!b||!d.pronto)return;
-    $('#pdfInfo').textContent=`aggiornato il ${new Date(d.aggiornato).toLocaleDateString('it-IT',{day:'numeric',month:'short'})} · ${(d.byte/1048576).toLocaleString('it-IT',{maximumFractionDigits:1})} MB`;b.hidden=false;}).catch(()=>{});
-  $$('#cards .apri').forEach(b=>b.addEventListener('click',()=>modificaProgetto(+b.closest('.c').dataset.i)));
+    <div class="tx"><span class="lbl">${nuova?'nuovo':nn(i)} · ${esc(p.tipo)}</span><b>${esc(p.nome)}${p.etichetta?`<span class="tag">${esc(p.etichetta)}</span>`:''}${bozza?'<span class="tag bozza">bozza</span>':''}</b>
+    <div class="ft">${nuova?'<span class="lbl">non ancora nell\'indice</span>':`<span class="lbl">${p.pubblicato?esc(p.contesto):'nascosto'}</span><span class="swHit"><button type="button" class="sw" role="switch" aria-checked="${p.pubblicato}" aria-label="Pubblicato: ${esc(p.nome)}" data-i="${i}"></button></span>`}</div></div>
+  </article>`;
+  $('#main').innerHTML=`<div class="hd"><div class="tit"><h1 class="D">Progetti</h1><span class="lbl">${P.filter(p=>p.pubblicato).length} pubblicati su ${P.length}${nB?` · ${nB} ${nB===1?'bozza':'bozze'}`:''} · trascina per riordinare</span></div>
+    <div class="scarica" id="pdfBox"><button class="btn pri" type="button" id="pdfApri">↓ portfolio PDF…</button><span class="lbl" id="pdfInfo"></span></div></div>
+  <div class="cards" id="cards">${P.map((p,i)=>{const b=stato.bozze[p.slug];return scheda(b?{...b.progetto,pubblicato:p.pubblicato}:p,i,{bozza:!!b});}).join('')}${bozzeNuove().map(b=>scheda(b.progetto,-1,{bozza:true,nuova:true})).join('')}<button class="nuovo" type="button" id="nuovoP">+ nuovo progetto</button></div>`;
+  // il portfolio PDF è privato: si scarica da qui (variante 2 del 4/11: scegli i progetti quando lo crei)
+  api('GET','/api/portfolio/info').then(d=>{if(d.pronto)$('#pdfInfo').textContent=`completo · ${dataBreve(d.aggiornato)} · ${mb(d.byte)}`;}).catch(()=>{});
+  $('#pdfApri').addEventListener('click',portfolioPDF);
+  $$('#cards [data-bozza] .apri').forEach(b=>b.addEventListener('click',()=>modificaProgetto(-1,b.closest('.c').dataset.bozza)));
+  $$('#cards [data-i] .apri').forEach(b=>b.addEventListener('click',()=>modificaProgetto(+b.closest('.c').dataset.i)));
+  // l'interruttore va online subito (anche con una bozza aperta, che lo segue)
   $$('#cards .sw').forEach(s=>s.addEventListener('click',async e=>{
     e.stopPropagation();const i=+s.dataset.i,el=stato.progetti.map(p=>({...p}));el[i].pubblicato=!el[i].pubblicato;
     s.setAttribute('aria-checked',el[i].pubblicato);s.disabled=true;
-    try{await salvaProgetti(el,el[i].pubblicato?`${el[i].nome} è pubblicato.`:`${el[i].nome} è nascosto.`);}catch(err){avviso(err.message,true);}
+    try{
+      await salvaProgetti(el,el[i].pubblicato?`${el[i].nome} è pubblicato.`:`${el[i].nome} è nascosto.`);
+      const b=stato.bozze[el[i].slug];if(b){const d=await api('PUT',`/api/bozze/progetti/${el[i].slug}`,{progetto:{...b.progetto,pubblicato:el[i].pubblicato}});stato.bozze[el[i].slug]=d.bozza;}
+    }catch(err){avviso(err.message,true);}
     disegnaProgetti();
   }));
   $('#nuovoP').addEventListener('click',()=>modificaProgetto(-1));
@@ -181,40 +196,65 @@ function riordina(box,elenco,salva){
     c.addEventListener('keydown',e=>{if(!e.altKey||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const i=+c.dataset.i,j=i+(e.key==='ArrowUp'?-1:1);if(j<0||j>=elenco.length)return;const el=elenco.map(x=>({...x}));[el[i],el[j]]=[el[j],el[i]];salva(el);});
   });
 }
-function modificaProgetto(i){
-  const nuovo=i<0,p=nuovo?{slug:'',nome:'',tipo:'',contesto:'',anteprima:'',pagina:false,pubblicato:false}:stato.progetti[i];
+const dataBreve=t=>new Date(t).toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+const mb=b=>`${(b/1048576).toLocaleString('it-IT',{maximumFractionDigits:1})} MB`;
+// Modifica di un progetto (variante A del 4/11: bozza per progetto). i = posizione nell'indice, -1 per un progetto nuovo;
+// slugBozza = bozza di un progetto nuovo non ancora pubblicato.
+function modificaProgetto(i,slugBozza){
+  const inIndice=i>=0,nuovo=!inIndice,vuoto={slug:'',nome:'',tipo:'',contesto:'',anteprima:'',pagina:false,pubblicato:false};
+  const b=slugBozza?stato.bozze[slugBozza]:inIndice?stato.bozze[stato.progetti[i].slug]:null;
+  const p=b?b.progetto:inIndice?stato.progetti[i]:vuoto;
   let anteprima=p.anteprima;
+  const slugAttuale=()=>p.slug||(($('#drawer [name=slug]')||{}).value||'').trim()||slugDa(($('#drawer [name=nome]')||{}).value);
+  const leggi=f=>{
+    const v={...p,nome:f.get('nome').trim(),tipo:f.get('tipo').trim(),contesto:f.get('contesto').trim(),anteprima,pubblicato:!!f.get('pubblicato')};
+    for(const k of ['anno','etichetta','descrizione']){const x=(f.get(k)||'').trim();if(x)v[k]=x;else delete v[k];}
+    v.slug=slugAttuale();delete v.pagina;
+    if(!v.nome)throw new Error('Serve un nome.');if(!v.anteprima)throw new Error('Carica un\'immagine di anteprima.');
+    if(nuovo&&!b&&stato.progetti.some(x=>x.slug===v.slug))throw new Error(`L'indirizzo "${v.slug}" è già usato da un altro progetto.`);
+    return v;
+  };
+  const salvaBozza=async f=>{const v=leggi(f);const d=await api('PUT',`/api/bozze/progetti/${v.slug}`,{progetto:v,nuovo});stato.bozze[v.slug]=d.bozza;return v;};
+  const azioni=[];
+  if(b)azioni.push({testo:'scarta bozza',fn:async()=>{
+    if(!confirm('Scartare la bozza? '+(nuovo?'Il progetto nuovo sparisce.':'Resta la versione pubblicata.')))return 'resta';
+    await api('DELETE',`/api/bozze/progetti/${p.slug}`);delete stato.bozze[p.slug];avviso('Bozza scartata.');disegnaProgetti();}});
+  azioni.push({testo:'anteprima ↗',fn:async f=>{
+    const w=window.open('about:blank','_blank'); // aperta subito, dentro il clic, così il browser non la blocca
+    try{await salvaBozza(f);}catch(e){if(w)w.close();throw e;}
+    if(w)w.location.href='/anteprima/';else location.href='/anteprima/';disegnaProgetti();return 'resta';}});
+  azioni.push({testo:'salva bozza',fn:async f=>{const v=await salvaBozza(f);avviso(`Bozza di ${v.nome} salvata: sul sito non cambia niente.`);disegnaProgetti();}});
   apriDrawer({
-    n:nuovo?'nuovo progetto':`${nn(i)} · modifica`,titolo:nuovo?'Nuovo':p.nome,
+    n:(nuovo?'nuovo progetto':`${nn(i)} · modifica`)+(b?` · bozza del ${dataBreve(b.aggiornato)}`:''),titolo:p.nome||'Nuovo',testoSalva:'pubblica',azioni,
     campi:`${campo('nome','nome',p.nome,{max:40})}
-      ${nuovo?campo('slug','indirizzo','',{max:40,aiuto:'leandrohenriquez.com/lavori/…',attr:'pattern="[a-z0-9]+(-[a-z0-9]+)*" autocapitalize="off" spellcheck="false"'}):''}
+      ${nuovo&&!b?campo('slug','indirizzo','',{max:40,aiuto:'leandrohenriquez.com/lavori/…',attr:'pattern="[a-z0-9]+(-[a-z0-9]+)*" autocapitalize="off" spellcheck="false"'}):''}
       <div class="due">${campo('tipo','tipo',p.tipo,{max:40})}${campo('contesto','contesto',p.contesto,{max:40})}</div>
       <div class="due">${campo('anno','anno',p.anno||'',{max:4,attr:'inputmode="numeric" pattern="(19|20)[0-9]{2}"'})}${campo('etichetta','etichetta',p.etichetta||'',{max:6,aiuto:'es. 3D'})}</div>
       ${campo('descrizione','descrizione',p.descrizione||'',{max:420,area:true,aiuto:'va anche nel portfolio PDF'})}
-      <div class="campo"><span class="lbl">anteprima · PNG scontornato o JPG, massimo 8 MB</span><div class="anteprima"><div class="th" id="thP">${anteprima?imgTag(anteprima,'anteprima'):''}</div><label class="btn">carica…<input type="file" accept="image/png,image/jpeg,image/webp,image/avif" hidden id="fileP"></label><span class="lbl" id="statoImg"></span></div></div>
-      ${nuovo?'':posizione(i,stato.progetti.length)}
+      <div class="campo"><span class="lbl">anteprima · PNG scontornato o JPG, massimo 8 MB</span><div class="anteprima"><div class="th" id="thP">${anteprima?imgTag(anteprima,'anteprima'):''}</div><label class="btn">carica…<input type="file" accept="image/png,image/jpeg,image/webp" id="fileP" hidden></label><span class="lbl" id="statoImg"></span></div></div>
+      ${inIndice?posizione(i,stato.progetti.length):''}
       ${interruttore('pubblicato','pubblicato nell\'indice',p.pubblicato)}
-      ${p.pagina?`<div class="riga"><span>pagina con il 3D</span><a href="${SITO}lavori/${esc(p.slug)}/" target="_blank" rel="noopener">apri ↗</a></div>`:''}`,
-    onElimina:nuovo?null:async()=>{
-      try{const d=await api('DELETE',`/api/progetti/${encodeURIComponent(p.slug)}?base=${stato.base.progetti}`);stato.base.progetti=d.base;stato.progetti=stato.progetti.filter(x=>x.slug!==p.slug);avviso(`${p.nome} tolto dall'indice.`);disegnaProgetti();}
+      ${inIndice&&stato.progetti[i].pagina?`<div class="riga"><span>pagina con il 3D</span><a href="${SITO}lavori/${esc(p.slug)}/" target="_blank" rel="noopener">apri ↗</a></div>`:''}
+      <p class="lbl">"salva bozza" tiene le modifiche solo qui nel pannello; "pubblica" le manda sul sito.</p>`,
+    onElimina:!inIndice?null:async()=>{
+      try{const d=await api('DELETE',`/api/progetti/${encodeURIComponent(p.slug)}?base=${stato.base.progetti}`);stato.base.progetti=d.base;stato.progetti=stato.progetti.filter(x=>x.slug!==p.slug);
+        if(stato.bozze[p.slug]){await api('DELETE',`/api/bozze/progetti/${p.slug}`).catch(()=>{});delete stato.bozze[p.slug];}
+        avviso(`${p.nome} tolto dall'indice.`);disegnaProgetti();}
       catch(e){if(await conflitto(e,async()=>{await caricaProgetti();disegnaProgetti();}))throw new Error('Dati ricaricati: riprova.');throw e;}
     },
     onSalva:async f=>{
-      const v={...p,nome:f.get('nome').trim(),tipo:f.get('tipo').trim(),contesto:f.get('contesto').trim(),anteprima,pubblicato:!!f.get('pubblicato')};
-      for(const k of ['anno','etichetta','descrizione']){const x=(f.get(k)||'').trim();if(x)v[k]=x;else delete v[k];}
-      if(!v.nome)throw new Error('Serve un nome.');if(!v.anteprima)throw new Error('Carica un\'immagine di anteprima.');
-      if(nuovo){
-        v.slug=(f.get('slug')||'').trim()||slugDa(v.nome);
-        try{const d=await api('POST','/api/progetti',{base:stato.base.progetti,progetto:v});stato.base.progetti=d.base;stato.progetti=[...stato.progetti,d.progetto];avviso(`${v.nome} aggiunto in fondo all'indice.`);}
-        catch(e){if(await conflitto(e,async()=>{await caricaProgetti();}))throw new Error('Dati ricaricati: riprova.');throw e;}
-      }else{const el=sposta(stato.progetti.map(x=>x.slug===p.slug?v:x),i,+f.get('posizione'));await salvaProgetti(el);}
+      const v=leggi(f),pos=inIndice?+f.get('posizione'):undefined;
+      try{const d=await api('POST',`/api/progetti/${v.slug}/pubblica`,{base:stato.base.progetti,progetto:v,nuovo,posizione:pos});
+        stato.base.progetti=d.base;stato.progetti=d.progetti;delete stato.bozze[v.slug];
+        avviso(`${v.nome} pubblicato. Il sito si aggiorna in circa un minuto.`);}
+      catch(e){if(await conflitto(e,async()=>{await caricaProgetti();disegnaProgetti();}))throw new Error('Dati ricaricati: la bozza è salva, riprova.');throw e;}
       disegnaProgetti();
     }
   });
-  if(nuovo){const n=$('#drawer [name=nome]'),s=$('#drawer [name=slug]');let toccato=false;s.addEventListener('input',()=>toccato=true);n.addEventListener('input',()=>{if(!toccato)s.value=slugDa(n.value);$('#drTitolo').textContent=n.value||'Nuovo';});}
+  if(nuovo&&!b){const n=$('#drawer [name=nome]'),sl=$('#drawer [name=slug]');let toccato=false;sl.addEventListener('input',()=>toccato=true);n.addEventListener('input',()=>{if(!toccato)sl.value=slugDa(n.value);$('#drTitolo').textContent=n.value||'Nuovo';});}
   $('#fileP').addEventListener('change',async e=>{
     const file=e.target.files[0];if(!file)return;
-    const slug=nuovo?(($('#drawer [name=slug]').value||'').trim()||slugDa($('#drawer [name=nome]').value)):p.slug;
+    const slug=slugAttuale();
     if(!slug){$('#drErr').textContent='Scrivi prima il nome del progetto.';return;}
     if(file.size>8*1024*1024){$('#drErr').textContent='Immagine troppo grande (massimo 8 MB).';return;}
     $('#statoImg').innerHTML='<span class="carica"></span> carico…';
@@ -225,6 +265,47 @@ function modificaProgetto(i){
       $('#thP').innerHTML=imgTag(anteprima,'anteprima');$('#statoImg').textContent='caricata ✓';
     }catch(err){$('#statoImg').textContent='';$('#drErr').textContent=err.message;}
   });
+}
+
+// ---------- portfolio PDF su misura (variante 2 del 4/11) ----------
+// Scegli progetti e ordine, dai un nome: la Action "Portfolio PDF" lo prepara (circa 2 minuti) e arriva una notifica.
+let pfTimer=null;
+async function portfolioPDF(){
+  const P=stato.progetti,ordine=[...P.filter(p=>p.pubblicato),...P.filter(p=>!p.pubblicato)].map(p=>p.slug),scelti=new Set(P.filter(p=>p.pubblicato).map(p=>p.slug));
+  const nome=slug=>{const p=P.find(x=>x.slug===slug);return p?p.nome:slug;};
+  apriDrawer({n:'portfolio PDF',titolo:'Portfolio',testoSalva:'crea PDF',
+    campi:`<div class="campo"><span class="lbl">pronti da scaricare</span><div class="pronti" id="pfPronti"><span class="lbl"><span class="carica"></span> carico…</span></div></div>
+      ${campo('nome','nome del nuovo portfolio','',{max:30,aiuto:'es. per Smeg'})}
+      <div class="campo"><div class="riga" style="border:0;padding:0"><span class="lbl" id="pfConta"></span><span style="white-space:nowrap"><button type="button" class="link" id="pfTutti">tutti</button> · <button type="button" class="link" id="pfNessuno">nessuno</button></span></div><ol class="scelta" id="pfScelta"></ol></div>`,
+    onSalva:async f=>{
+      const n=(f.get('nome')||'').trim(),el=ordine.filter(x=>scelti.has(x));
+      if(!n)throw new Error('Dai un nome al portfolio, per esempio "per Smeg".');if(!el.length)throw new Error('Scegli almeno un progetto.');
+      await api('POST','/api/portfolio/versioni',{nome:n,progetti:el});
+      $('#drawer [name=nome]').value='';avviso(`Preparo «${n}»: ti avviso quando è pronto, circa 2 minuti.`);await pronti();return 'resta';
+    }});
+  const disegnaScelta=()=>{
+    $('#pfConta').textContent=`${scelti.size} su ${P.length}, in quest'ordine`;
+    $('#pfScelta').innerHTML=ordine.map((slug,k)=>`<li class="${scelti.has(slug)?'':'no'}"><input type="checkbox" id="pf-${esc(slug)}" data-s="${esc(slug)}"${scelti.has(slug)?' checked':''}><label for="pf-${esc(slug)}">${esc(nome(slug))}</label>
+      <button type="button" class="su" data-k="${k}" data-d="-1" aria-label="Sposta su ${esc(nome(slug))}"${k===0?' disabled':''}>↑</button><button type="button" class="su" data-k="${k}" data-d="1" aria-label="Sposta giù ${esc(nome(slug))}"${k===ordine.length-1?' disabled':''}>↓</button></li>`).join('');
+  };
+  $('#pfScelta').addEventListener('change',e=>{const c=e.target.closest('input');if(!c)return;c.checked?scelti.add(c.dataset.s):scelti.delete(c.dataset.s);disegnaScelta();$(`#pf-${CSS.escape(c.dataset.s)}`).focus();});
+  $('#pfScelta').addEventListener('click',e=>{const b=e.target.closest('.su');if(!b)return;const k=+b.dataset.k,j=k+(+b.dataset.d);[ordine[k],ordine[j]]=[ordine[j],ordine[k]];disegnaScelta();
+    const x=$(`#pfScelta .su[data-k="${j}"][data-d="${b.dataset.d}"]`)||$(`#pfScelta .su[data-k="${j}"]`);if(x&&!x.disabled)x.focus();});
+  $('#pfTutti').addEventListener('click',()=>{ordine.forEach(x=>scelti.add(x));disegnaScelta();});
+  $('#pfNessuno').addEventListener('click',()=>{scelti.clear();disegnaScelta();});
+  disegnaScelta();
+  async function pronti(){
+    clearTimeout(pfTimer);const box=$('#pfPronti');if(!box||$('#drawer').hidden)return;
+    const [info,{versioni}]=await Promise.all([api('GET','/api/portfolio/info').catch(()=>({})),api('GET','/api/portfolio/versioni').catch(()=>({versioni:[]}))]);
+    const riga=(testo,dx,x='')=>`<div><span>${testo}</span>${dx}${x}</div>`;
+    box.innerHTML=(info.pronto?riga(`completo · ${P.filter(p=>p.pubblicato).length} progetti<br><span class="lbl">${dataBreve(info.aggiornato)} · ${mb(info.byte)} · si aggiorna da solo</span>`,'<a class="btn" href="/api/portfolio" download>↓</a>','<span></span>'):'')+
+      versioni.map(v=>riga(`${esc(v.nome)} · ${v.progetti.length} ${v.progetti.length===1?'progetto':'progetti'}<br><span class="lbl">${v.stato==='pronto'?`${dataBreve(v.aggiornato)} · ${mb(v.byte)}`:v.stato==='in-preparazione'?'<span class="carica"></span> in preparazione…':'non riuscito: riprova o guarda le Actions'}</span>`,
+        v.stato==='pronto'?`<a class="btn" href="/api/portfolio?versione=${v.id}" download aria-label="Scarica ${esc(v.nome)}">↓</a>`:'<span></span>',
+        `<button type="button" class="x" data-via="${v.id}" aria-label="Togli ${esc(v.nome)}">✕</button>`)).join('')||'<span class="lbl">ancora nessuno</span>';
+    $$('#pfPronti [data-via]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Togliere questa versione del portfolio?'))return;await api('DELETE',`/api/portfolio/versioni/${b.dataset.via}`).catch(e=>avviso(e.message,true));pronti();}));
+    if(versioni.some(v=>v.stato==='in-preparazione'))pfTimer=setTimeout(pronti,15000);
+  }
+  pronti();
 }
 
 // ---------- app del Laboratorio ----------

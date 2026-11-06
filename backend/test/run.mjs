@@ -16,7 +16,7 @@ async function tokenGoogle(email,{aud=CLIENT,exp=Date.now()/1000+600,verified=tr
 const files=new Map([['data/progetti.json',readFileSync(new URL('../../data/progetti.json',import.meta.url),'utf8')],['lavori/oopar/index.html','<html></html>'],['data/app.json',readFileSync(new URL('../../data/app.json',import.meta.url),'utf8')],['laboratorio/index.html',readFileSync(new URL('../../laboratorio/index.html',import.meta.url),'utf8')],['app/peso-cane/index.html','<html></html>'],['lavori/oopar/progetto.json',JSON.stringify({titolo:'Oopar',tappe:[{camera:{},parola:{testo:'Oopar'}}]})]]);
 let commits={c0:{tree:'t0',files:new Map(files)}},head='c0',n=0;const blobs={},trees={};
 const R=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{'content-type':'application/json'}});
-let chiamateGC=[];
+let chiamateGC=[],chiamateSito=[],avvii=[],permessoActions=false;
 // --- notifiche: chiave VAPID del server, telefono finto (chiavi ECDH + auth) e GitHub Actions finto (OIDC) ---
 const vapid=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);
 const vapidPub=b64u(new Uint8Array(await crypto.subtle.exportKey('raw',vapid.publicKey)));
@@ -58,6 +58,11 @@ async function finto(url,opt={}){
     if(url.includes('stats/hits'))return R({hits:[{path:'/',title:'Home',count:312,event:false,stats:[]},{path:'apri-oopar',count:58,event:true,stats:[]}]});
     if(url.includes('stats/toprefs'))return R({stats:[{name:'linkedin.com',count:118},{name:'',count:212}]});
     return R({stats:[{name:'phone',count:41}]});}
+  if(url.startsWith('https://leandrohenriquez.com/')){chiamateSito.push(url);const pth=url.slice(29).split('?')[0];
+    if(pth.endsWith('.html'))return new Response('<!doctype html><html><head><meta charset="utf-8"><script data-goatcounter="https://x.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script></head><body><main>home</main></body></html>',{headers:{'content-type':'text/html; charset=utf-8'}});
+    if(pth==='assets/css/home.css')return new Response('body{}',{headers:{'content-type':'text/css'}});
+    return new Response('no',{status:404,headers:{'content-type':'text/plain'}});}
+  if(url==='https://api.github.com/repos/o/r/actions/workflows/portfolio.yml/dispatches'){if(!permessoActions)return R({message:'Resource not accessible by personal access token'},403);avvii.push(JSON.parse(opt.body));return new Response(null,{status:204});}
   assert.ok(url.startsWith('https://api.github.com/repos/o/r/'),url);assert.equal(opt.headers.authorization,'Bearer gh-segreto');
   const p=url.slice('https://api.github.com/repos/o/r/'.length);
   if(m==='GET'&&p==='git/ref/heads/main')return R({object:{sha:head}});
@@ -73,7 +78,7 @@ async function finto(url,opt={}){
 const kv=new Map();
 const env={GITHUB_REPO:'o/r',GITHUB_TOKEN:'gh-segreto',OWNER_EMAIL:OWNER,SESSION_SECRET:'s'.repeat(40),GOOGLE_CLIENT_ID:CLIENT,GOATCOUNTER_CODE:'demo',GOATCOUNTER_TOKEN:'gc-segreto',
   VAPID_JWK:JSON.stringify(await crypto.subtle.exportKey('jwk',vapid.privateKey)),
-  ACCESSI:{get:async k=>kv.get(k)??null,put:async(k,v)=>{kv.set(k,v);}}};
+  ACCESSI:{get:async(k,t)=>{const v=kv.get(k)??null;return v!==null&&t==='arrayBuffer'&&typeof v!=='string'?v.buffer.slice(v.byteOffset,v.byteOffset+v.byteLength):v;},put:async(k,v)=>{kv.set(k,v);},delete:async k=>{kv.delete(k);}}};
 const app=crea({fetchImpl:finto});
 const O='https://pannello.test';
 async function chiama(metodo,percorso,{corpo,cookie,intest={}}={}){
@@ -168,5 +173,59 @@ await prova('portfolio: si scarica solo dopo l\'accesso',async()=>{
   assert.equal(r.headers.get('content-type'),'application/pdf');assert.match(r.headers.get('content-disposition'),/^attachment; filename="portfolio-leandro-henriquez-\d{4}-\d\d-\d\d\.pdf"$/);
   assert.equal(new TextDecoder().decode(await r.arrayBuffer()).slice(0,8),'%PDF-1.7');
   assert.equal((await chiama('GET','/api/portfolio/info',{cookie:cProp})).dati.pronto,true);});
+// --- bozze: restano nel pannello finché non le pubblichi ---
+await prova('bozza: si salva nel pannello senza toccare il sito',async()=>{
+  const prima=head;const r=await chiama('GET','/api/progetti',{cookie:cProp});const one=r.dati.progetti.find(p=>p.slug==='one');
+  const s=await chiama('PUT','/api/bozze/progetti/one',{cookie:cProp,corpo:{progetto:{...one,nome:'ONE bozza'}}});assert.equal(s.stato,200,JSON.stringify(s.dati));
+  assert.equal(head,prima,'nessun commit');const b=await chiama('GET','/api/bozze',{cookie:cProp});assert.equal(b.dati.progetti.one.progetto.nome,'ONE bozza');
+  assert.equal((await chiama('PUT','/api/bozze/progetti/one',{cookie:cProp,corpo:{progetto:{...one,nome:''}}})).stato,422);
+  assert.equal((await chiama('GET','/api/bozze')).stato,401);});
+await prova('anteprima: il sito con le bozze, solo dopo l\'accesso e senza statistiche',async()=>{
+  const fuori=await grezza('GET','/anteprima/');assert.equal(fuori.status,302);
+  const js=await grezza('GET','/anteprima/assets/js/indice.js',{cookie:cProp});assert.equal(js.status,200);const t=await js.text();
+  assert.match(t,/ONE bozza/);assert.doesNotMatch(commits[head].files.get('assets/js/indice.js'),/ONE bozza/);
+  const h=await grezza('GET','/anteprima/',{cookie:cProp});const html=await h.text();assert.equal(h.status,200);
+  assert.ok(chiamateSito.includes('https://leandrohenriquez.com/index.html'));assert.doesNotMatch(html,/goatcounter/);
+  assert.match(html,/name="robots" content="noindex, nofollow"/);assert.match(html,/anteprima delle bozze/);assert.equal(h.headers.get('cache-control'),'private, no-store');
+  assert.equal((await grezza('GET','/anteprima/assets/css/home.css',{cookie:cProp})).status,200);
+  assert.equal((await grezza('GET','/anteprima/a%2F..%2Fsegreto',{cookie:cProp})).status,400);});
+await prova('pubblica: un commit con la bozza, poi la bozza sparisce',async()=>{
+  const r=await chiama('GET','/api/progetti',{cookie:cProp});const b=(await chiama('GET','/api/bozze',{cookie:cProp})).dati.progetti.one;
+  const s=await chiama('POST','/api/progetti/one/pubblica',{cookie:cProp,corpo:{base:r.dati.base,progetto:b.progetto,posizione:0}});assert.equal(s.stato,200,JSON.stringify(s.dati));
+  const d=JSON.parse(commits[head].files.get('data/progetti.json'));assert.equal(d.progetti[0].slug,'one');assert.equal(d.progetti[0].nome,'ONE bozza');
+  assert.match(commits[head].files.get('assets/js/indice.js'),/ONE bozza/);assert.deepEqual((await chiama('GET','/api/bozze',{cookie:cProp})).dati.progetti,{});});
+await prova('pubblica: un progetto nuovo non sovrascrive uno che esiste',async()=>{
+  const r=await chiama('GET','/api/progetti',{cookie:cProp});const one=r.dati.progetti.find(p=>p.slug==='one');
+  assert.equal((await chiama('POST','/api/progetti/one/pubblica',{cookie:cProp,corpo:{base:r.dati.base,progetto:{...one,nome:'Altro'},nuovo:true}})).stato,409);
+  const n=await chiama('POST','/api/progetti/tavolo/pubblica',{cookie:cProp,corpo:{base:r.dati.base,progetto:{nome:'Tavolo',tipo:'arredo',contesto:'prova',anteprima:'assets/img/oopar.jpg'},nuovo:true}});
+  assert.equal(n.stato,200,JSON.stringify(n.dati));assert.equal(n.dati.progetti.at(-1).slug,'tavolo');assert.equal(n.dati.progetti.at(-1).pubblicato,false);});
+
+// --- portfolio su misura ---
+await prova('portfolio su misura: senza il permesso Actions lo dice chiaramente',async()=>{
+  const r=await chiama('POST','/api/portfolio/versioni',{cookie:cProp,corpo:{nome:'per Smeg',progetti:['oopar','one']}});
+  assert.equal(r.stato,403);assert.match(r.dati.errore,/Actions: read and write/);assert.deepEqual(JSON.parse(kv.get('portfolio-versioni')||'[]'),[]);});
+await prova('portfolio su misura: controlla nome e progetti',async()=>{permessoActions=true;
+  assert.equal((await chiama('POST','/api/portfolio/versioni',{cookie:cProp,corpo:{nome:'',progetti:['oopar']}})).stato,422);
+  assert.equal((await chiama('POST','/api/portfolio/versioni',{cookie:cProp,corpo:{nome:'x',progetti:['inventato']}})).stato,422);
+  assert.equal((await chiama('POST','/api/portfolio/versioni',{cookie:cProp,corpo:{nome:'x',progetti:['oopar','oopar']}})).stato,422);assert.equal(avvii.length,0);});
+let vid;
+await prova('portfolio su misura: avvia la Action, poi la versione pronta si scarica e arriva la notifica',async()=>{
+  assert.equal((await chiama('POST','/api/push',{cookie:cProp,corpo:{iscrizione,dispositivo:'Android · Chrome'}})).stato,201);
+  const r=await chiama('POST','/api/portfolio/versioni',{cookie:cProp,corpo:{nome:'per Smeg',progetti:['oopar','one']}});assert.equal(r.stato,201,JSON.stringify(r.dati));
+  vid=r.dati.versione.id;assert.deepEqual(avvii.at(-1),{ref:'main',inputs:{versione:vid,progetti:'oopar,one'}});
+  assert.equal((await grezza('GET','/api/portfolio?versione='+vid,{cookie:cProp})).status,404,'non ancora pronta');
+  const pdf=new TextEncoder().encode('%PDF-1.7\n% smeg\n%%EOF\n');
+  assert.equal((await grezza('PUT','/api/portfolio?versione=inventata1',{corpo:pdf,intest:{authorization:'Bearer '+await tokenActions()}})).status,404);
+  const up=await grezza('PUT','/api/portfolio?versione='+vid,{corpo:pdf,intest:{authorization:'Bearer '+await tokenActions()}});assert.equal(up.status,200);
+  assert.equal(ricevuti.at(-1).titolo,'Portfolio pronto');assert.match(ricevuti.at(-1).testo,/per Smeg/);
+  const l=await chiama('GET','/api/portfolio/versioni',{cookie:cProp});assert.equal(l.dati.versioni[0].stato,'pronto');
+  const g=await grezza('GET','/api/portfolio?versione='+vid,{cookie:cProp});assert.equal(g.status,200);assert.match(g.headers.get('content-disposition'),/portfolio-leandro-henriquez-per-smeg\.pdf/);
+  assert.equal(new TextDecoder().decode(await g.arrayBuffer()).slice(0,8),'%PDF-1.7');
+  const c=await grezza('GET','/api/portfolio',{cookie:cProp});assert.match(new TextDecoder().decode(await c.arrayBuffer()),/prova/,'il completo resta quello');});
+await prova('portfolio su misura: ne restano 5, le più vecchie si tolgono',async()=>{
+  for(let i=0;i<5;i++)assert.equal((await chiama('POST','/api/portfolio/versioni',{cookie:cProp,corpo:{nome:'v'+i,progetti:['oopar']}})).stato,201);
+  const l=await chiama('GET','/api/portfolio/versioni',{cookie:cProp});assert.equal(l.dati.versioni.length,5);assert.ok(!l.dati.versioni.some(v=>v.id===vid));assert.ok(!kv.has('portfolio-v-'+vid));
+  assert.equal((await chiama('DELETE','/api/portfolio/versioni/'+l.dati.versioni[0].id,{cookie:cProp})).stato,200);
+  assert.equal((await chiama('GET','/api/portfolio/versioni',{cookie:cProp})).dati.versioni.length,4);});
 await prova('uscita cancella il cookie',async()=>{const r=await chiama('POST','/api/uscita',{cookie:cProp});assert.equal(r.cookie,'hl_sessione=');});
 console.log(`\n${ok} prove superate`);

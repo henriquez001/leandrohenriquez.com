@@ -15,7 +15,11 @@ const ANNO=new Date().getFullYear();
 const dati=JSON.parse(fs.readFileSync(path.join(R,'data/progetti.json'),'utf8'));
 const err=controllaIndice(dati);
 if(err.length){console.error('data/progetti.json non valido:\n- '+err.join('\n- '));process.exit(1);}
-const lavori=dati.progetti.filter(p=>p.pubblicato);
+// PROGETTI="slug1,slug2,…" (versione su misura dal pannello): quei progetti, in quell'ordine, anche se nascosti dal sito.
+const scelti=(process.env.PROGETTI||'').split(',').map(x=>x.trim()).filter(Boolean);
+const ignoti=scelti.filter(x=>!dati.progetti.some(p=>p.slug===x));
+if(ignoti.length){console.error('progetti sconosciuti: '+ignoti.join(', '));process.exit(1);}
+const lavori=scelti.length?scelti.map(x=>dati.progetti.find(p=>p.slug===x)):dati.progetti.filter(p=>p.pubblicato);
 const N=lavori.length,nn=i=>String(i+1).padStart(2,'0');
 
 // Dati in più dalla pagina progetto, se esiste (lavori/<slug>/progetto.json).
