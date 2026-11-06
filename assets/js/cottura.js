@@ -2,7 +2,7 @@
    L'effetto fotocopia (bianco e nero contrastato, inchiostro di colore, copia rosa fuori registro) prima era fatto
    dal browser con filtri e fusioni a ogni fotogramma: su Firefox per Android lo scroll scattava.
    Qui lo si calcola UNA volta, in un canvas, e la foto diventa un'immagine normale: stesso aspetto, nessun lavoro durante lo scroll.
-   Valori presi dal tema (assets/tema/tema.css) e dalle stesse formule dei filtri CSS. */
+   Usato dalla home (scelta del 6/11, prova 5). Valori presi dal tema (assets/tema/tema.css) e dalle stesse formule dei filtri CSS. */
 (function(){
 const R=document.documentElement,CS=getComputedStyle(R);
 const rgb=s=>{const c=document.createElement('canvas').getContext('2d');c.fillStyle=s.trim()||'#000';const h=c.fillStyle;
