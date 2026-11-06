@@ -411,11 +411,11 @@ async function sezioneStatistiche(){
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   let g='',xs=[],ys=[];
   giornate.forEach((x,i)=>{const h=(x.visite/picco)*(H-alto-basso),X=i*(bw+2),Y=H-basso-h,r=Math.min(4,bw/2,h);xs.push(X+bw/2);ys.push(Y);
-    g+=h>0?`<path d="M${X} ${H-basso} V${Y+r} Q${X} ${Y} ${X+r} ${Y} H${X+bw-r} Q${X+bw} ${Y} ${X+bw} ${Y+r} V${H-basso} Z" fill="#111"/>`:'';});
+    g+=h>0?`<path d="M${X} ${H-basso} V${Y+r} Q${X} ${Y} ${X+r} ${Y} H${X+bw-r} Q${X+bw} ${Y} ${X+bw} ${Y+r} V${H-basso} Z" style="fill:var(--ink)"/>`:'';});
   const pk=giornate.findIndex(x=>x.visite===picco);
-  g+=`<line x1="0" x2="${W}" y1="${H-basso}" y2="${H-basso}" stroke="#111"/>`;
-  if(pk>=0&&giornate[pk].visite>0)g+=`<line x1="${xs[pk]}" x2="${W}" y1="${ys[pk]}" y2="${ys[pk]}" stroke="#111" stroke-dasharray="2 3"/><text x="${W}" y="${ys[pk]-6}" text-anchor="end" font-family="Roboto Mono" font-size="11">picco ${picco} · ${data(giornate[pk].giorno)}</text>`;
-  if(giornate.length)g+=`<text x="0" y="${H-4}" font-family="Roboto Mono" font-size="11" fill="#5e5c57">${data(giornate[0].giorno)}</text><text x="${W}" y="${H-4}" text-anchor="end" font-family="Roboto Mono" font-size="11" fill="#5e5c57">${data(giornate.at(-1).giorno)}</text>`;
+  g+=`<line x1="0" x2="${W}" y1="${H-basso}" y2="${H-basso}" style="stroke:var(--ink)"/>`;
+  if(pk>=0&&giornate[pk].visite>0)g+=`<line x1="${xs[pk]}" x2="${W}" y1="${ys[pk]}" y2="${ys[pk]}" style="stroke:var(--ink)" stroke-dasharray="2 3"/><text x="${W}" y="${ys[pk]-6}" text-anchor="end" style="font-family:var(--M);font-size:var(--piccolo)">picco ${picco} · ${data(giornate[pk].giorno)}</text>`;
+  if(giornate.length)g+=`<text x="0" y="${H-4}" style="font-family:var(--M);font-size:var(--piccolo);fill:var(--mute)">${data(giornate[0].giorno)}</text><text x="${W}" y="${H-4}" text-anchor="end" style="font-family:var(--M);font-size:var(--piccolo);fill:var(--mute)">${data(giornate.at(-1).giorno)}</text>`;
   svg.innerHTML=g;
   const tip=svg.parentNode.querySelector('.tip');
   svg.addEventListener('pointermove',e=>{if(!xs.length)return;const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W;let i=0,b=1e9;xs.forEach((v,k)=>{if(Math.abs(v-x)<b){b=Math.abs(v-x);i=k;}});

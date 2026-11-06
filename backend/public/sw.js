@@ -1,8 +1,8 @@
 /* Service worker del pannello: apre subito l'interfaccia anche con rete lenta e mostra le notifiche push.
    Le risposte di /api/ non vengono mai salvate: i dati arrivano sempre freschi dal server. */
 'use strict';
-const VERSIONE='hl-pannello-2';
-const GUSCIO=['/','/pannello.css','/pannello.js','/manifest.webmanifest','/icona-192.png','/fonts/archivo-wdth-wght.woff2','/fonts/roboto-mono-wght.woff2'];
+const VERSIONE='hl-pannello-3';
+const GUSCIO=['/','/tema.css','/pannello.css','/pannello.js','/manifest.webmanifest','/icona-192.png','/fonts/archivo-wdth-wght.woff2','/fonts/roboto-mono-wght.woff2'];
 
 self.addEventListener('install',e=>{e.waitUntil(caches.open(VERSIONE).then(c=>c.addAll(GUSCIO)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!==VERSIONE).map(n=>caches.delete(n)))).then(()=>self.clients.claim()));});
