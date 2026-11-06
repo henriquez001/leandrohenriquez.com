@@ -24,7 +24,7 @@ a{color:inherit}
 
 /* poster */
 .ps{height:100vh;height:100svh;position:relative;overflow:hidden;scroll-snap-align:start;border-bottom:var(--bordo) solid var(--inchiostro);
-  isolation:isolate;contain:layout paint;content-visibility:auto;contain-intrinsic-size:auto 100vh;view-timeline:--ps block}
+  isolation:isolate;contain:layout paint;view-timeline:--ps block}
 .ps:first-of-type{padding-top:var(--barra-alta)}
 .lay{position:absolute}
 /* parallasse fatta dal compositore (Chrome, Safari 26+): da +d·parallasse a −d·parallasse mentre la schermata attraversa la vista */
