@@ -11,7 +11,7 @@ name: Pannello
 on:
   push:
     branches: [main]
-    paths: [backend/**, tools/schema.js, .github/workflows/pannello.yml]
+    paths: [backend/**, tools/schema.js, assets/tema/**, assets/fonts/**, .github/workflows/pannello.yml]
   workflow_dispatch:
 permissions:
   contents: read
@@ -50,6 +50,10 @@ jobs:
         if: steps.pronto.outputs.ok == 'si'
         with:
           node-version: 22
+      - name: Tema del sito
+        if: steps.pronto.outputs.ok == 'si'
+        # stessa estetica del sito: copia assets/tema/ e i caratteri in public/sito/
+        run: npm run tema
       - name: Prove
         if: steps.pronto.outputs.ok == 'si'
         run: npm ci && npm test
