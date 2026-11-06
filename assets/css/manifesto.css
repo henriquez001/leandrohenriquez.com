@@ -2,7 +2,8 @@
    Qui solo posizioni e regole di composizione: ogni colore, carattere, spessore, angolo e durata
    viene da assets/tema/tema.css. Per cambiare l'aspetto modifica il tema, non questo file. */
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-snap-type:y proximity;background:var(--carta)}
+/* aggancio deciso, un poster per gesto (prova 7, scelta il 6/11) */
+html{scroll-snap-type:y mandatory;background:var(--carta)}
 body{background:var(--carta);color:var(--inchiostro);font:16px/1.5 var(--font-testo);-webkit-font-smoothing:antialiased}
 a{color:inherit}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -23,7 +24,7 @@ a{color:inherit}
 .msheet small{font:var(--peso-mono) var(--corpo-mono) var(--font-mono);margin-top:18px}
 
 /* poster */
-.ps{height:100vh;height:100svh;position:relative;overflow:hidden;scroll-snap-align:start;border-bottom:var(--bordo) solid var(--inchiostro);
+.ps{height:100vh;height:100svh;position:relative;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:always;border-bottom:var(--bordo) solid var(--inchiostro);
   isolation:isolate;contain:layout paint;view-timeline:--ps block}
 .ps:first-of-type{padding-top:var(--barra-alta)}
 .lay{position:absolute}
@@ -33,7 +34,7 @@ a{color:inherit}
   @keyframes par{from{transform:translateY(calc(var(--d,0) * var(--parallasse) * -1vh))}to{transform:translateY(calc(var(--d,0) * var(--parallasse) * 1vh))}}
 }
 .ov{mix-blend-mode:var(--sovrastampa)}
-.h{font:var(--peso-titoli) var(--s,20vw)/var(--interlinea-titoli) var(--font-titoli);letter-spacing:var(--spaziatura-titoli);text-transform:var(--maiuscole-titoli);white-space:nowrap}
+.h{font:var(--peso-titoli) calc(var(--s,20vw) * var(--k,1))/var(--interlinea-titoli) var(--font-titoli);letter-spacing:var(--spaziatura-titoli);text-transform:var(--maiuscole-titoli);white-space:nowrap}
 .lt{font:var(--peso-leggero) var(--s,5.5vw)/.92 var(--font-testo);letter-spacing:-.02em}
 .m{font:var(--peso-mono) var(--corpo-mono)/1.5 var(--font-mono);text-transform:uppercase}
 .ph{width:var(--w,44vw);aspect-ratio:1/1;position:relative}
@@ -42,9 +43,19 @@ a{color:inherit}
 .ph.reg img{filter:grayscale(1) contrast(3) brightness(1.4) sepia(1) hue-rotate(290deg) saturate(6)}
 /* copia fuori registro: nello stesso strato della foto, così si muovono insieme con una sola fusione */
 .ph.reg{position:absolute;left:var(--fuori-registro-x);top:var(--fuori-registro-y);opacity:var(--fuori-registro-opacita);mix-blend-mode:var(--sovrastampa)}
+/* foto "cotte" (assets/js/cottura.js, prova 5 scelta il 6/11): l'effetto fotocopia è calcolato una volta in un'immagine,
+   così durante lo scroll non ci sono filtri né fusioni sulle foto. Prima della cottura vale la versione con i filtri qui sopra. */
+.ph.cotta img.cotta{position:absolute;left:0;top:0;width:calc(100% + var(--ox));height:calc(100% + var(--oy));max-width:none;object-fit:fill;filter:none;mix-blend-mode:normal}
+.ph.cotta .tint,.ph.cotta~.ph.reg{display:none}
+.lay.t-ph:has(.ph.cotta){mix-blend-mode:normal}
+@media (pointer:fine){.lay.t-ph:has(.ph.cotta){mix-blend-mode:var(--sovrastampa)}}
 /* retino: un solo strato fisso su tutta la pagina invece di uno per schermata (meno lavoro a ogni fotogramma) */
 body::after{content:"";position:fixed;inset:0;z-index:40;pointer-events:none;background-image:radial-gradient(var(--inchiostro) 1.1px,transparent 1.3px);background-size:var(--retino-passo) var(--retino-passo);opacity:var(--retino-opacita)}
 .bar{height:var(--nastro);background:var(--inchiostro)}
+/* barre sempre più larghe della vista, anche inclinate: gli estremi non si vedono mai */
+.ps .lay.bar{left:-50vw!important;right:-50vw!important}
+/* misura dei titoli (manifesto.js, adatta): senza parallasse, com'è la schermata ferma */
+.misura .ps .lay{animation:none!important}
 .go{position:absolute;z-index:5;display:inline-flex;align-items:center;gap:14px;height:52px;padding:0 20px;border-radius:var(--raggio);background:var(--inchiostro);color:var(--carta);font:var(--peso-mono) 14px var(--font-mono);text-transform:uppercase;text-decoration:none;transition:transform var(--durata-breve) var(--curva)}
 .go:hover,.go:focus-visible{background:var(--inchiostro-a);outline:0}
 .go:active,.ps a.card:active~.go{transform:scale(var(--scala-pressione))}
@@ -53,7 +64,7 @@ body::after{content:"";position:fixed;inset:0;z-index:40;pointer-events:none;bac
 .ps a.card:hover~.go,.ps a.card:focus-visible~.go{background:var(--inchiostro-a)}
 
 /* studio e contatti */
-.lead{position:absolute;z-index:2;left:4vw;right:4vw;top:calc(var(--barra-alta) + 12vh);font:var(--peso-leggero) clamp(34px,5.4vw,86px)/1.02 var(--font-testo);letter-spacing:-.035em;max-width:17ch}
+.lead{position:absolute;z-index:2;left:4vw;right:4vw;top:calc(var(--barra-alta) + 12vh);font:var(--peso-leggero) clamp(34px,5.4vw,86px)/1.02 var(--font-testo);letter-spacing:-.035em;max-width:min(17ch,50vw)}
 .lead b{font-weight:var(--peso-titoli);color:var(--inchiostro-a);mix-blend-mode:var(--sovrastampa)}
 .tab{position:absolute;z-index:2;right:4vw;bottom:8vh;display:grid;grid-template-columns:auto auto;border-top:var(--bordo) solid var(--inchiostro);background:var(--carta);font:var(--corpo-mono)/1.4 var(--font-mono);text-transform:uppercase;min-width:min(520px,92vw)}
 .tab span,.tab b{padding:8px 0;border-bottom:1px solid var(--inchiostro)}
@@ -77,9 +88,12 @@ body::after{content:"";position:fixed;inset:0;z-index:40;pointer-events:none;bac
   .ps .lay.t-ph,.ps .lay.t-ph .ph{--w:80vw}
   .ps .lay.t-meta{left:4vw!important;bottom:12vh!important;rotate:0deg!important;--s:9vw!important}
   .ps .lay.t-side{right:4vw!important;top:auto!important;bottom:4vh!important}
+  .ps:has(.go) .lay.t-side{bottom:calc(3vh + 64px)!important}
   .go{left:4vw!important;right:auto!important;bottom:3vh!important;height:48px}
   .tab{left:4vw;right:4vw;min-width:0}
   .row{grid-template-columns:1fr;gap:10px}
-  .lead{top:calc(var(--barra-alta) + 6vh)}
+  .lead{top:calc(var(--barra-alta) + 10vh);max-width:17ch}
+  .ps .lay.b-studio{top:calc(var(--barra-alta) + 2vh)!important}
+  .mail{font-size:5.6vw;word-break:normal;white-space:nowrap}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-snap-type:none}.lay{transform:none!important;animation:none!important}}
