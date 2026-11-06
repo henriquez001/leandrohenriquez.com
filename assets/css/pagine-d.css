@@ -1,0 +1,31 @@
+/* hl. — Laboratorio, privacy e 404 in stile D "Manifesto" (scelta: Laboratorio A "elenco"). Valori dal tema: assets/tema/tema.css */
+html,body{background:var(--carta);color:var(--inchiostro)}
+body.lab{font:var(--peso-mono) var(--corpo-mono)/1.5 var(--font-mono);padding:0 max(18px,4vw) 48px;position:relative;overflow-x:hidden}
+body.lab::before{content:"";position:fixed;inset:0;background-image:radial-gradient(var(--inchiostro) 1.1px,transparent 1.3px);background-size:var(--retino-passo) var(--retino-passo);opacity:var(--retino-opacita);pointer-events:none;z-index:0}
+.lab main,.lab .f{position:relative;z-index:1}
+.lab .hlogo{height:22px}
+/* barra piena come in home */
+.lab .bar{position:sticky;top:0;z-index:10;margin:0 calc(-1 * max(18px,4vw));padding:0 18px;height:var(--barra-alta);background:var(--carta);border-bottom:var(--bordo) solid var(--inchiostro);text-transform:uppercase}
+.lab .bar a:hover,.lab .bar a:focus-visible{background:var(--inchiostro);color:var(--carta);outline:0}
+.lab .k{font:var(--peso-mono) var(--corpo-mono)/1.4 var(--font-mono);color:var(--inchiostro);text-transform:uppercase}
+.lab .hero{position:relative;padding:6vh 0 4vh}
+.lab h1{font:var(--peso-titoli) clamp(110px,26vw,380px)/var(--interlinea-titoli) var(--font-titoli);font-variation-settings:normal;letter-spacing:var(--spaziatura-titoli);text-transform:var(--maiuscole-titoli);color:var(--inchiostro-b);mix-blend-mode:var(--sovrastampa);rotate:-8deg;transform-origin:0 100%;margin:4vh 0 0 -1vw;white-space:nowrap}
+.lab .hero::after{content:"";position:absolute;left:calc(-1 * max(18px,4vw));right:calc(-1 * max(18px,4vw));bottom:7vh;height:var(--nastro);background:var(--inchiostro);rotate:4deg;z-index:-1}
+.lab .lead{font:var(--peso-leggero) clamp(24px,2.6vw,40px)/1.08 var(--font-testo);letter-spacing:-.02em;text-transform:none;max-width:24ch;margin-top:5vh;background:var(--carta);position:relative}
+.lab .tiles{gap:0;border-top:var(--bordo) solid var(--inchiostro)}
+.lab .t{border:0;border-bottom:var(--bordo) solid var(--inchiostro);border-radius:var(--raggio);padding:18px 0;background:var(--carta)}
+.lab .t h2{font:var(--peso-titoli) clamp(34px,5vw,80px)/.85 var(--font-titoli);font-variation-settings:normal;letter-spacing:-.05em;text-transform:var(--maiuscole-titoli);color:var(--inchiostro-a)}
+.lab .t p{font:400 16px/1.45 var(--font-testo)}
+.lab .tag{border:var(--bordo) solid var(--inchiostro);border-radius:var(--raggio);font:var(--peso-mono) var(--corpo-mono) var(--font-mono);padding:8px 14px;text-transform:uppercase;transition:transform var(--durata-breve) var(--curva)}
+.lab .tag.on{background:var(--inchiostro);color:var(--carta)}
+.lab .tag.on:hover,.lab .tag.on:focus-visible{background:var(--inchiostro-a);color:var(--carta);outline:0}
+.lab .tag:active{transform:scale(var(--scala-pressione))}
+.lab .prova{border-top:1px solid var(--inchiostro);background:var(--carta)}
+.lab .f{font:var(--peso-mono) 11px var(--font-mono);color:var(--inchiostro);text-transform:uppercase;border-top:var(--bordo) solid var(--inchiostro);padding-top:12px}
+.lab a:focus-visible{outline:0}
+/* privacy */
+.lab main:has(.priv) h1{font-size:clamp(72px,17vw,250px)}
+.priv section{border-top:var(--bordo) solid var(--inchiostro)!important}
+.priv h2{font:var(--peso-titoli) clamp(26px,3vw,44px)/.9 var(--font-titoli)!important;font-variation-settings:normal!important;letter-spacing:-.04em}
+.priv p,.priv li{font:400 15px/1.6 var(--font-testo)!important;text-transform:none}
+@media (max-width:640px){.lab h1{rotate:-5deg}.lab .lead{font-size:24px}}

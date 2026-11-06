@@ -1,0 +1,62 @@
+/* hl. — pagina progetto in stile D "Manifesto" (scelta: Oopar B, 3D in fotocopia). Valori dal tema: assets/tema/tema.css */
+html,body{background:var(--carta);color:var(--inchiostro)}
+body{font-family:var(--font-testo)}
+.hlogo{height:22px}
+/* barra piena in alto, come in home */
+#liveG::before{content:"";position:fixed;left:0;right:0;top:0;height:var(--barra-alta);background:var(--carta);border-bottom:var(--bordo) solid var(--inchiostro);z-index:74;pointer-events:none;box-shadow:none}
+#liveG .ui{font:var(--peso-mono) var(--corpo-mono)/1.35 var(--font-mono)!important;text-transform:uppercase}
+#liveG .ui.tl{left:18px!important;top:calc((var(--barra-alta) - 22px)/2)!important}
+#liveG .ui.tl a{font:var(--peso-mono) var(--corpo-mono) var(--font-mono)!important;text-transform:uppercase}
+#liveG .ui.tl a:hover,#liveG .ui.tl a:focus-visible{background:var(--inchiostro);color:var(--carta)!important;outline:0}
+#liveG .ui.tr{right:18px!important;top:6px!important;font-size:11px!important;line-height:1.2!important}
+/* retino su tutta la pagina */
+#liveG .tour::before{content:"";position:fixed;inset:0;background-image:radial-gradient(var(--inchiostro) 1.1px,transparent 1.3px);background-size:var(--retino-passo) var(--retino-passo);opacity:var(--retino-opacita);pointer-events:none;z-index:1}
+/* parole giganti: due inchiostri sovrastampati, inclinate a turno */
+#liveG .bigw b{font-family:var(--font-titoli);font-weight:var(--peso-titoli);letter-spacing:var(--spaziatura-titoli);line-height:var(--interlinea-titoli);mix-blend-mode:var(--sovrastampa);color:var(--inchiostro-a);font-size:22vw}
+#liveG .bigw b:nth-child(even){color:var(--inchiostro-b)}
+#liveG .bigw b.o,#liveG .bigw b.or{-webkit-text-stroke:0}
+#liveG .bigw b.o{color:var(--inchiostro-b)}
+#liveG .bigw b:nth-child(4n+1){rotate:15deg}#liveG .bigw b:nth-child(4n+2){rotate:-15deg}#liveG .bigw b:nth-child(4n+3){rotate:0deg}#liveG .bigw b:nth-child(4n){rotate:-8deg}
+/* quote */
+#liveG svg.dim text{font:var(--peso-mono) var(--corpo-mono) var(--font-mono);fill:var(--inchiostro);text-transform:uppercase}
+#liveG svg.dim .acc,#liveG svg.dim line,#liveG svg.dim path{stroke:var(--inchiostro)}
+/* didascalie: etichetta nera piena, titolo grosso, testo su carta */
+#liveG .cap .n{display:inline-block;background:var(--inchiostro);color:var(--carta);padding:5px 8px;font:var(--peso-mono) var(--corpo-mono)/1 var(--font-mono);text-transform:uppercase}
+#liveG .cap h3{font-family:var(--font-titoli);font-weight:var(--peso-titoli);letter-spacing:-.04em;font-size:3.6vw;line-height:.85;text-transform:var(--maiuscole-titoli)}
+#liveG .cap p{font:400 15px/1.5 var(--font-testo);color:var(--inchiostro);background:var(--carta);border-top:var(--bordo) solid var(--inchiostro);padding-top:8px}
+#liveG .idx{font-family:var(--font-titoli);font-weight:var(--peso-leggero);font-size:12vw;letter-spacing:-.04em}
+#liveG .s.intro .meta{font:var(--peso-mono) var(--corpo-mono)/1.4 var(--font-mono);text-transform:uppercase;border-top:var(--bordo) solid var(--inchiostro);padding-top:10px}
+/* contenuto */
+#liveG .content{background:var(--carta);border-top:var(--bordo) solid var(--inchiostro)}
+#liveG .sec{border-top:var(--bordo) solid var(--inchiostro)}
+#liveG .sec:first-child{border-top:0}
+#liveG .sec>.k{font:var(--peso-mono) var(--corpo-mono)/1 var(--font-mono);text-transform:uppercase}
+#liveG .sec>.k span:first-child{background:var(--inchiostro);color:var(--carta);padding:5px 8px;margin:-5px 0}
+#liveG .spec div{border-left:1px solid var(--inchiostro)}
+#liveG .spec small{font:var(--peso-mono) 11px/1 var(--font-mono);text-transform:uppercase;color:var(--inchiostro)}
+#liveG .spec b{font-family:var(--font-titoli);font-weight:var(--peso-titoli);letter-spacing:-.04em;font-size:4vw;font-variation-settings:normal}
+#liveG .spec div:nth-child(odd) b{color:var(--inchiostro-a)}
+#liveG .spec b i{font-weight:var(--peso-leggero);color:var(--inchiostro)}
+#liveG .gal img{border-radius:var(--raggio);filter:var(--fotocopia);mix-blend-mode:var(--sovrastampa)}
+#liveG .gal figure{position:relative}
+#liveG .gal figure:first-child::after{content:"";position:absolute;left:0;right:0;top:0;bottom:24px;background:var(--inchiostro-a);mix-blend-mode:screen;pointer-events:none}
+#liveG .gal .cut{background:var(--inchiostro-b);border-radius:var(--raggio)}
+#liveG .gal figcaption{font:var(--peso-mono) 11px/1.4 var(--font-mono);text-transform:uppercase}
+#liveG .proc div{border:var(--bordo) solid var(--inchiostro);border-radius:var(--raggio);font:var(--peso-mono) var(--corpo-mono)/1.4 var(--font-mono);text-transform:uppercase}
+#liveG .proc div:not(.ok){border-style:dashed}
+#liveG .proc div b{font-family:var(--font-titoli);font-weight:var(--peso-titoli);letter-spacing:-.04em;font-variation-settings:normal;text-transform:var(--maiuscole-titoli)}
+#liveG .next .k{font:var(--peso-mono) var(--corpo-mono)/1 var(--font-mono)!important;text-transform:uppercase}
+#liveG .next{overflow:hidden}
+#liveG .next b{font-family:var(--font-titoli);font-weight:var(--peso-titoli);letter-spacing:var(--spaziatura-titoli);font-variation-settings:normal!important;color:var(--inchiostro-b);mix-blend-mode:var(--sovrastampa);rotate:-8deg;transform-origin:0 100%;padding-top:4vw;font-size:14vw;transition:color var(--durata) var(--curva)}
+#liveG .next:hover b,#liveG .next:focus-visible b{color:var(--inchiostro-a)}
+#liveG .next:active b{scale:var(--scala-pressione)}
+@media (max-width:760px){
+  #liveG::before{height:calc(var(--barra-alta) + env(safe-area-inset-top))}
+  .live::before{background:var(--carta)}
+  #liveG .ui.tr{display:none}
+  #liveG .cap h3{font-size:36px}
+  #liveG .spec b{font-size:10vw}
+  #liveG .bigw b{font-size:28vw}
+}
+/* variante B "oggetto in fotocopia": anche il 3D passa dall'inchiostro blu */
+#liveG canvas.fx{filter:grayscale(1) contrast(2.4) brightness(1.05) sepia(1) hue-rotate(190deg) saturate(6);mix-blend-mode:var(--sovrastampa)}
