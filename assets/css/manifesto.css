@@ -2,7 +2,7 @@
    Qui solo posizioni e regole di composizione: ogni colore, carattere, spessore, angolo e durata
    viene da assets/tema/tema.css. Per cambiare l'aspetto modifica il tema, non questo file. */
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-snap-type:y mandatory;background:var(--carta)}
+html{scroll-snap-type:y proximity;background:var(--carta)}
 body{background:var(--carta);color:var(--inchiostro);font:16px/1.5 var(--font-testo);-webkit-font-smoothing:antialiased}
 a{color:inherit}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -24,7 +24,7 @@ a{color:inherit}
 
 /* poster */
 .ps{height:100vh;height:100svh;position:relative;overflow:hidden;scroll-snap-align:start;border-bottom:var(--bordo) solid var(--inchiostro);
-  isolation:isolate;contain:layout paint;content-visibility:auto;contain-intrinsic-size:auto 100vh;view-timeline:--ps block}
+  isolation:isolate;contain:layout paint;view-timeline:--ps block}
 .ps:first-of-type{padding-top:var(--barra-alta)}
 .lay{position:absolute}
 /* parallasse fatta dal compositore (Chrome, Safari 26+): da +d·parallasse a −d·parallasse mentre la schermata attraversa la vista */
