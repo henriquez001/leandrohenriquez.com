@@ -23,9 +23,15 @@ a{color:inherit}
 .msheet small{font:var(--peso-mono) var(--corpo-mono) var(--font-mono);margin-top:18px}
 
 /* poster */
-.ps{height:100vh;height:100svh;position:relative;overflow:hidden;scroll-snap-align:start;border-bottom:var(--bordo) solid var(--inchiostro)}
+.ps{height:100vh;height:100svh;position:relative;overflow:hidden;scroll-snap-align:start;border-bottom:var(--bordo) solid var(--inchiostro);
+  isolation:isolate;contain:layout paint;content-visibility:auto;contain-intrinsic-size:auto 100vh;view-timeline:--ps block}
 .ps:first-of-type{padding-top:var(--barra-alta)}
-.lay{position:absolute;will-change:transform}
+.lay{position:absolute}
+/* parallasse fatta dal compositore (Chrome, Safari 26+): da +d·parallasse a −d·parallasse mentre la schermata attraversa la vista */
+@supports (animation-timeline:view()){
+  .ps .lay{animation:par linear both;animation-timeline:--ps;animation-range:cover}
+  @keyframes par{from{transform:translateY(calc(var(--d,0) * var(--parallasse) * -1vh))}to{transform:translateY(calc(var(--d,0) * var(--parallasse) * 1vh))}}
+}
 .ov{mix-blend-mode:var(--sovrastampa)}
 .h{font:var(--peso-titoli) var(--s,20vw)/var(--interlinea-titoli) var(--font-titoli);letter-spacing:var(--spaziatura-titoli);text-transform:var(--maiuscole-titoli);white-space:nowrap}
 .lt{font:var(--peso-leggero) var(--s,5.5vw)/.92 var(--font-testo);letter-spacing:-.02em}
@@ -34,8 +40,10 @@ a{color:inherit}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:var(--fotocopia);mix-blend-mode:var(--sovrastampa)}
 .ph .tint{position:absolute;inset:0;mix-blend-mode:screen;background:var(--c)}
 .ph.reg img{filter:grayscale(1) contrast(3) brightness(1.4) sepia(1) hue-rotate(290deg) saturate(6)}
-.reg2{opacity:var(--fuori-registro-opacita)}
-.dots{position:absolute;inset:0;background-image:radial-gradient(var(--inchiostro) 1.1px,transparent 1.3px);background-size:var(--retino-passo) var(--retino-passo);opacity:var(--retino-opacita);pointer-events:none}
+/* copia fuori registro: nello stesso strato della foto, così si muovono insieme con una sola fusione */
+.ph.reg{position:absolute;left:var(--fuori-registro-x);top:var(--fuori-registro-y);opacity:var(--fuori-registro-opacita);mix-blend-mode:var(--sovrastampa)}
+/* retino: un solo strato fisso su tutta la pagina invece di uno per schermata (meno lavoro a ogni fotogramma) */
+body::after{content:"";position:fixed;inset:0;z-index:40;pointer-events:none;background-image:radial-gradient(var(--inchiostro) 1.1px,transparent 1.3px);background-size:var(--retino-passo) var(--retino-passo);opacity:var(--retino-opacita)}
 .bar{height:var(--nastro);background:var(--inchiostro)}
 .go{position:absolute;z-index:5;display:inline-flex;align-items:center;gap:14px;height:52px;padding:0 20px;border-radius:var(--raggio);background:var(--inchiostro);color:var(--carta);font:var(--peso-mono) 14px var(--font-mono);text-transform:uppercase;text-decoration:none;transition:transform var(--durata-breve) var(--curva)}
 .go:hover,.go:focus-visible{background:var(--inchiostro-a);outline:0}
@@ -67,7 +75,6 @@ a{color:inherit}
   .ps .lay.t-name{left:4vw!important;right:auto;top:calc(var(--barra-alta) + 4vh)!important;rotate:var(--rp,0deg)!important;--s:var(--sp,20vw)!important}
   .ps .lay.t-ph{left:10vw!important;top:calc(var(--barra-alta) + 20vh)!important}
   .ps .lay.t-ph,.ps .lay.t-ph .ph{--w:80vw}
-  .ps .lay.t-ph.reg2{left:calc(10vw + var(--fuori-registro-x) * .66)!important;top:calc(var(--barra-alta) + 20vh + var(--fuori-registro-y) * .8)!important}
   .ps .lay.t-meta{left:4vw!important;bottom:12vh!important;rotate:0deg!important;--s:9vw!important}
   .ps .lay.t-side{right:4vw!important;top:auto!important;bottom:4vh!important}
   .go{left:4vw!important;right:auto!important;bottom:3vh!important;height:48px}
@@ -75,4 +82,4 @@ a{color:inherit}
   .row{grid-template-columns:1fr;gap:10px}
   .lead{top:calc(var(--barra-alta) + 6vh)}
 }
-@media (prefers-reduced-motion:reduce){html{scroll-snap-type:none}.lay{transform:none!important}}
+@media (prefers-reduced-motion:reduce){html{scroll-snap-type:none}.lay{transform:none!important;animation:none!important}}

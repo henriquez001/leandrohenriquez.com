@@ -12,14 +12,13 @@ const ANG=(CS.getPropertyValue('--angoli').trim().split(/\s+/).map(Number).filte
 M.innerHTML=PROGETTI.map((p,i)=>{const a=ANGS[i%ANGS.length],r=i%2,c=r?'var(--inchiostro-b)':'var(--inchiostro-a)',c2=r?'var(--inchiostro-a)':'var(--inchiostro-b)',n=esc(p.nome),
   fit=+(92/(.62*p.nome.length)).toFixed(1),long=p.nome.length>7,s=Math.min(23,fit),sp=Math.min(24,fit),img=BASE+p.anteprima,link=p.pagina?`lavori/${p.slug}/`:'';
   return `<section class="ps" id="p-${p.slug}" aria-labelledby="t-${p.slug}">
-  ${L(.2,'t-name ov',`left:${long?-1:(r?40:-2)}vw;top:calc(var(--barra-alta) + ${long?`4vh + ${(Math.abs(Math.sin(a*Math.PI/180))*46).toFixed(1)}vw`:i%3*7+3+"vh"});--s:${s}vw;--sp:${sp}vw;rotate:${a}deg;--rp:${a*ANGT}deg`,`<h2 class="h" id="t-${p.slug}" style="color:${c}">${n}</h2>`)}
-  ${L(.6,'t-ph ov',`left:${r?4:47}vw;top:calc(var(--barra-alta) + 9vh)`,`<div class="ph" style="--c:${c2}"><img src="${img}" alt="${n}, ${esc(p.tipo)}" loading="${i<2?'eager':'lazy'}" decoding="async"><div class="tint"></div></div>`)}
-  ${L(.6,'t-ph reg2 ov',`left:calc(${r?4:47}vw + var(--fuori-registro-x));top:calc(var(--barra-alta) + 9vh + var(--fuori-registro-y))`,`<div class="ph reg" style="--c:#fff"><img src="${img}" alt="" loading="lazy" decoding="async"></div>`)}
+  ${L(.2,'t-name',`left:${long?-1:(r?40:-2)}vw;top:calc(var(--barra-alta) + ${long?`4vh + ${(Math.abs(Math.sin(a*Math.PI/180))*46).toFixed(1)}vw`:i%3*7+3+"vh"});--s:${s}vw;--sp:${sp}vw;rotate:${a}deg;--rp:${a*ANGT}deg`,`<h2 class="h" id="t-${p.slug}" style="color:${c}">${n}</h2>`)}
+  ${L(.6,'t-ph ov',`left:${r?4:47}vw;top:calc(var(--barra-alta) + 9vh)`,`<div class="ph" style="--c:${c2}"><img src="${img}" alt="${n}, ${esc(p.tipo)}" loading="${i<2?'eager':'lazy'}" decoding="async"><div class="tint"></div></div><div class="ph reg" style="--c:#fff" aria-hidden="true"><img src="${img}" alt="" loading="lazy" decoding="async"></div>`)}
   ${L(1,'t-meta lt',`left:${r?52:5}vw;bottom:9vh;--s:5.2vw`,`${pad(i)}/${PROGETTI.length}<br>${esc(p.tipo)}`)}
   ${L(1.3,'t-side m',`right:4vw;top:calc(var(--barra-alta) + 5vh);text-align:right`,`${esc(p.contesto||'')}<br>oggetto n. ${pad(i)}`)}
   ${L(.9,'bar',`left:-5vw;right:-5vw;top:${58+i%3*8}vh;rotate:${-a/2}deg`,'')}
   ${link?`<a class="card" href="${link}" data-slug="${p.slug}" aria-label="Apri il progetto ${n}"></a><span class="go" style="${r?'left:4vw':'right:4vw'};bottom:3vh" aria-hidden="true">apri il progetto${p.etichetta?' in '+esc(p.etichetta):''} →</span>`:''}
-  <div class="dots"></div></section>`;}).join('');
+  </section>`;}).join('');
 document.querySelectorAll('.cntot').forEach(e=>e.textContent=PROGETTI.length);
 
 // statistiche (nomi letti dal pannello): apri-<progetto>, clic-linkedin, email-copiata
@@ -39,15 +38,19 @@ const setM=on=>{sh.classList.toggle('on',on);mb.setAttribute('aria-expanded',on)
 mb.addEventListener('click',()=>setM(!sh.classList.contains('on')));sh.addEventListener('click',e=>{if(e.target.closest('a'))setM(false);});
 addEventListener('keydown',e=>{if(e.key==='Escape')setM(false);});
 
-// profondità: gli strati scorrono a velocità diverse (parallasse, niente deformazioni). Prima tutte le letture, poi le scritture.
-const S=[...document.querySelectorAll('.ps')],cnt=document.getElementById('cnt'),LAY=S.map(s=>[...s.querySelectorAll('.lay')].map(l=>({l,d:+l.dataset.d,v:''})));
+// profondità: gli strati scorrono a velocità diverse (parallasse, niente deformazioni).
+// Dove il browser lo sa fare (animation-timeline), la parallasse la calcola il compositore in CSS: niente lavoro a ogni fotogramma.
+// Altrimenti si aggiorna solo quando si scorre, e solo nelle schermate vicine.
+const S=[...document.querySelectorAll('.ps')],cnt=document.getElementById('cnt');
+S.forEach(s=>s.querySelectorAll('.lay').forEach(l=>l.style.setProperty('--d',l.dataset.d||0)));
 const RMQ=matchMedia('(prefers-reduced-motion: reduce)');
-let last='';
-function frame(){const H=innerHeight,R=S.map(s=>s.getBoundingClientRect().top/H);let cur=-1;
-  R.forEach((o,k)=>{if(Math.abs(o)<.5)cur=k;if(o>1.2||o<-1.2||RMQ.matches||!PAR)return;
-    LAY[k].forEach(x=>{const v=`translateY(${(o*x.d*-PAR).toFixed(1)}vh)`;if(v!==x.v){x.v=v;x.l.style.transform=v;}});});
-  const sec=S[cur],t=sec?(sec.dataset.n||(sec.id.startsWith('p-')?pad(S.indexOf(sec)-1)+'/'+PROGETTI.length:'')):'';
-  if(t!==last){last=t;cnt.textContent=t;}
-  requestAnimationFrame(frame);}
-requestAnimationFrame(frame);
+const CSSPAR=window.CSS&&CSS.supports('animation-timeline','view()');
+if(!CSSPAR&&PAR){const LAY=S.map(s=>[...s.querySelectorAll('.lay')].map(l=>({l,d:+l.dataset.d,v:''})));let req=0;
+  const frame=()=>{req=0;if(RMQ.matches)return;const H=innerHeight,R=S.map(s=>s.getBoundingClientRect().top/H);
+    R.forEach((o,k)=>{if(o>1.2||o<-1.2)return;LAY[k].forEach(x=>{const v=`translateY(${(o*x.d*-PAR).toFixed(1)}vh)`;if(v!==x.v){x.v=v;x.l.style.transform=v;}});});};
+  addEventListener('scroll',()=>{if(!req)req=requestAnimationFrame(frame);},{passive:true});addEventListener('resize',frame);frame();}
+// contatore in alto: cambia quando una schermata occupa più di metà vista
+let last='';const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const sec=e.target,
+  t=sec.dataset.n||(sec.id.startsWith('p-')?pad(S.indexOf(sec)-1)+'/'+PROGETTI.length:'');if(t!==last){last=t;cnt.textContent=t;}}),{threshold:.5});
+S.forEach(s=>io.observe(s));
 })();
