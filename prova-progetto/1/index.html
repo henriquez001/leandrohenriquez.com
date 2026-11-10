@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="it" data-base="../../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Oopar — prova 1 guidata</title>
+<meta name="theme-color" content="#E9E6DF">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../base.css">
+<style>
+html{scroll-snap-type:y mandatory}
+#c{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;pointer-events:none;display:block}
+#call{position:fixed;inset:0;width:100vw;height:100vh;z-index:2;pointer-events:none}
+#call line,#call path{stroke:var(--ink);stroke-width:1;fill:none}
+#call circle{fill:var(--carta);stroke:var(--ink);stroke-width:1.2}
+#call circle.dot{fill:var(--ink);stroke:none}
+#call text{font:var(--mono);fill:var(--ink);paint-order:stroke;stroke:var(--carta);stroke-width:5px;stroke-linejoin:round}
+.st{height:100vh;height:100svh;position:relative;z-index:3;scroll-snap-align:start;scroll-snap-stop:always}
+.st .cap{position:absolute;left:var(--m);bottom:7vh;width:min(380px,36vw);opacity:0;transform:translateY(10px);transition:opacity 240ms ease-out,transform 320ms cubic-bezier(.2,.9,.25,1)}
+.st.on .cap{opacity:1;transform:none}
+.cap .lab{margin-bottom:10px}
+.cap h2{font-size:clamp(40px,4.6vw,76px);margin-bottom:12px}
+.cap p{font-size:15px;color:#3d3c39;max-width:34ch}
+.st.intro .cap{width:auto;right:var(--m);display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.st.intro h1{font-size:min(22vw,300px)}
+.st.intro .meta{font:var(--mono);text-align:right}
+.st .no{position:absolute;right:var(--m);bottom:7vh;font-size:clamp(64px,9vw,150px);opacity:0;transition:opacity 240ms ease-out}
+.st.on .no{opacity:1}
+.after{position:relative;z-index:3;background:var(--carta);scroll-snap-align:start}
+.after .sec{padding:28px var(--m) 10vh}
+.after .sec>.lab{display:flex;justify-content:space-between;color:var(--ink);margin-bottom:5vh}
+.gal{display:grid;grid-template-columns:1.4fr 1fr;gap:var(--m);align-items:end}
+.gal figcaption{font:var(--mono);color:var(--mu);margin-top:8px}
+@media (max-width:760px){
+ .st .cap{left:var(--m);right:var(--m);width:auto;bottom:calc(20px + env(safe-area-inset-bottom))}
+ .cap h2{font-size:44px}
+ .st .no{display:none}
+ .st.intro .cap{flex-direction:column;align-items:flex-start}
+ .st.intro .meta{text-align:left}
+ .gal{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="tag">PROVA 1 · GUIDATA (3D)</div>
+<header class="hd"><div class="l"><a href="../../" aria-label="hl., home"><svg class="hlogo" role="img" aria-label="hl." xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg></a><a href="../../#lavori">← indice</a></div><div class="r">09 / 10<br>oopar lamp</div></header>
+<canvas id="c" aria-hidden="true"></canvas><svg id="call" aria-hidden="true"></svg>
+<main>
+<section class="st intro on" data-i="0"><div class="cap"><div><div class="lab" style="margin-bottom:10px">lampada da tavolo · 2017</div><h1 class="big">Oopar</h1></div><div class="meta">1° premio Pending Cultures<br>con Rucina Jogani<br>scorri ↓</div></div></section>
+<section class="st" data-i="1"><div class="cap"><div class="lab">01 — La sfera</div><h2 class="big">Ø 90, sospesa</h2><p>Una sfera cromata di 90 mm fluttua nel campo magnetico, al centro dell’occhio, e riflette la luce che esce dal corpo.</p></div><div class="no thin">01</div></section><section class="st" data-i="2"><div class="cap"><div class="lab">02 — Il decoro</div><h2 class="big">Madhubani</h2><p>La fascia interna porta un decoro ispirato alla pittura Madhubani: è il punto in cui si incontrano la cultura indiana e quella italiana.</p></div><div class="no thin">02</div></section><section class="st" data-i="3"><div class="cap"><div class="lab">03 — Il corpo</div><h2 class="big">Noce, a occhio</h2><p>Il guscio in noce ha la forma di un occhio con i fianchi concavi; la luce esce dalla fascia dentro il tunnel.</p></div><div class="no thin">03</div></section><section class="st" data-i="4"><div class="cap"><div class="lab">04 — Le misure</div><h2 class="big">300 × 195 × 200</h2><p>Misure prese dal modello Rhino: 300 mm di larghezza, 195 di altezza, 200 di profondità; sfera Ø 90.</p></div><div class="no thin">04</div></section>
+<div class="after">
+<section class="sec"><div class="lab"><span>scheda</span><span>dal modello Rhino</span></div><div class="spec"><div><small>larghezza</small><b>300 <i>mm</i></b></div><div><small>altezza</small><b>195 <i>mm</i></b></div><div><small>profondità</small><b>200 <i>mm</i></b></div><div><small>sfera</small><b>Ø 90 <i>mm</i></b></div><div><small>corpo</small><b>Noce</b></div><div><small>sfera</small><b>Cromo</b></div><div><small>parti</small><b>4</b></div><div><small>premio</small><b>1° <i>Pending Cultures</i></b></div></div></section>
+<section class="sec"><div class="lab"><span>immagini</span><span>render Vitrum</span></div><div class="gal"><figure><img src="../img/camera2-1600.webp" alt="Oopar di tre quarti" loading="lazy"><figcaption>tre quarti</figcaption></figure><figure><img src="../img/dettaglio-900.webp" alt="Oopar, la sfera e il decoro da vicino" loading="lazy"><figcaption>dettaglio</figcaption></figure></div></section>
+<a class="next" href="../../#lavori"><div class="lab"><span>prossimo progetto — 10 / 10</span><span>→</span></div><b>La Fornace</b></a><footer class="ft"><span>© 2026 Leandro Henriquez</span><a href="../../privacy/">privacy</a></footer>
+</div></main>
+<script src="../../assets/js/three.min.js"></script>
+<script src="../../assets/js/common.js"></script>
+<script src="../../assets/models/oopar-data.js"></script>
+<script src="../guidata.js"></script>
+</body></html>
