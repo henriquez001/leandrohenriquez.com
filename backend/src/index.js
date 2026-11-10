@@ -8,6 +8,7 @@ import {anteprima} from './anteprima.js';
 import schema from '../../tools/schema.js';
 const {SLUG,controllaVoce,controllaIndice,controllaPagina,generaIndiceJS,controllaApp,controllaElencoApp,inserisciRiquadri}=schema;
 
+const STILE='data/stile.json',NOME_STILE=/^[a-z0-9-]{1,30}$/;
 const INDICE='data/progetti.json',INDICE_JS='assets/js/indice.js',APP='data/app.json',LAB='laboratorio/index.html';
 const MAX_HTML=2*1024*1024;
 const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -137,6 +138,16 @@ export function crea({fetchImpl}={}){
     const html=await gh.leggi(LAB,base);if(html===null)throw new Errore(409,'Manca laboratorio/index.html');
     return gh.commit([{percorso:APP,testo:JSON.stringify(d,null,2)+'\n'},{percorso:LAB,testo:inserisciRiquadri(html,d)},...extra],messaggio,base,autore);
   }
+  // --- stile grafico del sito: data/stile.json; l'Action "Stile del sito" lo applica a tutte le pagine ---
+  R('GET','/api/stile',async(req,env)=>{const gh=new GitHub(env,f);const base=await gh.testa();
+    const d=await gh.leggiJSON(STILE,base)||{stile:'classico'};return json({base,stile:d.stile,disponibili:await gh.cartelle('stili',base)});});
+  R('PUT','/api/stile',async(req,env,s)=>{
+    const {base,stile}=await corpo(req);if(typeof stile!=='string'||!NOME_STILE.test(stile))throw new Errore(422,'Stile non valido');
+    const gh=new GitHub(env,f);const b=base||await gh.testa();
+    if(!(await gh.cartelle('stili',b)).includes(stile))throw new Errore(422,`Lo stile "${stile}" non c'è in stili/`);
+    const d=await gh.leggiJSON(STILE,b)||{};if(d.stile===stile)return json({base:b,stile});
+    return json({base:await gh.commit([{percorso:STILE,testo:JSON.stringify({...d,stile},null,1)+'\n'}],`Pannello: stile del sito "${stile}"`,b,s.email),stile});
+  },{soloProprietario:true});
   R('GET','/api/app',async(req,env)=>{const gh=new GitHub(env,f);const base=await gh.testa();return json({base,...(await gh.leggiJSON(APP,base))});});
   R('PUT','/api/app',async(req,env,s)=>{ // elenco intero: testi, ordine, stato, pubblicazione
     const {base,app}=await corpo(req);const d={app};const err=controllaElencoApp(d);if(err.length)throw new Errore(422,err.join('; '));

@@ -24,6 +24,8 @@ export class GitHub{
   async testa(){const ref=await this.req('GET',`git/ref/heads/${this.branch}`,null,{nullSe404:false});return ref.object.sha;}
   // Legge un file alla versione indicata (o all'ultima). Restituisce il testo o null.
   async leggi(percorso,ref){const j=await this.req('GET',`contents/${encodeURI(percorso)}?ref=${encodeURIComponent(ref||this.branch)}`);return j?b64dec(j.content):null;}
+  // Nomi delle sottocartelle di una cartella del repo (es. gli stili in stili/). [] se non esiste.
+  async cartelle(dir,ref){const j=await this.req('GET',`contents/${encodeURI(dir)}?ref=${encodeURIComponent(ref||this.branch)}`);return Array.isArray(j)?j.filter(x=>x.type==='dir').map(x=>x.name).sort():[];}
   async leggiJSON(percorso,ref){const t=await this.leggi(percorso,ref);return t===null?null:JSON.parse(t);}
   // Scrive più file in un solo commit. file: [{percorso, testo} | {percorso, base64} | {percorso, elimina:true}]
   // base = sha del commit su cui sono stati letti i dati: se main è andato avanti, il commit viene rifiutato.

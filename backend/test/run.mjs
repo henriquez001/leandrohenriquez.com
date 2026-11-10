@@ -13,7 +13,7 @@ async function tokenGoogle(email,{aud=CLIENT,exp=Date.now()/1000+600,verified=tr
   return `${h}.${c}.${b64u(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',chiave,new TextEncoder().encode(h+'.'+c)))}`;
 }
 // --- GitHub finto: repo in memoria con commit e ref ---
-const files=new Map([['data/progetti.json',readFileSync(new URL('../../data/progetti.json',import.meta.url),'utf8')],['lavori/oopar/index.html','<html></html>'],['data/app.json',readFileSync(new URL('../../data/app.json',import.meta.url),'utf8')],['laboratorio/index.html',readFileSync(new URL('../../laboratorio/index.html',import.meta.url),'utf8')],['app/peso-cane/index.html','<html></html>'],['lavori/oopar/progetto.json',JSON.stringify({titolo:'Oopar',tappe:[{camera:{},parola:{testo:'Oopar'}}]})]]);
+const files=new Map([['data/progetti.json',readFileSync(new URL('../../data/progetti.json',import.meta.url),'utf8')],['lavori/oopar/index.html','<html></html>'],['data/app.json',readFileSync(new URL('../../data/app.json',import.meta.url),'utf8')],['laboratorio/index.html',readFileSync(new URL('../../laboratorio/index.html',import.meta.url),'utf8')],['app/peso-cane/index.html','<html></html>'],['data/stile.json','{ "stile": "classico" }\n'],['stili/classico/index.html','<html></html>'],['stili/manifesto/index.html','<html></html>'],['lavori/oopar/progetto.json',JSON.stringify({titolo:'Oopar',tappe:[{camera:{},parola:{testo:'Oopar'}}]})]]);
 let commits={c0:{tree:'t0',files:new Map(files)}},head='c0',n=0;const blobs={},trees={};
 const R=(d,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{'content-type':'application/json'}});
 let chiamateGC=[],chiamateSito=[],avvii=[],permessoActions=false;
@@ -67,6 +67,8 @@ async function finto(url,opt={}){
   const p=url.slice('https://api.github.com/repos/o/r/'.length);
   if(m==='GET'&&p==='git/ref/heads/main')return R({object:{sha:head}});
   if(m==='GET'&&p.startsWith('contents/')){const [fp,q]=p.slice(9).split('?ref=');const c=commits[q==='main'?head:q];const t=c&&c.files.get(decodeURI(fp));
+    if(t===undefined&&c){const dir=decodeURI(fp)+'/';const sotto=[...new Set([...c.files.keys()].filter(k=>k.startsWith(dir)).map(k=>k.slice(dir.length).split('/')[0]))];
+      if(sotto.length)return R(sotto.map(x=>({name:x,type:[...c.files.keys()].some(k=>k.startsWith(dir+x+'/'))?'dir':'file'})));}
     return t===undefined?R({},404):R({content:Buffer.from(t,'latin1'===0?'':'utf8').toString('base64'),sha:'x'});}
   if(m==='GET'&&p.startsWith('git/commits/'))return R({tree:{sha:'t-'+p.slice(12)}});
   if(m==='POST'&&p==='git/blobs'){const id='b'+(++n);blobs[id]=b.encoding==='base64'?Buffer.from(b.content,'base64').toString('utf8'):b.content;return R({sha:id},201);}
@@ -227,5 +229,13 @@ await prova('portfolio su misura: ne restano 5, le più vecchie si tolgono',asyn
   const l=await chiama('GET','/api/portfolio/versioni',{cookie:cProp});assert.equal(l.dati.versioni.length,5);assert.ok(!l.dati.versioni.some(v=>v.id===vid));assert.ok(!kv.has('portfolio-v-'+vid));
   assert.equal((await chiama('DELETE','/api/portfolio/versioni/'+l.dati.versioni[0].id,{cookie:cProp})).stato,200);
   assert.equal((await chiama('GET','/api/portfolio/versioni',{cookie:cProp})).dati.versioni.length,4);});
+await prova('stile del sito: legge gli stili in stili/, il proprietario lo cambia con un commit',async()=>{
+  let r=await chiama('GET','/api/stile',{cookie:cProp});assert.equal(r.stato,200);assert.equal(r.dati.stile,'classico');assert.deepEqual(r.dati.disponibili,['classico','manifesto']);
+  r=await chiama('PUT','/api/stile',{cookie:cProp,corpo:{base:r.dati.base,stile:'inventato'}});assert.equal(r.stato,422);
+  r=await chiama('PUT','/api/stile',{cookie:cOspite,corpo:{stile:'manifesto'}});assert.ok([401,403].includes(r.stato));
+  r=await chiama('PUT','/api/stile',{cookie:cProp,corpo:{stile:'manifesto'}});assert.equal(r.stato,200);
+  assert.equal(JSON.parse(commits[head].files.get('data/stile.json')).stile,'manifesto');
+  const prima=head;r=await chiama('PUT','/api/stile',{cookie:cProp,corpo:{stile:'manifesto'}});assert.equal(head,prima,'stesso stile: nessun commit');
+});
 await prova('uscita cancella il cookie',async()=>{const r=await chiama('POST','/api/uscita',{cookie:cProp});assert.equal(r.cookie,'hl_sessione=');});
 console.log(`\n${ok} prove superate`);
