@@ -1,0 +1,50 @@
+# Applica lo stile grafico scelto in data/stile.json (dal pannello) a tutto il sito: node tools/applica-stile.js.
+# Stili in stili/<nome>/ (oggi "classico", attivo, e "manifesto", la variante D tenuta da parte il 10/11/2026).
+name: Stile del sito
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/stile.json
+      - stili/**
+      - tools/applica-stile.js
+      - .github/workflows/stile.yml
+  workflow_dispatch:
+    inputs:
+      stile:
+        description: 'stile da applicare (vuoto = quello in data/stile.json)'
+        required: false
+        default: ''
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: stile-del-sito
+  cancel-in-progress: false
+jobs:
+  applica:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Applica lo stile
+        env:
+          STILE: ${{ inputs.stile }}
+        run: |
+          if [ -n "$STILE" ]; then
+            node -e 'const fs=require("fs");const f="data/stile.json";const d=JSON.parse(fs.readFileSync(f));d.stile=process.env.STILE;fs.writeFileSync(f,JSON.stringify(d,null,1)+"\n")'
+          fi
+          node tools/applica-stile.js
+      - name: Salva e pubblica
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then echo "Niente da cambiare"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Stile del sito: $(node -p 'require("./data/stile.json").stile')"
+          git push
+          # un push fatto da questa Action non fa ripartire GitHub Pages da solo: lo si chiede esplicitamente
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Pages ripartirà al prossimo push"
