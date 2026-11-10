@@ -1,0 +1,35 @@
+/* prove pagina progetto (10/11): stile classico. Carta #E9E6DF, inchiostro #111, Archivo / Inter / Roboto Mono */
+@font-face{font-family:'Archivo';src:url(../assets/fonts/archivo-wdth-wght.woff2) format('woff2');font-weight:100 900;font-stretch:62% 125%;font-display:swap}
+@font-face{font-family:'Inter';src:url(../assets/fonts/inter-wght.woff2) format('woff2');font-weight:100 900;font-display:swap}
+@font-face{font-family:'Roboto Mono';src:url(../assets/fonts/roboto-mono-wght.woff2) format('woff2');font-weight:100 700;font-display:swap}
+:root{--carta:#E9E6DF;--ink:#111;--mu:#6b6963;--ln:rgba(17,17,17,.14);--bar:56px;--m:2.5vw;--mono:500 12px/1.4 'Roboto Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--carta);color:var(--ink)}
+body{font:16px/1.55 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+img{display:block;max-width:100%}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mono{font:var(--mono)}
+.hd{position:fixed;inset:0 0 auto;height:var(--bar);z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 var(--m);background:var(--carta);box-shadow:0 1px 0 var(--ln);font:var(--mono)}
+.hd .l{display:flex;align-items:center;gap:22px}
+.hd .hlogo{height:26px;width:auto;display:block}
+.hd a{text-decoration:none}
+.hd a:hover,.hd a:focus-visible{font-weight:700;outline:0}
+.hd .r{text-align:right}
+.big{font-family:Archivo,sans-serif;text-transform:uppercase;font-variation-settings:'wdth' 62,'wght' 800;line-height:.82;letter-spacing:0}
+.thin{font-family:Archivo,sans-serif;font-variation-settings:'wdth' 62,'wght' 250;line-height:.85}
+.lab{font:var(--mono);color:var(--mu)}
+.tag{position:fixed;left:8px;bottom:8px;z-index:99;background:#111;color:#E9E6DF;font:700 11px monospace;padding:6px 10px;pointer-events:none}
+/* scheda e prossimo progetto, uguali in tutte le prove */
+.spec{display:grid;grid-template-columns:repeat(4,1fr);column-gap:var(--m)}
+.spec div{border-top:1px solid var(--ink);padding:10px 0 26px}
+.spec small{display:block;font:var(--mono);color:var(--mu);margin-bottom:10px}
+.spec b{font:inherit;font-family:Archivo,sans-serif;text-transform:uppercase;font-variation-settings:'wdth' 62,'wght' 800;font-size:clamp(34px,4vw,64px);line-height:.88;display:block}
+.spec b i{font-style:normal;font-variation-settings:'wdth' 62,'wght' 250}
+.next{display:block;text-decoration:none;padding:6vh var(--m) 10vh;border-top:1px solid var(--ink)}
+.next .lab{display:flex;justify-content:space-between;color:var(--ink);margin-bottom:3vh}
+.next b{display:block;font-family:Archivo,sans-serif;text-transform:uppercase;font-size:min(15vw,220px);line-height:.85;white-space:nowrap;font-variation-settings:'wdth' 62,'wght' 300;transition:font-variation-settings 420ms cubic-bezier(.2,.9,.25,1)}
+.next:hover b,.next:focus-visible b{font-variation-settings:'wdth' 125,'wght' 900;outline:0}
+.ft{display:flex;justify-content:space-between;padding:14px var(--m);font:var(--mono);border-top:1px solid var(--ln)}
+@media (max-width:760px){:root{--m:16px;--bar:60px}.spec{grid-template-columns:1fr 1fr;column-gap:16px}.spec b{font-size:10vw}.hd .r{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important;animation:none!important;scroll-behavior:auto!important}}
