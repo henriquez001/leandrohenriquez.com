@@ -11,48 +11,52 @@
 <meta property="og:url" content="https://leandrohenriquez.com/">
 <meta property="og:image" content="https://leandrohenriquez.com/assets/img/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#f3f0e8">
+<meta name="theme-color" content="#E9E6DF">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preload" href="assets/fonts/inter-tight-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<!-- estetica: solo in assets/tema/ (tema.css = valori, caratteri.css = font); manifesto.css = struttura -->
-<link rel="stylesheet" href="assets/tema/caratteri.css">
-<link rel="stylesheet" href="assets/tema/tema.css">
-<link rel="stylesheet" href="assets/css/manifesto.css">
+<link rel="preload" href="assets/fonts/archivo-wdth-wght.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/home.css">
+<link rel="stylesheet" href="assets/css/mobile.css">
 <!-- statistiche senza cookie (vedi privacy): sul computer di sviluppo non conta nulla -->
 <script data-goatcounter="https://leandrohenriquez.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
-<a class="skip" href="#posters">vai ai lavori</a>
-<header class="hud"><a href="./" aria-label="hl., home"><svg class="hlogo" role="img" aria-label="hl." xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg></a><span class="cnt" id="cnt" aria-hidden="true"></span>
-  <nav aria-label="principale"><a href="#posters">lavori</a><a href="#studio">studio</a><a href="laboratorio/">laboratorio</a><a href="vitrum/">vitrum</a><a href="#contatti">contatti</a></nav>
-  <button class="mbtn" id="mbtn" type="button" aria-expanded="false" aria-controls="msheet">menu</button></header>
-<nav class="msheet" id="msheet" aria-label="menu"><a href="#posters">lavori</a><a href="#studio">studio</a><a href="laboratorio/">laboratorio</a><a href="vitrum/">vitrum</a><a href="#contatti">contatti</a><small>henriquez.leandro.a@gmail.com</small></nav>
-<main>
-<section class="ps" id="home" data-n="00/" aria-label="Leandro Henriquez">
-  <h1 class="sr">Leandro Henriquez, industrial designer</h1>
-  <div class="lay ov" data-d="0.15" style="left:-2vw;top:calc(var(--barra-alta) + 2vh);--s:24vw"><span class="h" style="color:var(--inchiostro-a);display:block" aria-hidden="true">Leandro</span></div>
-  <div class="lay ov" data-d="0.45" style="left:6vw;top:34vh;rotate:-15deg;--s:21vw"><span class="h" style="color:var(--inchiostro-b);display:block" aria-hidden="true">Henriquez</span></div>
-  <div class="lay m" data-d="0.8" style="right:5vw;bottom:9vh;width:320px">Industrial designer<br>Macerata, IT<br>Design specialist · Elica · dal 2022<br><br><span class="cntot">10</span> oggetti ↓</div>
-  <div class="lay bar" data-d="1.1" style="left:-5vw;right:-5vw;bottom:30vh;rotate:-15deg"></div></section>
-<div id="posters" tabindex="-1"></div>
-<noscript><section class="ps"><p class="lead">I lavori si vedono con JavaScript attivo. Scrivimi: henriquez.leandro.a@gmail.com</p></section></noscript>
-<section class="ps" id="studio" data-n="studio" aria-labelledby="t-studio" tabindex="-1">
-  <h2 class="sr" id="t-studio">Studio</h2>
-  <div class="lay ov" data-d="0.3" data-evita=".lead,.tab" style="right:-2vw;bottom:-3vh;--s:24vw;rotate:-8deg"><span class="h" style="color:var(--inchiostro-b);display:block" aria-hidden="true">Studio</span></div>
-  <p class="lead">Disegno <b>oggetti</b> che si usano bene: elettrodomestici, prodotti e packaging, dal primo schizzo al modello 3D.</p>
-  <div class="tab"><span>ruolo</span><b>Design specialist</b><span>dove</span><b>Elica S.p.A.</b><span>dal</span><b>2022</b><span>base</span><b>Macerata</b><span>formazione</span><b>Firenze · 109/110</b><span>ora</span><b>Magistrale</b><span>con</span><b>Bottega Ind. · GanzoDesign</b><span>strumenti</span><b>Rhino · <a href="vitrum/">Vitrum</a></b></div>
-  <div class="lay bar b-studio" data-d="0.9" style="left:-5vw;right:-5vw;top:calc(var(--barra-alta) + 7vh);rotate:-3deg"></div></section>
-<section class="ps" id="contatti" data-n="contatti" aria-labelledby="t-con" tabindex="-1">
-  <h2 class="sr" id="t-con">Contatti</h2>
-  <div class="lay ov" data-d="0.3" data-evita=".mail,.row" style="left:-2vw;bottom:-4vh;--s:20vw;rotate:-15deg"><span class="h" style="color:var(--inchiostro-a);display:block" aria-hidden="true">Scrivimi</span></div>
-  <a class="mail" id="mail" href="mailto:henriquez.leandro.a@gmail.com" aria-label="henriquez.leandro.a@gmail.com, copia l’indirizzo">henriquez.leandro.a@gmail.com</a>
-  <div class="row"><div>ora a Macerata<b class="clock">—</b></div><div>dove<b>43.30° N · 13.45° E</b></div><div>altrove<b><a href="https://www.linkedin.com/in/leandro-henriquez-57730515b/" target="_blank" rel="noopener">LinkedIn ↗</a> <a href="https://www.instagram.com/henriquez_leandro/" target="_blank" rel="noopener">Instagram ↗</a></b></div></div></section>
+<main class="live" id="liveJ">
+    <div class="ui tl"><svg class="hlogo" role="img" aria-label="hl." xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg></div>
+  <a class="skip" href="#jLav">vai ai lavori</a>
+  <nav class="jnav" aria-label="principale"><a href="#jLav" data-to="jLav">lavori</a><a href="#jStu" data-to="jStu">studio</a><a href="laboratorio/">laboratorio</a><a href="vitrum/">vitrum</a><a href="#jCon" data-to="jCon">contatti</a></nav>
+  <button class="mbtn" id="jMenu" type="button" aria-expanded="false" aria-controls="jSheet">menu</button>
+  <nav class="msheet" id="jSheet" aria-label="menu"><a href="#jLav" data-to="jLav">lavori</a><a href="#jStu" data-to="jStu">studio</a><a href="laboratorio/">laboratorio</a><a href="vitrum/">vitrum</a><a href="#jCon" data-to="jCon">contatti</a><small>henriquez.leandro.a@gmail.com</small></nav>
+  <div class="ui tr">industrial designer<br>macerata, it</div>
+  <div class="ui bl" id="jSec" aria-hidden="true">(00) home</div>
+  <div class="ui br" id="jClock" aria-hidden="true">macerata —:—</div>
+  <section class="hero" id="jHero">
+    <h1 class="sr">Leandro Henriquez, industrial designer</h1>
+    <div class="kin" data-word="LEANDRO" aria-hidden="true"></div><div class="kin" data-word="HENRIQUEZ" aria-hidden="true"></div>
+    <svg class="q" id="jQ" aria-hidden="true"></svg>
+  </section>
+  <section class="sx" id="jLav" tabindex="-1"><div class="bw" aria-hidden="true">Lavori</div>
+    <div class="hd"><b role="heading" aria-level="2">Lavori <i>10</i></b><span>passa sopra: il progetto ti segue · clicca Oopar per il 3D</span></div>
+    <div class="idx" id="jIdx"></div></section>
+  <section class="sx" id="jFeat"><div class="bw" aria-hidden="true">Oopar</div>
+    <div class="hd"><b role="heading" aria-level="2">In evidenza</b><span>09 / 10 — lampada da tavolo</span></div>
+    <div class="feat"><div class="pic" id="jPic"><img src="assets/img/cut-oopar.png" alt="Oopar Lamp"><svg id="jPicQ"></svg></div>
+      <div class="spec"><div><small>larghezza</small><b>300<i>mm</i></b></div><div><small>altezza</small><b>195<i>mm</i></b></div><div><small>sfera</small><b>Ø 90<i>mm</i></b></div><div><small>corpo</small><b>Noce</b></div><div><small>premio</small><b>1° Pending <i>Cultures</i></b></div><div><small>modello</small><b>Rhino <i>3D</i></b></div>
+        <a class="go" id="jGo" href="lavori/oopar/"><span>apri il progetto</span><b>Oopar in 3D →</b></a></div></div></section>
+  <section class="sx" id="jStu" tabindex="-1"><div class="bw" aria-hidden="true">Studio</div>
+    <div class="hd"><b role="heading" aria-level="2">Studio</b><span>chi sono, in una scheda</span></div>
+    <p class="lead4" id="jLead">Disegno oggetti che si usano bene: elettrodomestici, prodotti e packaging, dal primo schizzo al modello 3D.</p>
+    <div class="st4"><div><small>ruolo</small><b>Design <i>Specialist</i></b></div><div><small>dove</small><b>Elica S.p.A.</b></div><div><small>dal</small><b>2022</b></div><div><small>base</small><b>Macerata</b></div>
+      <div><small>formazione</small><b>Firenze <i>109/110</i></b></div><div><small>ora</small><b>Magistrale</b></div><div><small>con</small><b>Bottega Ind. · Ganzo</b></div><div><small>strumenti</small><b>Rhino · <i>Vitrum</i></b></div></div></section>
+  <section class="sx" id="jCon" tabindex="-1"><div class="bw" aria-hidden="true">Contatti</div>
+    <div class="hd"><b role="heading" aria-level="2">Contatti</b><span>clicca l’indirizzo per copiarlo</span></div>
+    <a class="mail" id="jMail" href="mailto:henriquez.leandro.a@gmail.com" aria-label="henriquez.leandro.a@gmail.com, copia l’indirizzo" data-word="henriquez.leandro.a@gmail.com"></a>
+    <div class="row3"><div>ora a Macerata<b id="jClock2">—</b></div><div>dove<b>43.30° N<br>13.45° E</b></div><div>altrove<b><a href="https://www.linkedin.com/in/leandro-henriquez-57730515b/" target="_blank" rel="noopener">LinkedIn ↗</a><br><a href="https://www.instagram.com/henriquez_leandro/" target="_blank" rel="noopener">Instagram ↗</a></b></div></div></section>
+  <footer class="f"><svg class="hlogo" role="img" aria-label="hl." xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg><span>© 2026 Leandro Henriquez — leandrohenriquez.com · <a href="privacy/">privacy</a></span></footer>
+  <div class="tr" id="jTr"></div><div class="copied" id="jCopied" role="status" aria-live="polite"></div>
 </main>
-<footer class="ft"><svg class="hlogo" role="img" aria-label="hl." xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg><span>© 2026 Leandro Henriquez · <a href="privacy/">privacy</a></span></footer>
-<div class="copied" id="copied" role="status" aria-live="polite"></div>
 <script src="assets/js/common.js"></script>
 <script src="assets/js/indice.js"></script>
-<script src="assets/js/manifesto.js"></script>
-<script src="assets/js/cottura.js"></script>
+<script src="assets/js/home.js"></script>
 </body>
 </html>

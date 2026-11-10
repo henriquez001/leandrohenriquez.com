@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="it">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>404 — Leandro Henriquez</title><meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/tema/caratteri.css">
+<link rel="stylesheet" href="/assets/tema/tema.css">
+<style>
+/* 404 in stile D: un poster solo */
+html,body{margin:0;height:100%;background:var(--carta);color:var(--inchiostro);overflow:hidden}
+body{position:relative;font-family:var(--font-testo)}
+body::before{content:"";position:fixed;inset:0;background-image:radial-gradient(var(--inchiostro) 1.1px,transparent 1.3px);background-size:var(--retino-passo) var(--retino-passo);opacity:var(--retino-opacita);pointer-events:none}
+main{height:100%;display:grid;place-items:center;position:relative}
+h1{margin:0;position:relative;font:var(--peso-titoli) clamp(160px,44vw,720px)/var(--interlinea-titoli) var(--font-titoli);letter-spacing:var(--spaziatura-titoli);color:var(--inchiostro-a);rotate:-15deg;isolation:isolate}
+h1 span{color:var(--inchiostro-b);position:absolute;left:calc(var(--fuori-registro-x) * 2);top:calc(var(--fuori-registro-y) * 2);z-index:0}
+h1 b{font:inherit;position:relative;z-index:1}
+.bar{position:absolute;left:-5vw;right:-5vw;top:64%;height:var(--nastro);background:var(--inchiostro);rotate:6deg}
+p{position:absolute;left:4vw;top:6vh;margin:0;font:var(--peso-mono) var(--corpo-mono)/1.6 var(--font-mono);text-transform:uppercase}
+a{position:absolute;right:4vw;bottom:6vh;display:inline-flex;align-items:center;height:52px;padding:0 20px;background:var(--inchiostro);color:var(--carta);font:var(--peso-mono) 14px var(--font-mono);text-transform:uppercase;text-decoration:none;transition:transform var(--durata-breve) var(--curva)}
+a:hover,a:focus-visible{background:var(--inchiostro-a);outline:0}
+a:active{transform:scale(var(--scala-pressione))}
+</style>
+<!-- statistiche senza cookie (vedi privacy): sul computer di sviluppo non conta nulla -->
+<script data-goatcounter="https://leandrohenriquez.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body><main><p>pagina non trovata<br>oggetto n. 404</p><h1 aria-label="404"><b aria-hidden="true">404</b><span aria-hidden="true">404</span></h1><div class="bar"></div><a href="/">← torna alla home</a></main></body>
+</html>

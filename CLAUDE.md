@@ -38,6 +38,16 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
 - Link e titoli sono semantici (`<a href>`, `h1` nascosto, titoli di sezione `role="heading"`):
   le righe con pagina sono `<a>`, quelle senza restano `<div>`.
 
+## Stili grafici (scelta del 10/11/2026)
+- Stile attivo **classico** (il sito com'era fino al 6/11). La variante D "Manifesto" è tenuta da parte e si attiva dal pannello:
+  il pannello scrive `data/stile.json` (`{"stile":"classico"}` o `"manifesto"`), l'Action `stile.yml` lancia
+  `node tools/applica-stile.js` e pubblica. A mano: `node tools/applica-stile.js manifesto`.
+- Home e 404 cambiano del tutto: le versioni vere sono in `stili/<stile>/index.html` e `stili/<stile>/404.html`;
+  quelle nella radice sono copie (si modificano in stili/, poi si applica lo stile).
+- Laboratorio, privacy e pagine progetto hanno blocchi `<!--stile:<nome>-->…<!--/stile:<nome>-->` nel `<head>`:
+  quello dello stile attivo è acceso, gli altri sono chiusi in un commento. Dentro un blocco niente "--".
+- Vitrum non cambia con lo stile. Il pannello ha la sua estetica (backend/public/tema.css).
+
 ## Struttura
 - `index.html` (home, `data-base=""`) e `lavori/<progetto>/index.html` (`data-base="../../"`).
   `common.js` legge `data-base` per costruire i percorsi delle immagini.
