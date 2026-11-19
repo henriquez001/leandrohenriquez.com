@@ -46,6 +46,12 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   quelle nella radice sono copie (si modificano in stili/, poi si applica lo stile).
 - Laboratorio, privacy e pagine progetto hanno blocchi `<!--stile:<nome>-->…<!--/stile:<nome>-->` nel `<head>`:
   quello dello stile attivo è acceso, gli altri sono chiusi in un commento. Dentro un blocco niente "--".
+- Stile **showroom** (scelta del 19/11/2026, P3 «Showroom a colori»): cambia solo home e 404 (`stili/showroom/`), nelle altre pagine
+  resta acceso il blocco «classico» (ripiego in applica-stile.js). Codice in `assets/showroom/` (showroom.css, showroom.js).
+  Due viste scelte dal menu in alto a destra: **Vetrina** (palco grande + striscia) e **Mosaico** (griglia 12 colonne); le tessere
+  sono le stesse e si spostano con FLIP. Progetti da `PROGETTI` (indice.js) + descrizione/anno da data/progetti.json.
+  Colori: immagini SENZA filtri (niente mix-blend: Leandro 19/11 «lascia i colori originali»), fondo tessera calcolato dal prodotto.
+  Immagini più grandi per slug nella costante FOTO di showroom.js.
 - Vitrum non cambia con lo stile. Il pannello ha la sua estetica (backend/public/tema.css).
 
 ## Struttura
