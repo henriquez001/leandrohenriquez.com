@@ -1,0 +1,91 @@
+/* Stile "showroom" per il pannello (19/11/2026, Leandro: "allinea il backend al nuovo stile").
+   Si carica dopo pannello.css solo quando data/stile.json vale "showroom" (backend/tools/copia-tema.cjs lo copia
+   in public/sito/showroom/). Toglie gli effetti del Manifesto (puntini, titoli timbrati e inclinati, nastro,
+   fotocopia) e mette quelli della home: cornice nera, blocchi tondi, pillole, Big Shoulders + Inter + Plex Mono.
+   Variante A scura (predefinita) e B chiara (classe .chiaro su <html>): si tiene quella scelta da Leandro. */
+@font-face{font-family:'Big Shoulders Display';src:url(../fonts/big-shoulders-display-wght.woff2) format('woff2');font-weight:500 900;font-display:swap}
+@font-face{font-family:'Inter';src:url(../fonts/inter-wght.woff2) format('woff2');font-weight:100 900;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url(../fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2');font-weight:500;font-display:swap}
+:root{
+  color-scheme:dark;
+  /* A: come la home, cornice nera e blocchi grafite */
+  --paper:#0D0D0D; --card:#1C1C1C; --ink:#F4F3EF; --ink-hover:#FFFFFF;
+  --rule:#2C2C2C; --mute:#A3A5A6; --hover:#262626; --img:#262626; --img-fondo:#E6E6E3;
+  --red:#FF7A6B; --velo:rgba(0,0,0,.55); --verde:#3DDC84; --barra-fondo:rgba(13,13,13,.86);
+  /* caratteri */
+  --D:'Big Shoulders Display',Impact,'Arial Narrow',sans-serif;
+  --M:'Inter',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --D-maiuscolo:uppercase; --D-wdth:100; --D-wght:900; --D-wght-scheda:800; --D-wght-voce:800;
+  --D-riga:.82; --D-spazio:-.005em; --testo:14px; --testo-riga:1.5; --testo-peso:400;
+  /* raggi: blocchi 24 come le tessere della home, campi 12, pillole */
+  --r-scheda:24px; --r:999px; --r-piccolo:12px; --r-tag:999px;
+  --spesso:1px; --barra:60px;
+  --ombra-presa:0 18px 40px rgba(0,0,0,.45);
+  --t-pagina:96px; --t-pagina-tel:64px; --t-accesso:120px; --t-drawer:60px; --t-scheda:30px; --t-hero:150px; --t-hero-tel:96px;
+}
+/* B: carta chiara, blocchi bianchi, testo nero */
+:root.chiaro{
+  color-scheme:light;
+  --paper:#F4F3EF; --card:#FFFFFF; --ink:#0D0D0D; --ink-hover:#2A2A2A;
+  --rule:#DCDAD4; --mute:#5E605F; --hover:#EAE8E2; --img:#E6E6E3; --img-fondo:#E6E6E3;
+  --red:#B42318; --velo:rgba(13,13,13,.28); --barra-fondo:rgba(244,243,239,.86);
+  --ombra-presa:0 18px 40px rgba(13,13,13,.18);
+}
+
+/* fondo pieno, niente retino */
+html,body{background:var(--paper)}
+body{background-image:none}
+/* barra in alto sfocata come la home (apple-look: materiali, barra traslucida sopra il contenuto) */
+.barra{background:var(--barra-fondo);color:var(--ink);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);
+  font:500 11px/1 var(--mono);letter-spacing:.06em;border-bottom:1px solid var(--rule)}
+@media (prefers-reduced-transparency:reduce){.barra{background:var(--paper);backdrop-filter:none;-webkit-backdrop-filter:none}}
+.menu{border-right:1px solid var(--rule);background:var(--paper)}
+.menu nav a{font:500 14px var(--M);text-transform:none;padding:8px 12px;margin:0 -12px;min-height:36px}
+.menu nav a[aria-current="page"]{background:var(--ink);color:var(--paper)}
+.lbl,.c .tag,.periodo button{font-family:var(--mono)}
+.lbl{font-size:11px;letter-spacing:.04em}
+
+/* titoli: diritti, un solo colore, niente sovrastampa */
+.hd h1,.accesso h1,#drTitolo{color:var(--ink);mix-blend-mode:normal;transform:none;margin:.2em 0 .1em;white-space:normal}
+.hd h1::after,.accesso h1::after,#drTitolo::after{content:none}
+main::before{content:none}
+
+/* pulsanti a pillola (apple-look: controlli, area minima 44 px su touch e 36 px su desktop) */
+.btn{font:600 13px var(--M);text-transform:none;letter-spacing:0;border:1px solid var(--rule);border-radius:999px;padding:8px 16px;background:var(--card)}
+.btn.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.ghost{background:none;border-color:transparent}
+.sw{border-radius:999px;background:#5E605F}.sw::after{border-radius:50%;background:#fff}
+.sw[aria-checked="true"]{background:var(--verde)}
+
+/* schede: blocchi tondi senza bordo, immagini con i colori originali */
+.cards{gap:10px}
+.c{border:0;border-radius:var(--r-scheda);background:var(--card)}
+.c .im{height:150px;border-bottom:0;background:var(--img-fondo)}
+.c .im{pointer-events:none}            /* il clic sull'immagine apre la scheda (prima lo bloccava) */
+.c .im img{filter:none;mix-blend-mode:normal}
+.c .im::after{content:none}
+.c .tx{padding:14px 16px 16px}
+.c .tag{border-color:var(--rule);padding:2px 8px}
+.c.bz{border:1px dashed var(--mute)}
+.nuovo{border:1px dashed var(--mute);border-radius:var(--r-scheda)}
+.anteprima .th img{filter:none}
+.vuoto{border:1px dashed var(--mute)}
+.periodo{border:1px solid var(--rule);border-radius:999px;padding:3px;background:var(--card)}
+.periodo button{border-radius:999px;font-size:12px}
+.f input[type=text],.f input[type=email],.f textarea,.f select,.aggiungi input{border:1px solid var(--rule);border-radius:12px;background:var(--card);min-height:40px}
+.drawer{border-left:0;border-radius:24px 0 0 24px;background:var(--paper)}
+.spec>div,.lista>div,.acc>div,.pronti>div,.scelta li,.f .riga{border-color:var(--rule)}
+.avviso{border-radius:999px;padding:10px 18px}
+.tip{border-radius:10px}
+.chart svg text{fill:var(--ink)}       /* etichetta del picco: senza colore proprio resterebbe nera sul fondo scuro */
+
+@media (hover:hover){.c:hover{border-color:transparent}}
+
+@media (max-width:720px){
+  .menu{border-top:1px solid var(--rule);background:var(--barra-fondo);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
+  .menu nav a[aria-current="page"]{background:none;color:var(--paper)}
+  .menu nav .ic{border-radius:999px}
+  .drawer{border-radius:0}
+  .c .im{height:180px}
+}

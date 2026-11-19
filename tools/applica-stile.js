@@ -17,7 +17,7 @@ let cambiati=0;
 const scrivi=(rel,testo)=>{const f=path.join(R,rel);if(fs.existsSync(f)&&fs.readFileSync(f,'utf8')===testo)return;fs.writeFileSync(f,testo);cambiati++;console.log('aggiornato',rel);};
 for(const f of ['index.html','404.html'])scrivi(f,fs.readFileSync(path.join(R,'stili',nome,f),'utf8'));
 // pagine con blocchi per stile
-const pagine=['laboratorio/index.html','privacy/index.html',...fs.readdirSync(path.join(R,'lavori')).map(d=>`lavori/${d}/index.html`)].filter(f=>fs.existsSync(path.join(R,f)));
+const pagine=['laboratorio/index.html','privacy/index.html',...fs.readdirSync(path.join(R,'lavori')).map(d=>`lavori/${d}/index.html`),...fs.readdirSync(path.join(R,'app')).map(d=>`app/${d}/index.html`)].filter(f=>fs.existsSync(path.join(R,f)));
 const RX=/<!--stile:([a-z]+)-->([\s\S]*?)<!--\/stile:\1-->/g;
 // Uno stile che riguarda solo home e 404 (es. "showroom") non ha blocchi nelle altre pagine: lì resta acceso "classico".
 const RIPIEGO='classico';
