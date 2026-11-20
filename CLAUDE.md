@@ -9,6 +9,9 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
 - Prima di ogni modifica visiva (layout, font, spaziature, menu, animazioni) si prepara
   un'anteprima con varianti affiancate e i valori esatti da cambiare. Non si applica nulla
   finché Leandro non sceglie la variante.
+- Ogni cambio di stile va portato **INTEGRALMENTE** (regola di Leandro del 20/11/2026): struttura, estetica e
+  comportamenti (griglia, tessere, viste, movimento) su TUTTE le pagine (home, 404, pagine progetto, Laboratorio,
+  privacy, app) e sul pannello (backend/public). Mai solo ricolorare la vecchia impaginazione. Unica eccezione: /vitrum/.
 - Lavorando su UI e animazioni si seguono le skill apple-look e apple-motion, citando la regola
   applicata. Leandro ha detto che per questo sito si possono anche ignorare quando servono
   scelte sperimentali.
