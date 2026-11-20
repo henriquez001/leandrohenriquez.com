@@ -1,0 +1,45 @@
+/* Prove "showroom integrale" (20/11/2026): le altre pagine con la STESSA struttura della home.
+   Si appoggia a assets/showroom/showroom.css (barra, tessere .t/.in, .btn, .mono, caratteri) e aggiunge solo
+   la griglia per le pagine fisse: ogni tessera dice quante colonne e righe occupa con --c/--r (computer)
+   e --cm/--rm (telefono). Nella pagina progetto ci sono due viste, come in home: --cv/--rv/--ov per la Vetrina. */
+.board{grid-auto-flow:row dense}
+.board>.t{grid-column:span var(--c,4);grid-row:span var(--r,3)}
+.board[data-v="vetrina"]>.t{grid-column:span var(--cv,var(--c,4));grid-row:span var(--rv,var(--r,3));order:var(--ov,50)}
+.board[data-v="vetrina"]>.solo-m,.board[data-v="mosaico"]>.solo-v{display:none}
+@media (max-width:760px){
+  .board{--cols:2;--rh:92px}
+  .board>.t{grid-column:span var(--cm,2);grid-row:span var(--rm,3)}
+  .board[data-v="vetrina"]>.t{grid-column:span var(--cvm,var(--cm,2));grid-row:span var(--rvm,var(--rm,3))}
+}
+.top .back{justify-self:end;font:600 13px var(--t);text-decoration:none;padding:0 16px;min-height:38px;display:inline-flex;align-items:center;border-radius:999px;background:#232323;color:#E6E6E3;box-shadow:inset 0 0 0 1px #2F2F2F}
+.top .back:hover{background:#2C2C2C}
+.tag-prova{position:fixed;left:10px;bottom:10px;z-index:99;background:#F4F3EF;color:#0D0D0D;font:600 11px var(--m);letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;border-radius:999px;pointer-events:none}
+
+/* tessere generiche */
+.carta{--bg:var(--carta);--tx:var(--ink)}
+.neutro{--bg:var(--neutro);--tx:var(--ink)}
+.verde{--bg:#3DDC84;--tx:var(--ink)}
+.t .row{position:relative;z-index:2;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.t .row .mono{opacity:.75}
+.tit{font:900 clamp(30px,min(13cqw,24cqh),150px)/.84 var(--f);text-transform:uppercase;letter-spacing:-.005em}
+.tit.m{font-size:clamp(24px,min(11cqw,20cqh),76px)}
+.t p{max-width:46ch;font-size:clamp(13.5px,3.2cqw,16px)}
+.t dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-size:13.5px}
+.t dt{font:500 11px/1.9 var(--m);letter-spacing:.06em;text-transform:uppercase;opacity:.65}
+.t dd{font-weight:500}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn.chiaro{background:var(--carta);color:var(--ink)}
+.btn.vuoto{background:transparent;color:var(--tx);box-shadow:inset 0 0 0 1.5px currentColor}
+.stat b small{font-size:.38em;margin-left:.08em;font-weight:700}
+.foto-t{--tx:var(--carta)}
+.foto-t .in>img.fondo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.foto-t .in::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.4),rgba(0,0,0,0) 30%,rgba(0,0,0,0) 55%,rgba(0,0,0,.6));pointer-events:none}
+.foto-t .in>*:not(img){position:relative;z-index:2}
+@media (hover:hover){a.t:hover .in>img.fondo,button.t:hover .in>img.fondo{transform:scale(1.04)}}
+a.t,button.t{display:block;text-decoration:none;text-align:left;cursor:pointer;border:0;font:inherit;padding:0}
+a.t:active,button.t:active{transform:scale(.985)}
+.t .go{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tx);color:var(--bg,var(--ink));font:600 16px var(--t)}
+.foto-t .go{background:var(--carta);color:var(--ink)}
+@container (max-height:250px){.t .hide-b{display:none}}
+@container (max-width:300px){.t .hide-s{display:none}}
+@media (prefers-reduced-motion:reduce){.foto-t .in>img.fondo{transition:none}a.t:active,button.t:active{transform:none}}
