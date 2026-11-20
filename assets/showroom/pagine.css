@@ -1,0 +1,141 @@
+/* Stile "showroom" sulle pagine diverse dalla home (scelta di Leandro del 20/11/2026, giro 8): le altre pagine con la STESSA struttura della home.
+   Si appoggia a assets/showroom/showroom.css (barra, tessere .t/.in, .btn, .mono, caratteri) e aggiunge solo
+   la griglia per le pagine fisse: ogni tessera dice quante colonne e righe occupa con --c/--r (computer)
+   e --cm/--rm (telefono). Nella pagina progetto ci sono due viste, come in home: --cv/--rv/--ov per la Vetrina. */
+.board{grid-auto-flow:row dense}
+.board>.t{grid-column:span var(--c,4);grid-row:span var(--r,3)}
+/* --r qui è il numero di righe della tessera (nello stile inline), quindi il raggio si rilegge da --raggio */
+:root{--raggio:24px}
+.board>.t{border-radius:var(--raggio)}
+@media (max-width:760px){:root{--raggio:20px}}
+.board[data-v="vetrina"]>.t{grid-column:span var(--cv,var(--c,4));grid-row:span var(--rv,var(--r,3));order:var(--ov,50)}
+.board[data-v="vetrina"]>.solo-m,.board[data-v="mosaico"]>.solo-v{display:none}
+@media (max-width:760px){
+  .board{--cols:2;--rh:92px}
+  .board>.t{grid-column:span var(--cm,2);grid-row:span var(--rm,3)}
+  .board[data-v="vetrina"]>.t{grid-column:span var(--cvm,var(--cm,2));grid-row:span var(--rvm,var(--rm,3))}
+}
+.top .back{justify-self:end;font:600 13px var(--t);text-decoration:none;padding:0 16px;min-height:38px;display:inline-flex;align-items:center;border-radius:999px;background:#232323;color:#E6E6E3;box-shadow:inset 0 0 0 1px #2F2F2F}
+.top .back:hover{background:#2C2C2C}
+
+/* tessere generiche */
+.carta{--bg:var(--carta);--tx:var(--ink)}
+.neutro{--bg:var(--neutro);--tx:var(--ink)}
+.verde{--bg:#3DDC84;--tx:var(--ink)}
+.t .row{position:relative;z-index:2;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.t .row .mono{opacity:.75}
+.tit{font:900 clamp(30px,min(13cqw,24cqh),150px)/.84 var(--f);text-transform:uppercase;letter-spacing:-.005em}
+.tit.m{font-size:clamp(24px,min(11cqw,20cqh),76px)}
+.t p{max-width:46ch;font-size:clamp(13.5px,3.2cqw,16px)}
+.t dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-size:13.5px}
+.t dt{font:500 11px/1.9 var(--m);letter-spacing:.06em;text-transform:uppercase;opacity:.65}
+.t dd{font-weight:500}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn.chiaro{background:var(--carta);color:var(--ink)}
+.btn.vuoto{background:transparent;color:var(--tx);box-shadow:inset 0 0 0 1.5px currentColor}
+.stat b small{font-size:.38em;margin-left:.08em;font-weight:700}
+.foto-t{--tx:var(--carta)}
+.foto-t .in>img.fondo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.foto-t .in::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.4),rgba(0,0,0,0) 30%,rgba(0,0,0,0) 55%,rgba(0,0,0,.6));pointer-events:none}
+.foto-t .in>*:not(img){position:relative;z-index:2}
+@media (hover:hover){a.t:hover .in>img.fondo,button.t:hover .in>img.fondo{transform:scale(1.04)}}
+a.t,button.t{display:block;text-decoration:none;text-align:left;cursor:pointer;border:0;font:inherit;padding:0}
+a.t:active,button.t:active{transform:scale(.985)}
+.t .go{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--tx);color:var(--bg,var(--ink));font:600 16px var(--t)}
+.foto-t .go{background:var(--carta);color:var(--ink)}
+@container (max-height:250px){.t .hide-b{display:none}}
+@container (max-width:300px){.t .hide-s{display:none}}
+@media (prefers-reduced-motion:reduce){.foto-t .in>img.fondo{transition:none}a.t:active,button.t:active{transform:none}}
+
+
+/* ---------- pagina progetto (lavori/<progetto>/) ---------- */
+/* pagina progetto: le stesse due viste della home. Vetrina = palco (il 3D) + striscia dei capitoli; Mosaico = tutto in tessere */
+.palco{--bg:var(--palco,#C5C7C8);--tx:var(--ink)}
+.palco canvas,.palco svg.call{position:absolute;inset:0;width:100%;height:100%;display:block}
+.palco svg.call{z-index:2;pointer-events:none;transition:opacity .25s}
+.palco svg.call path{stroke:var(--ink);stroke-width:1.2;fill:none}
+.palco svg.call circle{fill:var(--palco,#C5C7C8);stroke:var(--ink);stroke-width:1.4}
+.palco svg.call circle.dot{fill:var(--ink);stroke:none}
+.palco svg.call text{font:500 12px var(--m);fill:var(--ink);letter-spacing:.06em;paint-order:stroke;stroke:var(--palco,#C5C7C8);stroke-width:5px}
+.palco .in{pointer-events:none;z-index:3}
+.palco .cap{max-width:min(40ch,60cqw);display:flex;flex-direction:column;gap:8px;transition:opacity .25s}
+.palco .cap h2{font:900 clamp(30px,min(9cqw,13cqh),88px)/.86 var(--f);text-transform:uppercase}
+.palco .cap p{font-size:14.5px}
+.palco .ol{position:absolute;left:3%;bottom:-.06em;font:900 min(36vw,330px)/.8 var(--f);text-transform:uppercase;color:transparent;-webkit-text-stroke:2px var(--ink);opacity:.12;white-space:nowrap;pointer-events:none}
+.palco .foto{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s var(--ease);z-index:2}
+.palco.con-foto .foto{opacity:1}
+.palco.con-foto svg.call{opacity:0}
+.palco.con-foto .in{color:var(--carta)}
+.palco.con-foto .in::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.4),transparent 30%,transparent 55%,rgba(0,0,0,.55));z-index:-1}
+.palco .in>*{position:relative}
+.cap-t{--bg:var(--scuro);--tx:var(--carta)}
+.cap-t h3{font:900 clamp(22px,min(10cqw,16cqh),56px)/.86 var(--f);text-transform:uppercase}
+.cap-t .sm{position:absolute;right:0;bottom:0;width:50%;height:58%;object-fit:cover;border-radius:16px 0 0 0}
+.cap-t .tx-c{display:flex;flex-direction:column;gap:8px;max-width:50%}
+.cap-t[aria-pressed="true"]{--bg:var(--carta);--tx:var(--ink)}
+.board[data-v="vetrina"] .cap-t p,.board[data-v="vetrina"] .cap-t .sm{display:none}
+.board[data-v="vetrina"] .cap-t .tx-c{max-width:100%}
+.board[data-v="vetrina"] .cap-t h3{font-size:clamp(18px,min(9cqw,24cqh),34px)}
+.board[data-v="vetrina"] .ft-t .row .mono+.mono{display:none}
+.intro-p h1{font:900 min(26cqw,30cqh)/.82 var(--f);text-transform:uppercase}
+.intro-p .ds{max-width:42ch;font-size:clamp(14px,3.4cqw,17px)}
+.premio h2{font:900 clamp(30px,min(10cqw,30cqh),110px)/.84 var(--f);text-transform:uppercase}
+.next h2{font:900 clamp(30px,min(12cqw,30cqh),120px)/.84 var(--f);text-transform:uppercase}
+@container (max-height:420px){.intro-p .ds{display:none}}
+@container (max-height:300px){.intro-p dl{display:none}}
+@media (max-width:760px){.palco .cap p{display:none}.cap-t .tx-c{max-width:100%}.cap-t .sm{display:none}}
+
+/* ---------- Laboratorio ---------- */
+.lab-i h1{font:900 min(17cqw,40cqh)/.82 var(--f);text-transform:uppercase}
+.app-t{--bg:#FFB37A;--tx:var(--ink)}
+.app-t .in{flex-direction:row;align-items:stretch;gap:20px}
+.app-t .sx{display:flex;flex-direction:column;justify-content:space-between;gap:14px;flex:1 1 40%;min-width:0}
+.app-t h2{font:900 clamp(30px,min(6cqw,12cqh),72px)/.84 var(--f);text-transform:uppercase}
+.app-t iframe{flex:1 1 60%;min-width:0;border:0;border-radius:16px;background:var(--carta);box-shadow:0 1px 0 rgba(0,0,0,.08)}
+.arrivo{--bg:#2A2A2A;--tx:#8A8C8C}
+.arrivo h2{font:900 clamp(28px,min(12cqw,16cqh),64px)/.84 var(--f);text-transform:uppercase}
+.vit{--bg:#1B1B1B}
+.vit h2{font:900 clamp(28px,min(12cqw,18cqh),72px)/.84 var(--f);text-transform:uppercase}
+@media (max-width:760px){.app-t .in{flex-direction:column}.app-t iframe{flex:1 1 auto;min-height:280px}}
+
+/* ---------- Privacy ---------- */
+/* testi lunghi: qui le righe si adattano al contenuto */
+.board.auto{grid-auto-rows:auto}
+.board.auto>.t{grid-row:auto}
+.board.auto .t .in{position:relative;inset:auto;container-type:inline-size;gap:22px;justify-content:flex-start}
+.priv-i h1{font:900 clamp(64px,13vw,190px)/.82 var(--f);text-transform:uppercase}
+.priv-i p{font-size:clamp(16px,1.6vw,21px);max-width:56ch}
+.board.auto h2{font:800 clamp(28px,3vw,44px)/.9 var(--f);text-transform:uppercase;margin-bottom:12px}
+.board.auto .tx p{max-width:62ch;font-size:15px;line-height:1.6}
+.board.auto .tx p+p{margin-top:10px}
+.board.auto .tx a{text-underline-offset:3px}
+.t:not(.carta):not(.verde) .tx p{color:#C9CACA}
+
+/* ---------- App (app/<slug>/), anche ridotta dentro il Laboratorio con ?mini=1 ---------- */
+.tool{--bg:#FFB37A;--tx:var(--ink)}
+.tool h1{font:900 clamp(40px,min(10cqw,14cqh),110px)/.84 var(--f);text-transform:uppercase}
+.tool form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tool label{display:flex;flex-direction:column;gap:6px;font:500 11px/1.3 var(--m);letter-spacing:.06em;text-transform:uppercase}
+.tool input{font:600 22px var(--t);color:var(--ink);background:rgba(255,255,255,.55);border:0;border-radius:14px;padding:12px 14px;min-height:52px;width:100%}
+.tool input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.res-t b{font:800 min(46cqh,34cqw)/.85 var(--f)}
+.bar{height:12px;border-radius:999px;background:#2C2C2C;overflow:hidden}
+.bar u{display:block;height:100%;background:#FFB37A;border-radius:999px;transition:width .4s var(--ease)}
+body.mini .top,body.mini footer,body.mini .tag-prova,body.mini .solo-pieno{display:none}
+body.mini{background:#FFB37A}
+body.mini .wrap{padding:0}
+body.mini .board{--cols:1;--rh:auto;grid-auto-rows:auto}
+body.mini .board>.t{grid-column:1;grid-row:auto;margin:0;border-radius:0}
+body.mini .board .t .in{position:relative;container-type:inline-size}
+body.mini .res-t,body.mini .tool{min-height:0}
+body.mini .res-t b{font-size:64px}
+body.mini .tool h1{display:none}
+body.mini .tool .row{display:none}
+
+/* Laboratorio senza JavaScript: i riquadri generati (markup comune a tutti gli stili) restano tessere leggibili */
+.board>article.t:not(.app-t):not(.arrivo){grid-column:span 8;grid-row:span 6;padding:20px;display:flex;flex-direction:column;gap:12px}
+.board>article.t .k{display:flex;justify-content:space-between;font:500 11px var(--m);letter-spacing:.06em;text-transform:uppercase}
+.board>article.t .k a{color:inherit}
+.board>article.t h2{font:900 clamp(30px,4vw,64px)/.84 var(--f);text-transform:uppercase}
+.board>article.t iframe.prova{flex:1;border:0;border-radius:16px;background:var(--carta);min-height:240px}
+@media (max-width:760px){.board>article.t:not(.app-t):not(.arrivo){grid-column:span 2;grid-row:span 8}}
