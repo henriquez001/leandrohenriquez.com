@@ -133,9 +133,9 @@ body.mini .tool h1{display:none}
 body.mini .tool .row{display:none}
 
 /* Laboratorio senza JavaScript: i riquadri generati (markup comune a tutti gli stili) restano tessere leggibili */
-.board>article.t:not(.app-t):not(.arrivo){grid-column:span 8;grid-row:span 6;padding:20px;display:flex;flex-direction:column;gap:12px}
+.board>article.t:not(.prj):not(.app-t):not(.arrivo){grid-column:span 8;grid-row:span 6;padding:20px;display:flex;flex-direction:column;gap:12px}
 .board>article.t .k{display:flex;justify-content:space-between;font:500 11px var(--m);letter-spacing:.06em;text-transform:uppercase}
 .board>article.t .k a{color:inherit}
 .board>article.t h2{font:900 clamp(30px,4vw,64px)/.84 var(--f);text-transform:uppercase}
 .board>article.t iframe.prova{flex:1;border:0;border-radius:16px;background:var(--carta);min-height:240px}
-@media (max-width:760px){.board>article.t:not(.app-t):not(.arrivo){grid-column:span 2;grid-row:span 8}}
+@media (max-width:760px){.board>article.t:not(.prj):not(.app-t):not(.arrivo){grid-column:span 2;grid-row:span 8}}

@@ -1,4 +1,7 @@
-/* Pannello di leandrohenriquez.com — interfaccia (variante B). Parla solo con /api/ dello stesso Worker. */
+/* Pannello di leandrohenriquez.com — interfaccia in stile showroom (20/11/2026): la stessa struttura del sito.
+   Barra in alto con le sezioni, tessere su una griglia di 12 colonne, viste Vetrina e Mosaico (sito/showroom/viste.js).
+   Vetrina: si modifica sul palco grande; Mosaico: il modulo si apre in un foglio che nasce dalla tessera toccata.
+   Parla solo con /api/ dello stesso Worker. */
 'use strict';
 const SITO='https://leandrohenriquez.com/';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -6,6 +9,14 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const nn=i=>String(i+1).padStart(2,'0');
 const slugDa=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
 const stato={io:null,sezione:null,progetti:null,bozze:{},app:null,base:{},anteprime:{}};
+// tessere: st() scrive colonne/righe (--c/--r computer, --cv/--rv/--ov Vetrina, --cm/--rm telefono)
+const st=o=>Object.entries(o).map(([k,v])=>`--${k}:${v}`).join(';');
+const board=()=>$('#board');
+const vetrina=()=>board().dataset.v==='vetrina';
+const colore=slug=>(typeof COLORI!=='undefined'&&COLORI[slug])||'#E6E6E3';
+const scuro=slug=>typeof SCURI!=='undefined'&&!!SCURI[slug];
+const fotoP=p=>!/\.png$/i.test(p.anteprima||'');
+const tessera=(cls,dim,dentro,attr='')=>`<section class="t ${cls}" style="${st(dim)}"${attr}><div class="in">${dentro}</div></section>`;
 
 // ---------- rete ----------
 class ErroreApi extends Error{constructor(s,m){super(m);this.stato=s;}}
@@ -41,11 +52,17 @@ async function mostraAccesso(msg=''){
   },ux_mode:'popup',auto_select:false});
   google.accounts.id.renderButton($('#gbtn'),{theme:'filled_black',size:'large',shape:'rectangular',text:'signin_with',locale:'it'});
 }
-$('#esci').addEventListener('click',async()=>{await api('POST','/api/uscita').catch(()=>{});if(window.google)google.accounts.id.disableAutoSelect();stato.io=null;mostraAccesso('Sei uscito.');});
+// menu dell'account (nasce dal pulsante; si chiude con Esc o toccando fuori)
+function menuIo(apri){const m=$('#ioMenu'),b=$('#io');m.hidden=!apri;b.setAttribute('aria-expanded',apri);if(apri){const x=$('button:not([hidden]),a',m);if(x)x.focus();}}
+$('#io').addEventListener('click',e=>{e.stopPropagation();menuIo($('#ioMenu').hidden);});
+document.addEventListener('click',e=>{if(!$('#ioMenu').hidden&&!e.target.closest('#ioMenu'))menuIo(false);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#ioMenu').hidden){menuIo(false);$('#io').focus();}});
+$('#esci').addEventListener('click',async()=>{menuIo(false);await api('POST','/api/uscita').catch(()=>{});if(window.google)google.accounts.id.disableAutoSelect();stato.io=null;mostraAccesso('Sei uscito.');});
 
 async function avvia(){
   $('#accesso').hidden=true;$('#app').hidden=false;
   $('#ioEmail').textContent=stato.io.email;$('#voceAccessi').hidden=!stato.io.proprietario;
+  $('#io').textContent=(stato.io.email||'?').slice(0,2);$('#io').setAttribute('aria-label','Account '+stato.io.email+': notifiche ed esci');
   vai();statoNotifiche();
 }
 
@@ -61,10 +78,8 @@ const nomeDispositivo=()=>{const u=navigator.userAgent;
 async function statoNotifiche(){
   const b=$('#notifiche'),ok=pushOk()&&!!(await swReg);
   const s=ok?await iscrizioneAttuale().catch(()=>null):null;
-  b.hidden=!ok;b.setAttribute('aria-pressed',!!s);b.textContent=s?'notifiche ✓':'notifiche';
+  b.hidden=!ok;b.setAttribute('aria-pressed',!!s);b.textContent=s?'Notifiche attive ✓':'Attiva le notifiche';
   b.title=s?'Notifiche attive su questo dispositivo: tocca per disattivarle':'Ricevi qui gli avvisi del sito';
-  // la stessa riga nella pagina "tu" del telefono
-  const t=$('#tuNotifiche');if(t){t.hidden=!ok;$('#tuNot').textContent=s?'disattiva':'attiva';$('#tuNotStato').textContent=s?'attive su questo dispositivo':'spente su questo dispositivo';}
 }
 $('#notifiche').addEventListener('click',async()=>{
   const b=$('#notifiche');b.disabled=true;
@@ -89,40 +104,68 @@ function vai(){
   let s=location.hash.slice(1)||'progetti';
   if(!SEZIONI[s]||(s==='accessi'&&!stato.io.proprietario))s='progetti';
   stato.sezione=s;
-  {const b=$('#barraSez');if(b)b.textContent=s;}
-  $$('.menu nav a').forEach(a=>{if(a.dataset.s===s)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  $$('.nav.sez a').forEach(a=>{if(a.dataset.s===s)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  // la scelta Vetrina/Mosaico serve dove c'è un elenco da modificare
+  $('#vista').hidden=!['progetti','app'].includes(s);
   chiudiDrawer(true);
-  $('#main').innerHTML='<p class="lbl"><span class="carica"></span> carico…</p>';
-  SEZIONI[s]().catch(e=>{$('#main').innerHTML=`<div class="vuoto"><b>Qualcosa non va</b><span>${esc(e.message)}</span></div>`;});
+  board().innerHTML=tessera('carta intro-p',{c:12,r:3,cm:2,rm:3},`<div class="row"><span class="mono">Pannello · ${esc(s)}</span></div><p class="lbl"><span class="carica"></span> carico…</p>`);
+  SEZIONI[s]().catch(e=>{board().innerHTML=tessera('carta intro-p',{c:12,r:3,cm:2,rm:4},`<div class="row"><span class="mono">Qualcosa non va</span></div><div><h1>Errore</h1><p>${esc(e.message)}</p></div>`);});
 }
 
-// ---------- pannello laterale ----------
-let drSalva=null,drElimina=null,drPrimaFocus=null;
+// ---------- modifica: sul palco della Vetrina o nel foglio del Mosaico ----------
+// Lo stesso modulo (#drForm) si sposta nel palco (#ed) quando la vista è Vetrina e la voce sta nell'elenco,
+// altrimenti va nel foglio, che nasce dalla tessera toccata (apple-motion: le finestre nascono da chi le apre).
+let drSalva=null,drElimina=null,drPrimaFocus=null,drNelPalco=false,drDa=null;
+const RIDOTTO=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function palcoVuoto(){const ed=$('#ed');if(!ed)return;ed.style.removeProperty('--bg');ed.style.removeProperty('--tx');
+  $$('#board .sel').forEach(x=>x.classList.remove('sel'));
+  $('.in',ed).innerHTML=`<div class="vuoto-ed"><span class="mono">Modifica</span><div><h2>${stato.sezione==='app'?'Scegli un\u2019app':'Scegli un progetto'}</h2><p>Toccalo nella striscia: lo modifichi qui.</p></div></div>`;}
 // azioni: pulsanti in più accanto a quello principale, [{testo, fn(FormData, pulsante)}]; fn può restituire 'resta' per non chiudere
-function apriDrawer({n,titolo,campi,onSalva,onElimina,testoSalva='salva e pubblica',azioni=[]}){
-  drPrimaFocus=document.activeElement;
+// palco: {vis, sfondo, testo} per mostrare la voce nel palco della Vetrina; da: la tessera da cui nasce il foglio
+function apriDrawer({n,titolo,campi,onSalva,onElimina,testoSalva='Salva e pubblica',azioni=[],palco=null,da=null,fuoco=true}){
+  chiudiDrawer(true,false);
+  drPrimaFocus=document.activeElement;drDa=da;
   $('#drN').textContent=n;titoloDr(titolo);$('#drCampi').innerHTML=campi;$('#drErr').textContent='';
   $('#drSalva').textContent=testoSalva;$('#drSalva').disabled=false;
   drSalva=onSalva;drElimina=onElimina;$('#drElimina').hidden=!onElimina;
-  const ex=$('#drExtra');ex.innerHTML='';$('.drBtn').classList.toggle('azioni',azioni.length>0);
-  azioni.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='btn';b.textContent=a.testo;ex.appendChild(b);
+  const ex=$('#drExtra');ex.innerHTML='';
+  azioni.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='btn vuoto';b.textContent=a.testo;ex.appendChild(b);
     b.addEventListener('click',async()=>{const t=b.textContent;b.disabled=true;$('#drErr').textContent='';
       try{if(await a.fn(new FormData($('#drForm')),b)!=='resta')chiudiDrawer();}catch(err){$('#drErr').textContent=err.message;}finally{b.disabled=false;b.textContent=t;}});});
-  const d=$('#drawer'),v=$('#velo');d.hidden=false;v.hidden=false;
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{d.classList.add('aperto');v.classList.add('aperto');}));
-  setTimeout(()=>{const p=$('input,textarea',d);if(p)p.focus({preventScroll:true});},60);
+  const ed=$('#ed'),form=$('#drForm');
+  drNelPalco=!!(palco&&ed&&vetrina());
+  if(drNelPalco){
+    ed.style.setProperty('--bg',palco.sfondo||'var(--carta)');ed.style.setProperty('--tx',palco.testo||'var(--ink)');
+    const in_=$('.in',ed);in_.innerHTML=palco.vis||'';in_.appendChild(form);
+    $$('#board .sel').forEach(x=>x.classList.remove('sel'));if(da)da.classList.add('sel');
+    if(fuoco){const r=ed.getBoundingClientRect();if(r.top<70||r.bottom>innerHeight)ed.scrollIntoView({behavior:RIDOTTO()?'auto':'smooth',block:'nearest'});}
+  }else{
+    const d=$('#drawer'),v=$('#velo');$('.in',d).appendChild(form);d.hidden=false;v.hidden=false;
+    if(da&&!RIDOTTO()){const r=da.getBoundingClientRect(),f=d.getBoundingClientRect(),sx=r.width/f.width,sy=r.height/f.height;
+      d.style.transition='none';d.style.transform=`translate(${r.left+r.width/2-(f.left+f.width/2)}px,${r.top+r.height/2-(f.top+f.height/2)}px) scale(${sx},${sy})`;
+      d.getBoundingClientRect();d.style.transition='';d.style.transform='';}
+    requestAnimationFrame(()=>v.classList.add('aperto'));
+  }
+  if(fuoco)setTimeout(()=>{const p=$('input:not([type=hidden]):not([type=file]),textarea',form);if(p)p.focus({preventScroll:true});},60);
 }
-function chiudiDrawer(subito=false){
-  const d=$('#drawer'),v=$('#velo');if(d.hidden)return;
-  d.classList.remove('aperto');v.classList.remove('aperto');
-  const fine=()=>{if(!d.classList.contains('aperto')){d.hidden=true;v.hidden=true;}};
-  const lento=!subito&&matchMedia('(prefers-reduced-motion:no-preference)').matches;
-  lento?setTimeout(fine,360):fine();
-  if(drPrimaFocus&&document.contains(drPrimaFocus))drPrimaFocus.focus({preventScroll:true});
+function chiudiDrawer(subito=false,rimetti=true){
+  const d=$('#drawer'),v=$('#velo'),form=$('#drForm');
+  if(drNelPalco){drNelPalco=false;$('.in',d).appendChild(form);if(rimetti)palcoVuoto();
+    if(!subito&&drDa&&document.contains(drDa)){const h=$('.hit',drDa)||drDa;h.focus({preventScroll:true});}return;}
+  if(d.hidden)return;
+  v.classList.remove('aperto');
+  // il foglio torna nella tessera da cui è nato
+  if(!subito&&drDa&&document.contains(drDa)&&!RIDOTTO()){const r=drDa.getBoundingClientRect(),f=d.getBoundingClientRect();
+    d.style.transform=`translate(${r.left+r.width/2-(f.left+f.width/2)}px,${r.top+r.height/2-(f.top+f.height/2)}px) scale(${r.width/f.width},${r.height/f.height})`;
+    setTimeout(()=>{d.hidden=true;v.hidden=true;d.style.transform='';},300);}
+  else{d.hidden=true;v.hidden=true;}
+  if(!subito&&drPrimaFocus&&document.contains(drPrimaFocus))drPrimaFocus.focus({preventScroll:true});
 }
+// cambiando vista il modulo aperto si chiude e le tessere si ridisegnano per la vista nuova
+document.addEventListener('vista',()=>{if(!stato.io)return;chiudiDrawer(true);if(stato.sezione==='progetti'&&stato.progetti)disegnaProgetti();else if(stato.sezione==='app'&&stato.app)disegnaApp();});
 $$('[data-chiudi]').forEach(b=>b.addEventListener('click',()=>chiudiDrawer()));
 $('#velo').addEventListener('click',()=>chiudiDrawer());
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#drawer').hidden)chiudiDrawer();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(!$('#drawer').hidden||drNelPalco)&&$('#ioMenu').hidden)chiudiDrawer();});
 $('#drForm').addEventListener('submit',async e=>{
   e.preventDefault();if(!drSalva)return;const b=$('#drSalva'),t=b.textContent;
   b.disabled=true;b.innerHTML='<span class="carica"></span> salvo…';$('#drErr').textContent='';
@@ -136,7 +179,7 @@ $('#drElimina').addEventListener('click',async()=>{
 });
 const campo=(nome,etichetta,valore='',{max,area,tipo='text',aiuto='',attr=''}={})=>`<label><span class="lbl">${etichetta}${aiuto?' · '+aiuto:''}</span>${area?`<textarea name="${nome}" maxlength="${max||''}" ${attr}>${esc(valore)}</textarea>`:`<input type="${tipo}" name="${nome}" value="${esc(valore)}" ${max?`maxlength="${max}"`:''} ${attr}>`}</label>`;
 const interruttore=(nome,etichetta,on)=>`<div class="riga"><span id="l-${nome}">${etichetta}</span><span class="swHit"><button type="button" class="sw" role="switch" aria-labelledby="l-${nome}" aria-checked="${!!on}" data-campo="${nome}"></button></span><input type="hidden" name="${nome}" value="${on?'1':''}"></div>`;
-document.addEventListener('click',e=>{const s=e.target.closest('#drawer .sw');if(!s)return;const on=s.getAttribute('aria-checked')!=='true';s.setAttribute('aria-checked',on);$(`#drawer input[name="${s.dataset.campo}"]`).value=on?'1':'';});
+document.addEventListener('click',e=>{const s=e.target.closest('#drForm .sw');if(!s)return;const on=s.getAttribute('aria-checked')!=='true';s.setAttribute('aria-checked',on);$(`#drForm input[name="${s.dataset.campo}"]`).value=on?'1':'';});
 
 // Posizione nell'elenco: serve sul telefono, dove non si trascina.
 const posizione=(i,n)=>`<label class="riga"><span>posizione</span><select name="posizione" style="width:auto">${Array.from({length:n},(_,k)=>`<option value="${k}"${k===i?' selected':''}>${nn(k)}</option>`).join('')}</select></label>`;
@@ -160,23 +203,33 @@ async function salvaProgetti(elenco,msg='Salvato. Il sito si aggiorna in circa u
 }
 async function sezioneProgetti(){await caricaProgetti();disegnaProgetti();}
 function disegnaProgetti(){
-  const P=stato.progetti,nB=Object.keys(stato.bozze).length;
-  const scheda=(p,i,{bozza=false,nuova=false}={})=>`<article class="c${p.pubblicato||nuova?'':' off'}${bozza?' bz':''}"${nuova?` data-bozza="${esc(p.slug)}"`:` draggable="true" data-i="${i}"`}>
-    <button class="apri" type="button" aria-label="Modifica ${esc(p.nome)}${bozza?' (bozza)':''}"></button>
-    <div class="im">${imgTag(p.anteprima,p.nome)}</div>
-    <div class="tx"><span class="lbl">${nuova?'nuovo':nn(i)} · ${esc(p.tipo)}</span><b>${esc(p.nome)}${p.etichetta?`<span class="tag">${esc(p.etichetta)}</span>`:''}${bozza?'<span class="tag bozza">bozza</span>':''}</b>
-    <div class="ft">${nuova?'<span class="lbl">non ancora nell\'indice</span>':`<span class="lbl">${p.pubblicato?esc(p.contesto):'nascosto'}</span><span class="swHit"><button type="button" class="sw" role="switch" aria-checked="${p.pubblicato}" aria-label="Pubblicato: ${esc(p.nome)}" data-i="${i}"></button></span>`}</div></div>
-  </article>`;
-  $('#main').innerHTML=`<div class="hd"><div class="tit"><h1 class="D" data-t="Progetti">Progetti</h1><span class="lbl">${P.filter(p=>p.pubblicato).length} pubblicati su ${P.length}${nB?` · ${nB} ${nB===1?'bozza':'bozze'}`:''} · trascina per riordinare</span></div>
-    <div class="scarica" id="pdfBox"><button class="btn pri" type="button" id="pdfApri">↓ portfolio PDF…</button><span class="lbl" id="pdfInfo"></span></div></div>
-  <div class="cards" id="cards">${P.map((p,i)=>{const b=stato.bozze[p.slug];return scheda(b?{...b.progetto,pubblicato:p.pubblicato}:p,i,{bozza:!!b});}).join('')}${bozzeNuove().map(b=>scheda(b.progetto,-1,{bozza:true,nuova:true})).join('')}<button class="nuovo" type="button" id="nuovoP">+ nuovo progetto</button></div>`;
+  const P=stato.progetti,nB=Object.keys(stato.bozze).length,nOn=P.filter(p=>p.pubblicato).length;
+  // tessera di un progetto: colore pieno del prodotto (colori.js del sito), immagine senza filtri, interruttore "sul sito"
+  const prj=(p,i,{bozza=false,nuova=false}={})=>{const foto=fotoP(p),cls=`t prj${foto?' foto':''}${p.pubblicato||nuova?'':' off'}`;
+    return `<article class="${cls}" style="--bg:${foto?'#1C1C1C':colore(p.slug)};--tx:${foto||scuro(p.slug)?'var(--carta)':'var(--ink)'}"${nuova?` data-bozza="${esc(p.slug)}"`:` draggable="true" data-i="${i}"`}><div class="in">
+    ${p.anteprima?`<img class="im" src="${esc(urlImg(p.anteprima))}" alt="" loading="lazy">`:''}
+    <div class="row"><span class="mono">${nuova?'nuovo':nn(i)} · ${esc(p.tipo)}</span><span class="mono">${nuova?'non ancora nell\'indice':p.pubblicato?esc(p.contesto):'nascosto'}</span></div>
+    <div class="bot"><h2 class="nm">${esc(p.nome)}${bozza?'<span class="tag">bozza</span>':''}${p.etichetta?`<span class="tag">${esc(p.etichetta)}</span>`:''}</h2></div>
+    <button class="hit" type="button" aria-label="Modifica ${esc(p.nome)}${bozza?' (bozza)':''}"></button></div>
+    ${nuova?'':`<span class="sw-p swHit"><button type="button" class="sw" role="switch" aria-checked="${p.pubblicato}" aria-label="${esc(p.nome)} sul sito" data-i="${i}"></button></span>`}</article>`;};
+  board().innerHTML=tessera('carta intro-p',{c:4,r:4,cv:4,rv:5,ov:1,cm:2,rm:4},`<div class="row"><span class="mono">Pannello · progetti</span><span class="mono hide-s"><i class="dot"></i>sito collegato</span></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><h1>Progetti</h1>
+    <p><b>${nOn}</b> sul sito su ${P.length}${nB?`, ${nB} ${nB===1?'bozza':'bozze'}`:''}. Tocca un progetto per modificarlo; trascinalo per cambiare l’ordine.</p>
+    <div class="acts"><button class="btn" type="button" id="nuovoP">+ Nuovo progetto</button><a class="btn vuoto" href="${SITO}" target="_blank" rel="noopener">Vedi il sito ↗</a></div></div>`)+
+  tessera('ed solo-v',{cv:8,rv:5,ov:2,cvm:2,rvm:8},'',' id="ed" aria-label="Modifica del progetto"')+
+  P.map((p,i)=>{const b=stato.bozze[p.slug];return prj(b?{...b.progetto,pubblicato:p.pubblicato}:p,i,{bozza:!!b});}).join('')+
+  bozzeNuove().map(b=>prj(b.progetto,-1,{bozza:true,nuova:true})).join('')+
+  tessera('pdf-t',{c:6,r:2,cv:6,rv:2,ov:30,cm:2,rm:3},`<div class="row"><span class="mono">Portfolio PDF</span><span class="mono hide-s" id="pdfInfo">privato</span></div>
+    <div class="acts"><button class="btn chiaro" type="button" id="pdfApri">↓ Scarica o crea su misura…</button></div>`)+
+  tessera('stat',{c:6,r:2,cv:6,rv:2,ov:31,cm:2,rm:2},`<span class="mono">Sul sito</span><b>${nOn}<small> / ${P.length}</small></b>`);
+  palcoVuoto();
   // il portfolio PDF è privato: si scarica da qui (variante 2 del 4/11: scegli i progetti quando lo crei)
-  api('GET','/api/portfolio/info').then(d=>{if(d.pronto)$('#pdfInfo').textContent=`completo · ${dataBreve(d.aggiornato)} · ${mb(d.byte)}`;}).catch(()=>{});
-  $('#pdfApri').addEventListener('click',portfolioPDF);
-  $$('#cards [data-bozza] .apri').forEach(b=>b.addEventListener('click',()=>modificaProgetto(-1,b.closest('.c').dataset.bozza)));
-  $$('#cards [data-i] .apri').forEach(b=>b.addEventListener('click',()=>modificaProgetto(+b.closest('.c').dataset.i)));
+  api('GET','/api/portfolio/info').then(d=>{if(d.pronto&&$('#pdfInfo'))$('#pdfInfo').textContent=`completo · ${dataBreve(d.aggiornato)} · ${mb(d.byte)}`;}).catch(()=>{});
+  $('#pdfApri').addEventListener('click',e=>portfolioPDF(e.currentTarget.closest('.t')));
+  $$('#board [data-bozza] .hit').forEach(b=>b.addEventListener('click',()=>modificaProgetto(-1,b.closest('.prj').dataset.bozza,b.closest('.prj'))));
+  $$('#board .prj[data-i] .hit').forEach(b=>b.addEventListener('click',()=>modificaProgetto(+b.closest('.prj').dataset.i,undefined,b.closest('.prj'))));
   // l'interruttore va online subito (anche con una bozza aperta, che lo segue)
-  $$('#cards .sw').forEach(s=>s.addEventListener('click',async e=>{
+  $$('#board .prj .sw').forEach(s=>s.addEventListener('click',async e=>{
     e.stopPropagation();const i=+s.dataset.i,el=stato.progetti.map(p=>({...p}));el[i].pubblicato=!el[i].pubblicato;
     s.setAttribute('aria-checked',el[i].pubblicato);s.disabled=true;
     try{
@@ -185,13 +238,13 @@ function disegnaProgetti(){
     }catch(err){avviso(err.message,true);}
     disegnaProgetti();
   }));
-  $('#nuovoP').addEventListener('click',()=>modificaProgetto(-1));
-  riordina($('#cards'),stato.progetti,async el=>{try{await salvaProgetti(el,'Nuovo ordine salvato.');}catch(e){avviso(e.message,true);}disegnaProgetti();});
+  $('#nuovoP').addEventListener('click',e=>modificaProgetto(-1,undefined,e.currentTarget.closest('.t')));
+  riordina(board(),stato.progetti,async el=>{try{await salvaProgetti(el,'Nuovo ordine salvato.');}catch(e){avviso(e.message,true);}disegnaProgetti();});
 }
 // Trascinamento con il mouse (HTML5) e, da tastiera, Alt+↑/↓ sulla scheda.
 function riordina(box,elenco,salva){
   let da=null;
-  $$('.c',box).forEach(c=>{
+  $$('.prj[data-i]',box).forEach(c=>{
     c.addEventListener('dragstart',e=>{da=+c.dataset.i;c.classList.add('presa');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',da);setTimeout(()=>c.classList.add('trascina'));});
     c.addEventListener('dragend',()=>{c.classList.remove('presa','trascina');$$('.sopra',box).forEach(x=>x.classList.remove('sopra'));});
     c.addEventListener('dragover',e=>{if(da===null)return;e.preventDefault();$$('.sopra',box).forEach(x=>x!==c&&x.classList.remove('sopra'));c.classList.add('sopra');});
@@ -203,12 +256,12 @@ const dataBreve=t=>new Date(t).toLocaleDateString('it-IT',{day:'numeric',month:'
 const mb=b=>`${(b/1048576).toLocaleString('it-IT',{maximumFractionDigits:1})} MB`;
 // Modifica di un progetto (variante A del 4/11: bozza per progetto). i = posizione nell'indice, -1 per un progetto nuovo;
 // slugBozza = bozza di un progetto nuovo non ancora pubblicato.
-function modificaProgetto(i,slugBozza){
+function modificaProgetto(i,slugBozza,da=null,fuoco=true){
   const inIndice=i>=0,nuovo=!inIndice,vuoto={slug:'',nome:'',tipo:'',contesto:'',anteprima:'',pagina:false,pubblicato:false};
   const b=slugBozza?stato.bozze[slugBozza]:inIndice?stato.bozze[stato.progetti[i].slug]:null;
   const p=b?b.progetto:inIndice?stato.progetti[i]:vuoto;
   let anteprima=p.anteprima;
-  const slugAttuale=()=>p.slug||(($('#drawer [name=slug]')||{}).value||'').trim()||slugDa(($('#drawer [name=nome]')||{}).value);
+  const slugAttuale=()=>p.slug||(($('#drForm [name=slug]')||{}).value||'').trim()||slugDa(($('#drForm [name=nome]')||{}).value);
   const leggi=f=>{
     const v={...p,nome:f.get('nome').trim(),tipo:f.get('tipo').trim(),contesto:f.get('contesto').trim(),anteprima,pubblicato:!!f.get('pubblicato')};
     for(const k of ['anno','etichetta','descrizione']){const x=(f.get(k)||'').trim();if(x)v[k]=x;else delete v[k];}
@@ -219,26 +272,29 @@ function modificaProgetto(i,slugBozza){
   };
   const salvaBozza=async f=>{const v=leggi(f);const d=await api('PUT',`/api/bozze/progetti/${v.slug}`,{progetto:v,nuovo});stato.bozze[v.slug]=d.bozza;return v;};
   const azioni=[];
-  if(b)azioni.push({testo:'scarta bozza',fn:async()=>{
+  if(b)azioni.push({testo:'Scarta bozza',fn:async()=>{
     if(!confirm('Scartare la bozza? '+(nuovo?'Il progetto nuovo sparisce.':'Resta la versione pubblicata.')))return 'resta';
     await api('DELETE',`/api/bozze/progetti/${p.slug}`);delete stato.bozze[p.slug];avviso('Bozza scartata.');disegnaProgetti();}});
-  azioni.push({testo:'anteprima ↗',fn:async f=>{
+  azioni.push({testo:'Anteprima ↗',fn:async f=>{
     const w=window.open('about:blank','_blank'); // aperta subito, dentro il clic, così il browser non la blocca
     try{await salvaBozza(f);}catch(e){if(w)w.close();throw e;}
     if(w)w.location.href='/anteprima/';else location.href='/anteprima/';disegnaProgetti();return 'resta';}});
-  azioni.push({testo:'salva bozza',fn:async f=>{const v=await salvaBozza(f);avviso(`Bozza di ${v.nome} salvata: sul sito non cambia niente.`);disegnaProgetti();}});
-  apriDrawer({
-    n:(nuovo?'nuovo progetto':`${nn(i)} · modifica`)+(b?` · bozza del ${dataBreve(b.aggiornato)}`:''),titolo:p.nome||'Nuovo',testoSalva:'pubblica',azioni,
+  azioni.push({testo:'Salva bozza',fn:async f=>{const v=await salvaBozza(f);avviso(`Bozza di ${v.nome} salvata: sul sito non cambia niente.`);disegnaProgetti();}});
+  const foto=fotoP(p);
+  apriDrawer({da,fuoco,
+    palco:inIndice||b?{sfondo:foto?'var(--carta)':colore(p.slug),testo:scuro(p.slug)&&!foto?'var(--carta)':'var(--ink)',
+      vis:`<div class="vis${foto?' foto':''}"><span class="mono">${inIndice?nn(i):'nuovo'} · ${esc(p.tipo)}</span>${p.anteprima?`<img src="${esc(urlImg(p.anteprima))}" alt="">`:''}<span class="nm2">${esc(p.nome)}</span></div>`}:null,
+    n:(nuovo?'nuovo progetto':`${nn(i)} · modifica`)+(b?` · bozza del ${dataBreve(b.aggiornato)}`:''),titolo:p.nome||'Nuovo',testoSalva:'Pubblica',azioni,
     campi:`${campo('nome','nome',p.nome,{max:40})}
       ${nuovo&&!b?campo('slug','indirizzo','',{max:40,aiuto:'leandrohenriquez.com/lavori/…',attr:'pattern="[a-z0-9]+(-[a-z0-9]+)*" autocapitalize="off" spellcheck="false"'}):''}
       <div class="due">${campo('tipo','tipo',p.tipo,{max:40})}${campo('contesto','contesto',p.contesto,{max:40})}</div>
       <div class="due">${campo('anno','anno',p.anno||'',{max:4,attr:'inputmode="numeric" pattern="(19|20)[0-9]{2}"'})}${campo('etichetta','etichetta',p.etichetta||'',{max:6,aiuto:'es. 3D'})}</div>
       ${campo('descrizione','descrizione',p.descrizione||'',{max:420,area:true,aiuto:'va anche nel portfolio PDF'})}
-      <div class="campo"><span class="lbl">anteprima · PNG scontornato o JPG, massimo 8 MB</span><div class="anteprima"><div class="th" id="thP">${anteprima?imgTag(anteprima,'anteprima'):''}</div><label class="btn">carica…<input type="file" accept="image/png,image/jpeg,image/webp" id="fileP" hidden></label><span class="lbl" id="statoImg"></span></div></div>
+      <div class="campo"><span class="lbl">anteprima · PNG scontornato o JPG, massimo 8 MB</span><div class="anteprima"><div class="th" id="thP">${anteprima?imgTag(anteprima,'anteprima'):''}</div><label class="btn">Carica…<input type="file" accept="image/png,image/jpeg,image/webp" id="fileP" hidden></label><span class="lbl" id="statoImg"></span></div></div>
       ${inIndice?posizione(i,stato.progetti.length):''}
       ${interruttore('pubblicato','pubblicato nell\'indice',p.pubblicato)}
       ${inIndice&&stato.progetti[i].pagina?`<div class="riga"><span>pagina con il 3D</span><a href="${SITO}lavori/${esc(p.slug)}/" target="_blank" rel="noopener">apri ↗</a></div>`:''}
-      <p class="lbl">"salva bozza" tiene le modifiche solo qui nel pannello; "pubblica" le manda sul sito.</p>`,
+      <p class="lbl">«Salva bozza» tiene le modifiche solo qui nel pannello; «Pubblica» le manda sul sito.</p>`,
     onElimina:!inIndice?null:async()=>{
       try{const d=await api('DELETE',`/api/progetti/${encodeURIComponent(p.slug)}?base=${stato.base.progetti}`);stato.base.progetti=d.base;stato.progetti=stato.progetti.filter(x=>x.slug!==p.slug);
         if(stato.bozze[p.slug]){await api('DELETE',`/api/bozze/progetti/${p.slug}`).catch(()=>{});delete stato.bozze[p.slug];}
@@ -254,7 +310,7 @@ function modificaProgetto(i,slugBozza){
       disegnaProgetti();
     }
   });
-  if(nuovo&&!b){const n=$('#drawer [name=nome]'),sl=$('#drawer [name=slug]');let toccato=false;sl.addEventListener('input',()=>toccato=true);n.addEventListener('input',()=>{if(!toccato)sl.value=slugDa(n.value);titoloDr(n.value||'Nuovo');});}
+  if(nuovo&&!b){const n=$('#drForm [name=nome]'),sl=$('#drForm [name=slug]');let toccato=false;sl.addEventListener('input',()=>toccato=true);n.addEventListener('input',()=>{if(!toccato)sl.value=slugDa(n.value);titoloDr(n.value||'Nuovo');});}
   $('#fileP').addEventListener('change',async e=>{
     const file=e.target.files[0];if(!file)return;
     const slug=slugAttuale();
@@ -273,10 +329,10 @@ function modificaProgetto(i,slugBozza){
 // ---------- portfolio PDF su misura (variante 2 del 4/11) ----------
 // Scegli progetti e ordine, dai un nome: la Action "Portfolio PDF" lo prepara (circa 2 minuti) e arriva una notifica.
 let pfTimer=null;
-async function portfolioPDF(){
+async function portfolioPDF(da=null){
   const P=stato.progetti,ordine=[...P.filter(p=>p.pubblicato),...P.filter(p=>!p.pubblicato)].map(p=>p.slug),scelti=new Set(P.filter(p=>p.pubblicato).map(p=>p.slug));
   const nome=slug=>{const p=P.find(x=>x.slug===slug);return p?p.nome:slug;};
-  apriDrawer({n:'portfolio PDF',titolo:'Portfolio',testoSalva:'crea PDF',
+  apriDrawer({da,n:'portfolio PDF',titolo:'Portfolio',testoSalva:'Crea PDF',
     campi:`<div class="campo"><span class="lbl">pronti da scaricare</span><div class="pronti" id="pfPronti"><span class="lbl"><span class="carica"></span> carico…</span></div></div>
       ${campo('nome','nome del nuovo portfolio','',{max:30,aiuto:'es. per Smeg'})}
       <div class="campo"><div class="riga" style="border:0;padding:0"><span class="lbl" id="pfConta"></span><span style="white-space:nowrap"><button type="button" class="link" id="pfTutti">tutti</button> · <button type="button" class="link" id="pfNessuno">nessuno</button></span></div><ol class="scelta" id="pfScelta"></ol></div>`,
@@ -284,7 +340,7 @@ async function portfolioPDF(){
       const n=(f.get('nome')||'').trim(),el=ordine.filter(x=>scelti.has(x));
       if(!n)throw new Error('Dai un nome al portfolio, per esempio "per Smeg".');if(!el.length)throw new Error('Scegli almeno un progetto.');
       await api('POST','/api/portfolio/versioni',{nome:n,progetti:el});
-      $('#drawer [name=nome]').value='';avviso(`Preparo «${n}»: ti avviso quando è pronto, circa 2 minuti.`);await pronti();return 'resta';
+      $('#drForm [name=nome]').value='';avviso(`Preparo «${n}»: ti avviso quando è pronto, circa 2 minuti.`);await pronti();return 'resta';
     }});
   const disegnaScelta=()=>{
     $('#pfConta').textContent=`${scelti.size} su ${P.length}, in quest'ordine`;
@@ -319,33 +375,38 @@ async function salvaApp(el,msg='Salvato. Il Laboratorio si aggiorna in circa un 
 }
 async function sezioneApp(){await caricaApp();disegnaApp();}
 function disegnaApp(){
-  const A=stato.app;
-  $('#main').innerHTML=`<div class="hd"><h1 class="D" data-t="App">App</h1><span class="lbl">la pagina Laboratorio del sito · trascina per riordinare</span></div>
-  <div class="cards" id="cards">${A.map((a,i)=>`<article class="c${a.pubblicato?'':' off'}" draggable="true" data-i="${i}">
-    <button class="apri" type="button" aria-label="Modifica ${esc(a.nome)}"></button>
-    <div class="tx"><span class="lbl">${nn(i)} · ${esc(a.tipo)}</span><b>${esc(a.nome)}<span class="tag${a.stato==='pronta'?' pieno':''}">${a.stato==='pronta'?'pronta':'in arrivo'}</span></b>
-    <span class="lbl">${esc(a.descrizione||'')}</span>
-    <div class="ft"><span class="lbl">${a.pubblicato?'pubblicata':'nascosta'}</span><span class="swHit"><button type="button" class="sw" role="switch" aria-checked="${a.pubblicato}" aria-label="Pubblicata: ${esc(a.nome)}" data-i="${i}"></button></span></div></div>
-  </article>`).join('')}<button class="nuovo" type="button" id="nuovaA">+ nuova app</button></div>`;
-  $$('#cards .apri').forEach(b=>b.addEventListener('click',()=>modificaApp(+b.closest('.c').dataset.i)));
-  $$('#cards .sw').forEach(s=>s.addEventListener('click',async e=>{
+  const A=stato.app,pronte=A.filter(a=>a.stato==='pronta'&&a.pubblicato).length;
+  board().innerHTML=tessera('carta intro-p',{c:4,r:4,cv:4,rv:5,ov:1,cm:2,rm:4},`<div class="row"><span class="mono">Pannello · app</span><span class="mono hide-s">pagina Laboratorio</span></div>
+    <div style="display:flex;flex-direction:column;gap:12px"><h1>App</h1><p><b>${pronte}</b> pronte sul sito su ${A.length}. Tocca un’app per modificarla; trascinala per cambiare l’ordine.</p>
+    <div class="acts"><button class="btn" type="button" id="nuovaA">+ Nuova app</button><a class="btn vuoto" href="${SITO}laboratorio/" target="_blank" rel="noopener">Laboratorio ↗</a></div></div>`)+
+  tessera('ed solo-v',{cv:8,rv:5,ov:2,cvm:2,rvm:8},'',' id="ed" aria-label="Modifica dell\'app"')+
+  A.map((a,i)=>`<article class="t prj app-p${a.stato==='pronta'?'':' arr'}${a.pubblicato?'':' off'}" draggable="true" data-i="${i}" style="${st({c:4,r:3,cm:2,rm:3})}"><div class="in">
+    <div class="row"><span class="mono">${nn(i)} · ${esc(a.tipo)}</span><span class="mono">${a.stato==='pronta'?'pronta':'in arrivo'}</span></div>
+    <div><h2>${esc(a.nome)}</h2>${a.descrizione?`<p>${esc(a.descrizione)}</p>`:''}</div>
+    <button class="hit" type="button" aria-label="Modifica ${esc(a.nome)}"></button></div>
+    <span class="sw-p swHit"><button type="button" class="sw" role="switch" aria-checked="${a.pubblicato}" aria-label="${esc(a.nome)} nel Laboratorio" data-i="${i}"></button></span></article>`).join('');
+  palcoVuoto();
+  $$('#board .prj .hit').forEach(b=>b.addEventListener('click',()=>modificaApp(+b.closest('.prj').dataset.i,b.closest('.prj'))));
+  $$('#board .prj .sw').forEach(s=>s.addEventListener('click',async e=>{
     e.stopPropagation();const i=+s.dataset.i,el=stato.app.map(a=>({...a}));el[i].pubblicato=!el[i].pubblicato;s.disabled=true;
     try{await salvaApp(el,el[i].pubblicato?`${el[i].nome} è pubblicata.`:`${el[i].nome} è nascosta.`);}catch(err){avviso(err.message,true);}
     disegnaApp();
   }));
-  $('#nuovaA').addEventListener('click',()=>modificaApp(-1));
-  riordina($('#cards'),stato.app,async el=>{try{await salvaApp(el,'Nuovo ordine salvato.');}catch(e){avviso(e.message,true);}disegnaApp();});
+  $('#nuovaA').addEventListener('click',e=>modificaApp(-1,e.currentTarget.closest('.t')));
+  riordina(board(),stato.app,async el=>{try{await salvaApp(el,'Nuovo ordine salvato.');}catch(e){avviso(e.message,true);}disegnaApp();});
 }
-function modificaApp(i){
+function modificaApp(i,da=null,fuoco=true){
   const nuova=i<0,a=nuova?{slug:'',nome:'',tipo:'',descrizione:'',stato:'in-arrivo',pubblicato:false}:stato.app[i];
   let html=null;
-  apriDrawer({
-    n:nuova?'nuova app':`${nn(i)} · modifica`,titolo:nuova?'Nuova':a.nome,testoSalva:nuova?'aggiungi':'salva e pubblica',
+  apriDrawer({da,fuoco,
+    palco:nuova?null:{sfondo:a.stato==='pronta'?'#FFB37A':'var(--carta)',testo:'var(--ink)',
+      vis:`<div class="vis"><span class="mono">${nn(i)} · ${esc(a.tipo)}</span><span class="nm2">${esc(a.nome)}</span></div>`},
+    n:nuova?'nuova app':`${nn(i)} · modifica`,titolo:nuova?'Nuova':a.nome,testoSalva:nuova?'Aggiungi':'Salva e pubblica',
     campi:`${campo('nome','nome',a.nome,{max:40})}
       ${nuova?campo('slug','indirizzo','',{max:40,aiuto:'leandrohenriquez.com/app/…',attr:'autocapitalize="off" spellcheck="false"'}):''}
       ${campo('tipo','tipo',a.tipo,{max:30,aiuto:'es. calcolatore'})}
       ${campo('descrizione','descrizione',a.descrizione||'',{max:160,area:true})}
-      <div class="campo"><span class="lbl">file dell'app · una pagina HTML completa, massimo 2 MB</span><div class="anteprima"><label class="btn">${a.stato==='pronta'?'sostituisci…':'carica…'}<input type="file" accept=".html,text/html" hidden id="fileA"></label><span class="lbl" id="statoFile">${a.stato==='pronta'?`<a href="${SITO}app/${esc(a.slug)}/" target="_blank" rel="noopener">apri quella online ↗</a>`:'nessun file: sul sito appare come “in arrivo”'}</span></div></div>
+      <div class="campo"><span class="lbl">file dell'app · una pagina HTML completa, massimo 2 MB</span><div class="anteprima"><label class="btn">${a.stato==='pronta'?'Sostituisci…':'Carica…'}<input type="file" accept=".html,text/html" hidden id="fileA"></label><span class="lbl" id="statoFile">${a.stato==='pronta'?`<a href="${SITO}app/${esc(a.slug)}/" target="_blank" rel="noopener">apri quella online ↗</a>`:'nessun file: sul sito appare come “in arrivo”'}</span></div></div>
       ${nuova?'':posizione(i,stato.app.length)}
       ${interruttore('pubblicato','pubblicata nel Laboratorio',a.pubblicato)}`,
     onElimina:nuova?null:async()=>{
@@ -370,7 +431,7 @@ function modificaApp(i){
       disegnaApp();
     }
   });
-  if(nuova){const n=$('#drawer [name=nome]'),s=$('#drawer [name=slug]');let t=false;s.addEventListener('input',()=>t=true);n.addEventListener('input',()=>{if(!t)s.value=slugDa(n.value);titoloDr(n.value||'Nuova');});}
+  if(nuova){const n=$('#drForm [name=nome]'),s=$('#drForm [name=slug]');let t=false;s.addEventListener('input',()=>t=true);n.addEventListener('input',()=>{if(!t)s.value=slugDa(n.value);titoloDr(n.value||'Nuova');});}
   $('#fileA').addEventListener('change',async e=>{
     const file=e.target.files[0];if(!file)return;
     if(file.size>2*1024*1024){$('#drErr').textContent='File troppo grande (massimo 2 MB).';return;}
@@ -385,7 +446,7 @@ async function sezioneStatistiche(){
   let d;
   try{d=await api('GET',`/api/statistiche?giorni=${giorni}`);}
   catch(e){
-    if(e.stato===503){$('#main').innerHTML=`<div class="hd"><h1 class="D" data-t="Statistiche">Statistiche</h1></div><div class="vuoto"><b>GoatCounter non è ancora collegato</b><span class="lbl">Servono il codice dell'account e una chiave API di sola lettura. Quando ci sono, qui compaiono visite, pagine, provenienza e azioni.</span></div>`;return;}
+    if(e.stato===503){board().innerHTML=tessera('carta intro-p vuoto-t',{c:12,r:3,cm:2,rm:5},`<div class="row"><span class="mono">Pannello · statistiche</span></div><div><h1>Statistiche</h1><p>GoatCounter non è ancora collegato. Servono il codice dell'account e una chiave API di sola lettura: quando ci sono, qui compaiono visite, pagine, provenienza e azioni.</p></div>`);return;}
     throw e;
   }
   const tot=d.totale,giornate=d.perGiorno,picco=Math.max(1,...giornate.map(g=>g.visite));
@@ -393,32 +454,27 @@ async function sezioneStatistiche(){
   const ev=n=>{const r=d.eventi.find(x=>x.percorso===n);return r?r.visite:0;};
   const top=d.pagine[0];
   const data=s=>new Date(s+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'short'});
-  $('#main').innerHTML=`<div class="hd"><h1 class="D" data-t="Statistiche">Statistiche</h1><div class="periodo" role="group" aria-label="Periodo">${[7,30,90].map(g=>`<button type="button" aria-pressed="${g===giorni}" data-g="${g}">${g} giorni</button>`).join('')}</div></div>
-  <section class="stat">
-    <div><span class="lbl">visite · ultimi ${d.periodo.giorni} giorni</span><div class="D hero">${tot}</div></div>
-    <div class="chart"><svg id="barre" role="img" aria-label="Visite per giorno, picco ${picco}"></svg><div class="tip"></div></div>
-    <div class="spec">
-      <div><span class="lbl">visitatori unici</span><b>${d.unici}</b></div>
-      <div><span class="lbl">pagina più vista</span><b>${esc(top?(top.titolo||top.percorso):'—')}</b></div>
-      <div><span class="lbl">apri oopar</span><b>${ev('apri-oopar')}</b></div>
-      <div><span class="lbl">email copiata</span><b>${ev('email-copiata')}</b></div>
-      <div><span class="lbl">clic linkedin</span><b>${ev('clic-linkedin')}</b></div>
-      <div><span class="lbl">da telefono</span><b>${tutti?Math.round(telefoni/tutti*100)+'%':'—'}</b></div>
-    </div>
-    <div><span class="lbl">da dove arrivano</span><div class="lista">${d.provenienza.map(p=>`<div><span>${esc(p.nome)}</span><span>${p.visite}</span></div>`).join('')||'<div><span class="lbl">ancora nessun dato</span><span></span></div>'}</div></div>
-    <div><span class="lbl">pagine</span><div class="lista">${d.pagine.map(p=>`<div><span>${esc(p.titolo||p.percorso)} <span class="lbl">${esc(p.percorso)}</span></span><span>${p.visite}</span></div>`).join('')||'<div><span class="lbl">ancora nessun dato</span><span></span></div>'}</div></div>
-  </section>`;
+  const num=(et,v,cls='',dim={c:3,r:2,cm:1,rm:2})=>tessera('stat '+cls,dim,`<span class="mono">${et}</span><b${typeof v==='string'&&!/^[\d.%—]+$/.test(v)?' class="testo"':''}>${typeof v==='number'?v.toLocaleString('it-IT'):esc(v)}</b>`);
+  const lista=(tit,righe,cls='')=>tessera('lista-t '+cls,{c:4,r:4,cm:2,rm:5},`<div class="row"><span class="mono">${tit}</span></div><ol>${righe||'<li><span class="lbl">ancora nessun dato</span></li>'}</ol>`);
+  board().innerHTML=tessera('carta intro-p',{c:6,r:3,cm:2,rm:4},`<div class="row"><span class="mono">Pannello · statistiche</span><span class="mono hide-s">GoatCounter, senza cookie</span></div>
+    <div style="display:flex;flex-direction:column;gap:14px"><h1>Statistiche</h1><div class="periodo" role="group" aria-label="Periodo">${[7,30,90].map(g=>`<button type="button" aria-pressed="${g===giorni}" data-g="${g}">${g} giorni</button>`).join('')}</div></div>`)+
+    num(`Visite · ${d.periodo.giorni} giorni`,tot,'',{c:3,r:3,cm:1,rm:2})+num('Visitatori unici',d.unici,'',{c:3,r:3,cm:1,rm:2})+
+    tessera('graf',{c:8,r:4,cm:2,rm:4},`<div class="row"><span class="mono">Visite al giorno</span><span class="mono">picco ${picco}</span></div><div class="chart"><svg id="barre" role="img" aria-label="Visite per giorno, picco ${picco}"></svg><div class="tip"></div></div>`)+
+    lista('Pagine',d.pagine.slice(0,8).map(p=>`<li><span>${esc(p.titolo||p.percorso)}<small>${esc(p.percorso)}</small></span><b>${p.visite}</b></li>`).join(''),'carta')+
+    num('Email copiata',ev('email-copiata'),'verde')+num('Apri Oopar',ev('apri-oopar'))+num('Clic LinkedIn',ev('clic-linkedin'))+num('Da telefono',tutti?Math.round(telefoni/tutti*100)+'%':'—')+
+    num('Pagina più vista',top?(top.titolo||top.percorso):'—','',{c:4,r:2,cm:2,rm:2})+
+    lista('Da dove arrivano',d.provenienza.slice(0,8).map(p=>`<li><span>${esc(p.nome)}</span><b>${p.visite}</b></li>`).join(''));
   $$('.periodo button').forEach(b=>b.addEventListener('click',()=>{giorni=+b.dataset.g;sezioneStatistiche().catch(e=>avviso(e.message,true));}));
-  // istogramma: colonne con angoli di 4 px in alto, spazio 2 px, quota del picco tratteggiata
-  const svg=$('#barre'),W=Math.max(300,svg.clientWidth||600),H=190,basso=20,alto=22,n=Math.max(1,giornate.length),bw=Math.max(2,W/n-2);
+  // istogramma: colonne con angoli di 3 px in alto, spazio 2 px; il giorno di picco in verde, quota del picco tratteggiata
+  const svg=$('#barre'),W=Math.max(300,svg.clientWidth||600),H=Math.max(140,svg.clientHeight||190),basso=20,alto=22,n=Math.max(1,giornate.length),bw=Math.max(2,W/n-2);
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   let g='',xs=[],ys=[];
-  giornate.forEach((x,i)=>{const h=(x.visite/picco)*(H-alto-basso),X=i*(bw+2),Y=H-basso-h,r=Math.min(4,bw/2,h);xs.push(X+bw/2);ys.push(Y);
-    g+=h>0?`<path d="M${X} ${H-basso} V${Y+r} Q${X} ${Y} ${X+r} ${Y} H${X+bw-r} Q${X+bw} ${Y} ${X+bw} ${Y+r} V${H-basso} Z" style="fill:var(--ink)"/>`:'';});
   const pk=giornate.findIndex(x=>x.visite===picco);
-  g+=`<line x1="0" x2="${W}" y1="${H-basso}" y2="${H-basso}" style="stroke:var(--ink)"/>`;
-  if(pk>=0&&giornate[pk].visite>0)g+=`<line x1="${xs[pk]}" x2="${W}" y1="${ys[pk]}" y2="${ys[pk]}" style="stroke:var(--ink)" stroke-dasharray="2 3"/><text x="${W}" y="${ys[pk]-6}" text-anchor="end" style="font-family:var(--M);font-size:var(--piccolo)">picco ${picco} · ${data(giornate[pk].giorno)}</text>`;
-  if(giornate.length)g+=`<text x="0" y="${H-4}" style="font-family:var(--M);font-size:var(--piccolo);fill:var(--mute)">${data(giornate[0].giorno)}</text><text x="${W}" y="${H-4}" text-anchor="end" style="font-family:var(--M);font-size:var(--piccolo);fill:var(--mute)">${data(giornate.at(-1).giorno)}</text>`;
+  giornate.forEach((x,i)=>{const h=(x.visite/picco)*(H-alto-basso),X=i*(bw+2),Y=H-basso-h,r=Math.min(3,bw/2,h);xs.push(X+bw/2);ys.push(Y);
+    g+=h>0?`<path d="M${X} ${H-basso} V${Y+r} Q${X} ${Y} ${X+r} ${Y} H${X+bw-r} Q${X+bw} ${Y} ${X+bw} ${Y+r} V${H-basso} Z" style="fill:${i===pk?'#3DDC84':'#4A4A4A'}"/>`:'';});
+  g+=`<line x1="0" x2="${W}" y1="${H-basso}" y2="${H-basso}" style="stroke:#4A4A4A"/>`;
+  if(pk>=0&&giornate[pk].visite>0)g+=`<line x1="${xs[pk]}" x2="${W}" y1="${ys[pk]}" y2="${ys[pk]}" style="stroke:#3DDC84" stroke-dasharray="2 3"/><text x="${W}" y="${ys[pk]-6}" text-anchor="end" style="font:500 11px var(--m);fill:var(--carta)">picco ${picco} · ${data(giornate[pk].giorno)}</text>`;
+  if(giornate.length)g+=`<text x="0" y="${H-4}" style="font:500 11px var(--m);fill:#8A8C8C">${data(giornate[0].giorno)}</text><text x="${W}" y="${H-4}" text-anchor="end" style="font:500 11px var(--m);fill:#8A8C8C">${data(giornate.at(-1).giorno)}</text>`;
   svg.innerHTML=g;
   const tip=svg.parentNode.querySelector('.tip');
   svg.addEventListener('pointermove',e=>{if(!xs.length)return;const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W;let i=0,b=1e9;xs.forEach((v,k)=>{if(Math.abs(v-x)<b){b=Math.abs(v-x);i=k;}});
@@ -429,31 +485,21 @@ async function sezioneStatistiche(){
 // ---------- accessi (solo proprietario) ----------
 async function sezioneAccessi(){
   const d=await api('GET','/api/accessi');
-  const riga=a=>`<div><span><b>${esc(a.email)}</b><br><span class="lbl">${esc(a.nota||'')}${a.aggiunta?` · aggiunta il ${esc(a.aggiunta)}`:''}</span></span><button type="button" class="btn" data-togli="${esc(a.email)}">togli</button></div>`;
-  $('#main').innerHTML=`<div class="hd"><h1 class="D" data-t="Accessi">Accessi</h1><span class="lbl">solo queste email entrano nel pannello</span></div>
-  <div class="acc"><div><span><b>${esc(d.proprietario)}</b><br><span class="lbl">proprietario · entra sempre</span></span><span></span></div>${d.elenco.map(riga).join('')}</div>
-  <form class="aggiungi" id="formAcc"><input type="email" name="email" placeholder="email Google" required autocomplete="off" aria-label="Email Google"><input type="text" name="nota" placeholder="nota, es. chi è" maxlength="80" aria-label="Nota"><button class="btn pri" type="submit">aggiungi</button></form>
-  <p class="err" id="accErr2" role="alert"></p>`;
+  const mail=(a,pro=false)=>tessera(`mail-t${pro?' verde':''}`,{c:4,r:2,cm:2,rm:2},`<div class="row"><span class="mono">${pro?'proprietario · entra sempre':esc(a.nota||'accesso')}${!pro&&a.aggiunta?` · ${esc(a.aggiunta)}`:''}</span></div>
+    <div class="acts"><b>${esc(pro?a:a.email)}</b>${pro?'':`<button type="button" class="btn vuoto" data-togli="${esc(a.email)}">Togli</button>`}</div>`);
+  board().innerHTML=tessera('carta intro-p',{c:4,r:3,cm:2,rm:3},`<div class="row"><span class="mono">Pannello · accessi</span></div><div><h1>Accessi</h1><p>Solo queste email Google entrano nel pannello.</p></div>`)+
+    tessera('carta',{c:8,r:3,cm:2,rm:5},`<div class="row"><span class="mono">Aggiungi un accesso</span></div>
+    <form class="aggiungi" id="formAcc"><input type="email" name="email" placeholder="email Google" required autocomplete="off" aria-label="Email Google"><input type="text" name="nota" placeholder="nota, es. chi è" maxlength="80" aria-label="Nota"><button class="btn" type="submit">Aggiungi</button></form>
+    <p class="err" id="accErr2" role="alert"></p>`)+
+    mail(d.proprietario,true)+d.elenco.map(a=>mail(a)).join('');
   $('#formAcc').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);
     try{await api('POST','/api/accessi',{email:f.get('email'),nota:f.get('nota')});avviso('Email aggiunta.');sezioneAccessi();}catch(err){$('#accErr2').textContent=err.message;}});
   $$('[data-togli]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm(`Togliere l'accesso a ${b.dataset.togli}?`))return;
     try{await api('DELETE',`/api/accessi/${encodeURIComponent(b.dataset.togli)}`);avviso('Accesso tolto.');sezioneAccessi();}catch(err){avviso(err.message,true);}}));
 }
 
-// ---------- tu (su telefono: account, notifiche, accessi, esci; su desktop stanno nel menu a sinistra) ----------
-async function sezioneTu(){
-  $('#main').innerHTML=`<div class="hd"><div class="tit"><h1 class="D" data-t="Tu">Tu</h1><span class="lbl">${esc(stato.io.email)}</span></div></div>
-  <div class="acc">
-    <div id="tuNotifiche" hidden><span><b>Notifiche</b><br><span class="lbl" id="tuNotStato"></span></span><button type="button" class="btn" id="tuNot">attiva</button></div>
-    ${stato.io.proprietario?'<div><span><b>Accessi</b><br><span class="lbl">chi può entrare nel pannello</span></span><a class="btn" href="#accessi">apri</a></div>':''}
-    <div><span><b>Esci</b><br><span class="lbl">chiude la sessione su questo dispositivo</span></span><button type="button" class="btn" id="tuEsci">esci</button></div>
-  </div>`;
-  $('#tuNot').addEventListener('click',()=>$('#notifiche').click());
-  $('#tuEsci').addEventListener('click',()=>$('#esci').click());
-  statoNotifiche();
-}
-
-const SEZIONI={progetti:sezioneProgetti,app:sezioneApp,statistiche:sezioneStatistiche,accessi:sezioneAccessi,tu:sezioneTu};
+// account, notifiche ed esci stanno nel menu del pulsante in alto a destra (prima: sezione «tu» del telefono)
+const SEZIONI={progetti:sezioneProgetti,app:sezioneApp,statistiche:sezioneStatistiche,accessi:sezioneAccessi};
 
 // ---------- avvio ----------
 (async()=>{try{stato.io=await api('GET','/api/io');avvia();}catch{mostraAccesso();}})();

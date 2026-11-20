@@ -92,9 +92,11 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   passano da `conta()` in common.js: `email-copiata`, `apri-<progetto>`, `clic-linkedin`.
 - `backend/` — pannello di gestione (Cloudflare Worker): accesso Google con elenco email, progetti,
   immagini, statistiche GoatCounter. Vedi `backend/README.md`; test con `cd backend && npm test`.
-  Pannello in stile D "Manifesto", identico al sito (scelta di Leandro 6/11): i valori stanno in `assets/tema/tema.css` del sito,
-  copiato in `backend/public/sito/` a ogni pubblicazione (`npm run tema`, non nel repo); `backend/public/tema.css` collega i nomi
-  del pannello a quelli del sito; `pannello.css` è solo struttura. Per cambiare l'aspetto di sito e pannello si tocca assets/tema/tema.css.
+  Pannello in stile **showroom** con la stessa struttura del sito (regola del 20/11): barra con le sezioni, tessere, viste
+  Vetrina (modifica sul palco) e Mosaico (foglio che nasce dalla tessera); account e notifiche nel menu del pulsante in alto a destra.
+  Usa i file del sito `assets/showroom/{showroom.css,pagine.css,viste.js,colori.js}`, copiati in `backend/public/sito/showroom/`
+  a ogni pubblicazione (`npm run tema`, non nel repo); `pannello.css` aggiunge solo moduli, interruttori e avvisi.
+  `backend/public/tema.css` (stile D) non è più caricato.
 
 ## Prestazioni dello scroll (problemi già risolti, non reintrodurli)
 - Scroll mappato direttamente, niente molle sullo scroll; scroll-snap nativo CSS.
