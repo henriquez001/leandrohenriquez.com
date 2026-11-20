@@ -7,15 +7,17 @@
      il contenuto è contro-scalato, quindi il testo non si deforma). Se l'animazione è in corso e arriva un nuovo
      comando, riparte dal punto in cui si trova (interrompibile).
    - Cliccando un progetto lo si porta "in evidenza": nella Vetrina diventa il palco grande, nel Mosaico la tessera grande.
-   - Colori: le immagini non hanno filtri. Il fondo delle tessere con immagine scontornata (PNG) è la tinta dominante
-     del prodotto, schiarita; le foto riempiono la tessera. */
+   - Colori: le immagini non hanno filtri. Il fondo delle tessere è il colore pieno del prodotto, scelto a mano in
+     assets/showroom/colori.js (COLORI, SCURI per il testo chiaro). Per un progetto nuovo senza colore lo si calcola
+     dall'immagine (tinta dominante, funzione tinta). Le foto riempiono la tessera. */
 (function(){
 'use strict';
 var board=document.getElementById('board'); if(!board) return;
 var seg=document.getElementById('vista'), btns=[].slice.call(seg.querySelectorAll('button'));
 var reduce=matchMedia('(prefers-reduced-motion: reduce)');
 // immagini più grandi di quelle dell'indice, dove esistono (lo slug è quello di data/progetti.json)
-var FOTO={oopar:'vitrum/img/oopar-tre-quarti.webp', otto:'assets/showroom/otto.webp'};
+var FOTO=typeof FOTO_GRANDI!=='undefined'?FOTO_GRANDI:{};
+var COL=typeof COLORI!=='undefined'?COLORI:{}, SCU=typeof SCURI!=='undefined'?SCURI:{};
 var P=(typeof PROGETTI!=='undefined'?PROGETTI:[]).slice();
 var pad=function(i){return String(i+1).padStart(2,'0');};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
@@ -40,7 +42,8 @@ var prj=P.map(function(p,i){
   if(link) a.querySelector('.btn').addEventListener('click',function(){conta('apri-'+p.slug);});
   a.querySelector('.hit').addEventListener('click',function(){scegli(i,true);});
   var img=a.querySelector('.im');
-  if(img.complete&&img.naturalWidth) tinta(img,a,foto); else img.addEventListener('load',function(){tinta(img,a,foto);},{once:true});
+  if(COL[p.slug]){ a.style.setProperty('--bg',COL[p.slug]); if(SCU[p.slug]) a.style.setProperty('--tx','var(--carta)'); }
+  else if(img.complete&&img.naturalWidth) tinta(img,a,foto); else img.addEventListener('load',function(){tinta(img,a,foto);},{once:true});
   board.insertBefore(a,proc);
   return a;
 });

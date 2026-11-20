@@ -49,12 +49,20 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   quelle nella radice sono copie (si modificano in stili/, poi si applica lo stile).
 - Laboratorio, privacy e pagine progetto hanno blocchi `<!--stile:<nome>-->…<!--/stile:<nome>-->` nel `<head>`:
   quello dello stile attivo è acceso, gli altri sono chiusi in un commento. Dentro un blocco niente "--".
-- Stile **showroom** (scelta del 19/11/2026, P3 «Showroom a colori»): cambia solo home e 404 (`stili/showroom/`), nelle altre pagine
-  resta acceso il blocco «classico» (ripiego in applica-stile.js). Codice in `assets/showroom/` (showroom.css, showroom.js).
+- Ogni stile può avere pagine INTERE in `stili/<stile>/<percorso>` (index, 404, laboratorio/, privacy/, lavori/<p>/, app/<slug>/):
+  `applica-stile.js` copia nella radice quella dello stile scelto, o quella di `stili/classico/` se lo stile non ce l'ha.
+  Le parti generate (app:inizio/app:fine del Laboratorio, segnaposto g: delle pagine progetto) vengono riportate dalla radice
+  a tutte le copie. Si modificano le pagine in stili/, mai le copie nella radice.
+- Stile **showroom** (scelta del 19/11/2026, P3 «Showroom a colori», ATTIVO; online su tutte le pagine dal 20/11): codice in
+  `assets/showroom/` (showroom.css + showroom.js home, pagine.css + viste.js + progetto.js altre pagine, colori.js).
   Due viste scelte dal menu in alto a destra: **Vetrina** (palco grande + striscia) e **Mosaico** (griglia 12 colonne); le tessere
-  sono le stesse e si spostano con FLIP. Progetti da `PROGETTI` (indice.js) + descrizione/anno da data/progetti.json.
-  Colori: immagini SENZA filtri (niente mix-blend: Leandro 19/11 «lascia i colori originali»), fondo tessera calcolato dal prodotto.
-  Immagini più grandi per slug nella costante FOTO di showroom.js.
+  sono le stesse e si spostano con FLIP. Nelle pagine fisse ogni tessera dice colonne/righe con `--c/--r` (`--cv/--rv/--ov` in Vetrina,
+  `--cm/--rm` sul telefono); il raggio degli angoli è `--raggio`. Home: progetti da `PROGETTI` + descrizione/anno da data/progetti.json.
+  Pagina progetto showroom GENERATA dalla sezione `"showroom"` di progetto.json (intro, intero, capitoli con camera/punto/quote, foto,
+  premio, prossimo) con `node tools/genera-html.js lavori/<p>`: scrive stili/showroom/lavori/<p>/index.html, poi `applica-stile.js`.
+  Il Laboratorio showroom trasforma in tessere i riquadri generati (stesso markup del pannello) con un piccolo script.
+  Colori: immagini SENZA filtri (niente mix-blend: Leandro 19/11 «lascia i colori originali»); fondo tessera = colore pieno scelto a
+  mano in `assets/showroom/colori.js` (COLORI, SCURI = testo chiaro, FOTO_GRANDI = immagini più grandi); senza colore si calcola.
 - Vitrum non cambia con lo stile. Il pannello ha la sua estetica (backend/public/tema.css).
 
 ## Struttura
@@ -69,7 +77,8 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   processo e prossimo progetto. `index.html` del progetto è solo il guscio (meta, logo, script).
   Per una pagina nuova: copiare la cartella `lavori/oopar/`, cambiare meta e JSON.
   Dopo ogni modifica al JSON: `node tools/genera-html.js lavori/<progetto>` copia i testi
-  nell'HTML (tra i segnaposto `<!--g:...-->`), così la pagina si legge anche senza JavaScript.
+  nell'HTML classico (tra i segnaposto `<!--g:...-->`, nella radice o in stili/classico/), rigenera la versione showroom,
+  poi `node tools/applica-stile.js`.
 - `assets/models/oopar-data.js` — mesh della lampada Oopar convertita da lampada.stp
   (OpenCASCADE, base64). La home non carica three.js né il modello.
 - `assets/js/three.min.js` — three.js r128, locale.

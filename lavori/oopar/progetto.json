@@ -6,74 +6,430 @@
     "dati": "assets/models/oopar-data.js",
     "costruttore": "oopar"
   },
-  "intro": ["Lampada da tavolo", "1° premio Pending Cultures", "trascina per ruotare ↔ · scorri ↓"],
+  "intro": [
+    "Lampada da tavolo",
+    "1° premio Pending Cultures",
+    "trascina per ruotare ↔ · scorri ↓"
+  ],
   "tappe": [
     {
-      "camera": { "yaw": 35, "pitch": 18, "dist": 11.5 },
-      "parola": { "testo": "Oopar" }
+      "camera": {
+        "yaw": 35,
+        "pitch": 18,
+        "dist": 11.5
+      },
+      "parola": {
+        "testo": "Oopar"
+      }
     },
     {
-      "camera": { "yaw": 0, "pitch": 4, "dist": 10.5 },
-      "parola": { "testo": "300 mm", "stile": "o" },
-      "didascalia": { "n": "01 — MISURE", "titolo": "Un occhio di 30 cm", "testo": "300 × 195 × 200 mm: le quote vengono direttamente dal modello Rhino." },
+      "camera": {
+        "yaw": 0,
+        "pitch": 4,
+        "dist": 10.5
+      },
+      "parola": {
+        "testo": "300 mm",
+        "stile": "o"
+      },
+      "didascalia": {
+        "n": "01 — MISURE",
+        "titolo": "Un occhio di 30 cm",
+        "testo": "300 × 195 × 200 mm: le quote vengono direttamente dal modello Rhino."
+      },
       "quote": [
-        { "verso": "o", "da": [-1.5, 0.22, 0], "a": [1.5, 0.22, 0], "testo": "300 mm", "scosta": 46, "rif": [[0, -0.975, 0]] },
-        { "verso": "v", "da": [0, 0.975, 0], "a": [0, -0.975, 0], "testo": "195", "scosta": 40, "rif": [[1.5, 0.22, -1], [1.5, 0.22, 1]] }
+        {
+          "verso": "o",
+          "da": [
+            -1.5,
+            0.22,
+            0
+          ],
+          "a": [
+            1.5,
+            0.22,
+            0
+          ],
+          "testo": "300 mm",
+          "scosta": 46,
+          "rif": [
+            [
+              0,
+              -0.975,
+              0
+            ]
+          ]
+        },
+        {
+          "verso": "v",
+          "da": [
+            0,
+            0.975,
+            0
+          ],
+          "a": [
+            0,
+            -0.975,
+            0
+          ],
+          "testo": "195",
+          "scosta": 40,
+          "rif": [
+            [
+              1.5,
+              0.22,
+              -1
+            ],
+            [
+              1.5,
+              0.22,
+              1
+            ]
+          ]
+        }
       ]
     },
     {
-      "camera": { "yaw": 10, "pitch": 6, "dist": 7.6 },
-      "parola": { "testo": "Ø 90", "stile": "or" },
-      "didascalia": { "n": "02 — LA SFERA", "titolo": "Ø 90, sospesa", "testo": "Una sfera cromata di 90 mm fluttua nel campo magnetico e riflette la luce del corpo." },
+      "camera": {
+        "yaw": 10,
+        "pitch": 6,
+        "dist": 7.6
+      },
+      "parola": {
+        "testo": "Ø 90",
+        "stile": "or"
+      },
+      "didascalia": {
+        "n": "02 — LA SFERA",
+        "titolo": "Ø 90, sospesa",
+        "testo": "Una sfera cromata di 90 mm fluttua nel campo magnetico e riflette la luce del corpo."
+      },
       "quote": [
-        { "sfera": 0.45, "testo": "Ø 90", "scosta": 40 }
+        {
+          "sfera": 0.45,
+          "testo": "Ø 90",
+          "scosta": 40
+        }
       ]
     },
     {
-      "camera": { "yaw": -62, "pitch": 16, "dist": 9.4 },
-      "parola": { "testo": "Noce" },
-      "didascalia": { "n": "03 — IL CORPO", "titolo": "Noce, nel pieno", "testo": "Il guscio a occhio, con i fianchi concavi, nasce dall’incrocio tra cultura italiana e indiana." },
+      "camera": {
+        "yaw": -62,
+        "pitch": 16,
+        "dist": 9.4
+      },
+      "parola": {
+        "testo": "Noce"
+      },
+      "didascalia": {
+        "n": "03 — IL CORPO",
+        "titolo": "Noce, nel pieno",
+        "testo": "Il guscio a occhio, con i fianchi concavi, nasce dall’incrocio tra cultura italiana e indiana."
+      },
       "quote": [
-        { "verso": "o", "da": [-1.5, 0.22, -1], "a": [-1.5, 0.22, 1], "testo": "200", "scosta": 40, "rif": [[0, -0.975, 0.8], [0, -0.975, -0.8], [-1.5, 0.22, 1], [-1.5, 0.22, -1]] }
+        {
+          "verso": "o",
+          "da": [
+            -1.5,
+            0.22,
+            -1
+          ],
+          "a": [
+            -1.5,
+            0.22,
+            1
+          ],
+          "testo": "200",
+          "scosta": 40,
+          "rif": [
+            [
+              0,
+              -0.975,
+              0.8
+            ],
+            [
+              0,
+              -0.975,
+              -0.8
+            ],
+            [
+              -1.5,
+              0.22,
+              1
+            ],
+            [
+              -1.5,
+              0.22,
+              -1
+            ]
+          ]
+        }
       ]
     },
     {
-      "camera": { "yaw": -150, "pitch": 10, "dist": 9.8 },
-      "parola": { "testo": "Luce", "stile": "o" },
-      "didascalia": { "n": "04 — LA LUCE", "titolo": "Dalla fascia interna", "testo": "La luce esce dalla fascia dentro il tunnel e si riflette sulla sfera." }
+      "camera": {
+        "yaw": -150,
+        "pitch": 10,
+        "dist": 9.8
+      },
+      "parola": {
+        "testo": "Luce",
+        "stile": "o"
+      },
+      "didascalia": {
+        "n": "04 — LA LUCE",
+        "titolo": "Dalla fascia interna",
+        "testo": "La luce esce dalla fascia dentro il tunnel e si riflette sulla sfera."
+      }
     }
   ],
   "scheda": {
     "nota": "dal file lampada.stp",
     "voci": [
-      { "voce": "larghezza", "valore": "300", "unita": "mm" },
-      { "voce": "altezza", "valore": "195", "unita": "mm" },
-      { "voce": "profondità", "valore": "200", "unita": "mm" },
-      { "voce": "sfera", "valore": "Ø 90", "unita": "mm" },
-      { "voce": "corpo", "valore": "Noce" },
-      { "voce": "sfera", "valore": "Cromo" },
-      { "voce": "parti", "valore": "4" },
-      { "voce": "premio", "valore": "1° Pending ", "unita": "Cultures" }
+      {
+        "voce": "larghezza",
+        "valore": "300",
+        "unita": "mm"
+      },
+      {
+        "voce": "altezza",
+        "valore": "195",
+        "unita": "mm"
+      },
+      {
+        "voce": "profondità",
+        "valore": "200",
+        "unita": "mm"
+      },
+      {
+        "voce": "sfera",
+        "valore": "Ø 90",
+        "unita": "mm"
+      },
+      {
+        "voce": "corpo",
+        "valore": "Noce"
+      },
+      {
+        "voce": "sfera",
+        "valore": "Cromo"
+      },
+      {
+        "voce": "parti",
+        "valore": "4"
+      },
+      {
+        "voce": "premio",
+        "valore": "1° Pending ",
+        "unita": "Cultures"
+      }
     ]
   },
   "immagini": {
     "nota": "render dal portfolio",
     "voci": [
-      { "src": "assets/img/oopar.jpg", "alt": "Oopar Lamp su un tavolo in marmo", "didascalia": ["Ambientata", "render"] },
-      { "src": "assets/img/cut-oopar.png", "alt": "Oopar Lamp scontornata", "didascalia": ["Il decoro originale", "render"], "scontornata": true }
+      {
+        "src": "assets/img/oopar.jpg",
+        "alt": "Oopar Lamp su un tavolo in marmo",
+        "didascalia": [
+          "Ambientata",
+          "render"
+        ]
+      },
+      {
+        "src": "assets/img/cut-oopar.png",
+        "alt": "Oopar Lamp scontornata",
+        "didascalia": [
+          "Il decoro originale",
+          "render"
+        ],
+        "scontornata": true
+      }
     ]
   },
   "processo": {
     "nota": "cosa c’è e cosa manca",
     "voci": [
-      { "titolo": "Schizzi", "stato": "da fornire" },
-      { "titolo": "Modello Rhino", "stato": "lampada.stp ✓", "fatto": true },
-      { "titolo": "Render Vitrum", "stato": "da fare insieme" }
+      {
+        "titolo": "Schizzi",
+        "stato": "da fornire"
+      },
+      {
+        "titolo": "Modello Rhino",
+        "stato": "lampada.stp ✓",
+        "fatto": true
+      },
+      {
+        "titolo": "Render Vitrum",
+        "stato": "da fare insieme"
+      }
     ]
   },
   "prossimo": {
     "etichetta": "Prossimo progetto — 10 / 10",
     "titolo": "La Fornace →",
     "link": "#lavori"
+  },
+  "showroom": {
+    "nota": "Dati della pagina in stile showroom (Vetrina e Mosaico). Le misure vengono da scheda.voci con unità mm.",
+    "colore": "#C5C7C8",
+    "tipo": "lampada da tavolo",
+    "anno": "2017",
+    "descrizione": "Oopar («sopra» in hindi) è una lampada da tavolo a forma di occhio, simbolo di protezione nella cultura indiana. La luce dei LED si riflette su una sfera cromata sospesa nel foro centrale; dentro, un decoro in stile Madhubani retroilluminato.",
+    "dati": [
+      [
+        "Con",
+        "Rucina Jogani"
+      ],
+      [
+        "Premio",
+        "1° Pending Cultures"
+      ],
+      [
+        "Materiali",
+        "noce, acciaio cromato"
+      ]
+    ],
+    "intero": {
+      "titolo": "Un occhio di noce",
+      "testo": "Ruota con lo scorrimento. Scegli un capitolo per andare sul punto che spiega.",
+      "camera": {
+        "yaw": 35,
+        "pitch": 15,
+        "dist": 11.5
+      }
+    },
+    "capitoli": [
+      {
+        "n": "01 · la sfera",
+        "titolo": "Ø 90, sospesa",
+        "testo": "Una sfera cromata di 90 mm fluttua nel campo magnetico, al centro dell’occhio, e riflette la luce che esce dal corpo.",
+        "img": "img/sfera-900.webp",
+        "camera": {
+          "yaw": 14,
+          "pitch": 5,
+          "dist": 6.4
+        },
+        "guarda": [
+          0,
+          0,
+          0
+        ],
+        "punto": [
+          0.2,
+          0.2,
+          0.38
+        ]
+      },
+      {
+        "n": "02 · il decoro",
+        "titolo": "Madhubani",
+        "testo": "La fascia interna porta un decoro ispirato alla pittura Madhubani: è il punto in cui si incontrano la cultura indiana e quella italiana.",
+        "img": "img/decoro-900.webp",
+        "camera": {
+          "yaw": -30,
+          "pitch": 12,
+          "dist": 7.4
+        },
+        "guarda": [
+          -0.55,
+          0.2,
+          0
+        ],
+        "punto": [
+          -0.6,
+          -0.45,
+          0.55
+        ]
+      },
+      {
+        "n": "03 · il corpo",
+        "titolo": "Noce, a occhio",
+        "testo": "Il guscio in noce ha la forma di un occhio con i fianchi concavi; la luce esce dalla fascia dentro il tunnel.",
+        "img": "img/laterale-900.webp",
+        "camera": {
+          "yaw": -78,
+          "pitch": 10,
+          "dist": 9.5
+        },
+        "guarda": [
+          0,
+          0,
+          0
+        ],
+        "punto": [
+          -1.05,
+          -0.1,
+          0.7
+        ]
+      },
+      {
+        "n": "04 · le misure",
+        "titolo": "300 × 195 × 200",
+        "testo": "Misure prese dal modello Rhino: 300 mm di larghezza, 195 di altezza, 200 di profondità; sfera Ø 90.",
+        "img": "img/frontale-900.webp",
+        "camera": {
+          "yaw": 0,
+          "pitch": 2,
+          "dist": 10.5
+        },
+        "guarda": [
+          0,
+          0,
+          0
+        ],
+        "quote": {
+          "larghezza": [
+            -1.5,
+            1.5,
+            -0.975
+          ],
+          "altezza": [
+            0.975,
+            -0.975,
+            1.5
+          ],
+          "testi": [
+            "300 MM",
+            "195"
+          ]
+        }
+      }
+    ],
+    "foto": [
+      {
+        "src": "img/camera2-1600.webp",
+        "piccola": "img/camera2-900.webp",
+        "nome": "tre quarti",
+        "alt": "Oopar di tre quarti, render",
+        "nota": "render Vitrum"
+      },
+      {
+        "src": "img/dettaglio-1600.webp",
+        "piccola": "img/dettaglio-900.webp",
+        "nome": "dettaglio",
+        "alt": "La sfera e il decoro da vicino"
+      },
+      {
+        "src": "img/frontale-1600.webp",
+        "piccola": "img/frontale-900.webp",
+        "nome": "fronte",
+        "alt": "Oopar di fronte"
+      },
+      {
+        "src": "img/laterale-1600.webp",
+        "piccola": "img/laterale-900.webp",
+        "nome": "fianco",
+        "alt": "Oopar di fianco"
+      }
+    ],
+    "premio": {
+      "titolo": "1° premio",
+      "testo": "Pending Cultures. Progetto con Rucina Jogani.",
+      "anno": "2017"
+    },
+    "prossimo": {
+      "slug": "la-fornace"
+    }
   }
 }

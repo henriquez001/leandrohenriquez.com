@@ -1,4 +1,4 @@
-/* Prove showroom: il menu Vetrina/Mosaico delle pagine (come in home). Le tessere sono le stesse nelle due viste:
+/* Stile showroom: il menu Vetrina/Mosaico delle pagine diverse dalla home (pagina progetto). Le tessere sono le stesse nelle due viste:
    cambia solo il loro posto sulla griglia; il passaggio è animato con FLIP (posizione prima → dopo, poi la tessera
    scivola). Interrompibile: un nuovo clic riparte dalla posizione in cui le tessere si trovano. La scelta resta
    salvata nel browser (stessa chiave "hl-vista" della home). */
