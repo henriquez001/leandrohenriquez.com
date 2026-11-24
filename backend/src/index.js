@@ -260,7 +260,7 @@ export function crea({fetchImpl}={}){
     if(url.pathname.startsWith('/anteprima/')&&req.method==='GET'){ // il sito con le bozze, solo dopo l'accesso
       try{
         if(!(await leggiSessione(req,env)))return Response.redirect(url.origin+'/',302);
-        return await anteprima(url,{env,f,bozze:await leggiBozze(env),leggiIndice:()=>new GitHub(env,f).leggiJSON(INDICE)});
+        return await anteprima(url,{env,f,bozze:await leggiBozze(env),leggiIndice:()=>new GitHub(env,f).leggiJSON(INDICE),leggiJSON:x=>new GitHub(env,f).leggiJSON(x)});
       }catch(e){console.error(e);return new Response('Anteprima non disponibile',{status:502,headers:{'cache-control':'no-store'}});}
     }
     if(!url.pathname.startsWith('/api/'))return env.ASSETS?env.ASSETS.fetch(req):new Response('Non trovato',{status:404});

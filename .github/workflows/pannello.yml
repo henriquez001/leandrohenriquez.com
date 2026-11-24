@@ -11,7 +11,7 @@ name: Pannello
 on:
   push:
     branches: [main]
-    paths: [backend/**, tools/schema.js, assets/tema/**, assets/showroom/**, assets/fonts/**, .github/workflows/pannello.yml]
+    paths: [backend/**, tools/schema.js, tools/bianco.js, assets/fonts/**, .github/workflows/pannello.yml]
   workflow_dispatch:
 permissions:
   contents: read

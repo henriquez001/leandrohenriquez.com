@@ -70,7 +70,7 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   accendono, cerchio «Apri» (M1) + ingresso col marchio, sipario nero col nome della pagina, immagini a tendina, firma «henriquez» (N4).
   Scartati: caratteri pesanti, blocchi di colore, metafore («trovate»), effetti timidi. Codice: `assets/bianco/bianco.css` + `bianco.js`.
   Le pagine in `stili/bianco/` sono GENERATE: `node tools/genera-bianco.js` (da data/progetti.json + data/bianco.json + data/app.json),
-  poi `node tools/applica-stile.js`; lo fa anche l'Action `stile.yml` a ogni modifica dei dati. Non si modificano a mano.
+  poi `node tools/applica-stile.js` (le pagine le costruisce `tools/bianco.js`, usato anche dall'anteprima delle bozze del pannello); lo fa anche l'Action `stile.yml` a ogni modifica dei dati. Non si modificano a mano.
   `data/bianco.json` (a mano, per slug): breve, testo, ruolo, esito, cliente, con, gruppo, categoria, colore, immagine, galleria.
   Il movimento sta tutto sotto `html.mv` (spento con «riduci movimento» e senza JavaScript). Pagine che esistono solo in bianco
   (lavori/, studio/, contatti/, schede) restano nella radice se si torna a un altro stile.
