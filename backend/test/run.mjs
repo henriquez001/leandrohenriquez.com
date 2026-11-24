@@ -127,10 +127,11 @@ await prova('pagina progetto: legge e salva solo se valida',async()=>{const r=aw
   assert.equal((await chiama('PUT','/api/progetti/oopar/pagina',{cookie:cProp,corpo:{base:r.dati.base,pagina:r.dati.pagina}})).stato,200);});
 await prova('app: nuova app in arrivo, poi file caricato e riquadro generato',async()=>{
   let r=await chiama('GET','/api/app',{cookie:cProp});assert.equal(r.dati.app.length,2);
-  // il contatore conta le app pubblicate: lo si ricava dai dati veri, che cambiano dal pannello
-  const pubblicate=r.dati.app.filter(a=>a.pubblicato).length;
+  // il contatore conta le app pubblicate: lo si ricava dai dati veri, che cambiano dal pannello.
+  // Non tutti gli stili lo mostrano (bianco no): si controlla solo dove la pagina lo ha.
+  const pubblicate=r.dati.app.filter(a=>a.pubblicato).length,haContatore=/<span id="nApp">/.test(commits[head].files.get('laboratorio/index.html'));
   r=await chiama('POST','/api/app',{cookie:cProp,corpo:{base:r.dati.base,app:{slug:'timer',nome:'Timer',tipo:'strumento',pubblicato:true}}});assert.equal(r.stato,201,JSON.stringify(r.dati));
-  let lab=commits[head].files.get('laboratorio/index.html');assert.match(lab,/<h2>Timer<\/h2>/);assert.match(lab,new RegExp(`<span id="nApp">${pubblicate+1}</span>`));assert.doesNotMatch(lab,/app\/timer\/\?mini/);
+  let lab=commits[head].files.get('laboratorio/index.html');assert.match(lab,/<h2>Timer<\/h2>/);if(haContatore) assert.match(lab,new RegExp(`<span id="nApp">${pubblicate+1}</span>`));assert.doesNotMatch(lab,/app\/timer\/\?mini/);
   const x=await chiama('PUT','/api/app/timer/file',{cookie:cProp,corpo:{base:r.dati.base,html:'non è html'}});assert.equal(x.stato,422);
   const y=await chiama('PUT','/api/app/timer/file',{cookie:cProp,corpo:{base:r.dati.base,html:'<!doctype html><html><body>ok</body></html>'}});assert.equal(y.stato,200,JSON.stringify(y.dati));
   const fs=commits[head].files;assert.equal(fs.get('app/timer/index.html'),'<!doctype html><html><body>ok</body></html>');assert.match(fs.get('laboratorio/index.html'),/app\/timer\/\?mini=1/);});
