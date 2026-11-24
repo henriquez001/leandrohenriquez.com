@@ -10,6 +10,7 @@ on:
       - data/bianco.json
       - data/app.json
       - tools/genera-bianco.js
+      - tools/bianco.js
       - stili/**
       - tools/applica-stile.js
       - .github/workflows/stile.yml

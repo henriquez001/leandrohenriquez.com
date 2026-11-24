@@ -190,6 +190,16 @@ await prova('anteprima: il sito con le bozze, solo dopo l\'accesso e senza stati
   assert.match(html,/name="robots" content="noindex, nofollow"/);assert.match(html,/anteprima delle bozze/);assert.equal(h.headers.get('cache-control'),'private, no-store');
   assert.equal((await grezza('GET','/anteprima/assets/css/home.css',{cookie:cProp})).status,200);
   assert.equal((await grezza('GET','/anteprima/a%2F..%2Fsegreto',{cookie:cProp})).status,400);});
+await prova('anteprima con lo stile bianco: pagine rigenerate con le bozze, percorsi dentro /anteprima/',async()=>{
+  // lo stile attivo e i testi lunghi stanno nel repo: qui si aggiungono al repo finto
+  const fs=commits[head].files;fs.set('data/stile.json','{"stile":"bianco"}');fs.set('data/bianco.json',readFileSync(new URL('../../data/bianco.json',import.meta.url),'utf8'));
+  try{
+    const h=await grezza('GET','/anteprima/lavori/',{cookie:cProp});assert.equal(h.status,200);const html=await h.text();
+    assert.match(html,/ONE bozza/);assert.match(html,/href="\/anteprima\/assets\/bianco\/bianco\.css"/);assert.doesNotMatch(html,/(href|src)="\/(?!anteprima\/|\/|#)/); // resta fuori solo il ritorno al pannello (/#progetti)
+    assert.doesNotMatch(html,/goatcounter/);assert.match(html,/anteprima delle bozze/);assert.match(html,/name="robots" content="noindex, nofollow"/);
+    const home=await grezza('GET','/anteprima/',{cookie:cProp});assert.equal(home.status,200);assert.match(await home.text(),/assets\/bianco\/bianco\.js/);
+    assert.equal((await grezza('GET','/anteprima/lavori/',{})).status,302);
+  }finally{fs.delete('data/stile.json');fs.delete('data/bianco.json');}});
 await prova('pubblica: un commit con la bozza, poi la bozza sparisce',async()=>{
   const r=await chiama('GET','/api/progetti',{cookie:cProp});const b=(await chiama('GET','/api/bozze',{cookie:cProp})).dati.progetti.one;
   const s=await chiama('POST','/api/progetti/one/pubblica',{cookie:cProp,corpo:{base:r.dati.base,progetto:b.progetto,posizione:0}});assert.equal(s.stato,200,JSON.stringify(s.dati));

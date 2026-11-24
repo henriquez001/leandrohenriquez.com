@@ -11,7 +11,7 @@ name: Pannello
 on:
   push:
     branches: [main]
-    paths: [backend/**, tools/schema.js, assets/tema/**, assets/showroom/**, assets/fonts/**, .github/workflows/pannello.yml]
+    paths: [backend/**, tools/schema.js, tools/bianco.js, assets/fonts/**, .github/workflows/pannello.yml]
   workflow_dispatch:
 permissions:
   contents: read
@@ -52,7 +52,7 @@ jobs:
           node-version: 22
       - name: Tema del sito
         if: steps.pronto.outputs.ok == 'si'
-        # stessa estetica del sito: copia assets/tema/ e i caratteri in public/sito/
+        # stessa estetica del sito: copia i caratteri (assets/fonts/) in public/sito/fonts/
         run: npm run tema
       - name: Prove
         if: steps.pronto.outputs.ok == 'si'

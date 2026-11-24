@@ -1,7 +1,6 @@
-/* Pannello di leandrohenriquez.com — interfaccia in stile showroom (20/11/2026): la stessa struttura del sito.
-   Barra in alto con le sezioni, tessere su una griglia di 12 colonne, viste Vetrina e Mosaico (sito/showroom/viste.js).
-   Vetrina: si modifica sul palco grande; Mosaico: il modulo si apre in un foglio che nasce dalla tessera toccata.
-   Parla solo con /api/ dello stesso Worker. */
+/* Pannello di leandrohenriquez.com — interfaccia in stile «bianco» (scelta di Leandro del 24/11/2026, variante P3 «Due colonne»).
+   Progetti e App: elenco a sinistra, modifica a destra; sul telefono prima l'elenco, poi la scheda con «← indietro».
+   Statistiche e Accessi: una pagina sola. Parla solo con /api/ dello stesso Worker. */
 'use strict';
 const SITO='https://leandrohenriquez.com/';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -9,14 +8,14 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const nn=i=>String(i+1).padStart(2,'0');
 const slugDa=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
 const stato={io:null,sezione:null,progetti:null,bozze:{},app:null,base:{},anteprime:{}};
-// tessere: st() scrive colonne/righe (--c/--r computer, --cv/--rv/--ov Vetrina, --cm/--rm telefono)
-const st=o=>Object.entries(o).map(([k,v])=>`--${k}:${v}`).join(';');
-const board=()=>$('#board');
-const vetrina=()=>board().dataset.v==='vetrina';
-const colore=slug=>(typeof COLORI!=='undefined'&&COLORI[slug])||'#E6E6E3';
-const scuro=slug=>typeof SCURI!=='undefined'&&!!SCURI[slug];
+// blocchi delle pagine a colonna unica: --c = colonne su 12 (computer), --cm = metà larghezza (1) o tutta (2) sul telefono
+const st=o=>Object.entries(o).filter(([k])=>k==='c'||k==='cm').map(([k,v])=>`--${k}:${v}`).join(';');
+const board=()=>$('#pagina');
+const lista=()=>$('#lista');
+const largo=()=>matchMedia('(min-width:861px)').matches;
 const fotoP=p=>!/\.png$/i.test(p.anteprima||'');
-const tessera=(cls,dim,dentro,attr='')=>`<section class="t ${cls}" style="${st(dim)}"${attr}><div class="in">${dentro}</div></section>`;
+const tessera=(cls,dim,dentro,attr='')=>`<section class="bl ${cls}" style="${st(dim)}"${attr}>${dentro}</section>`;
+const NOMI={progetti:'Progetti',app:'App',statistiche:'Statistiche',accessi:'Accessi'};
 
 // ---------- rete ----------
 class ErroreApi extends Error{constructor(s,m){super(m);this.stato=s;}}
@@ -35,8 +34,7 @@ async function conflitto(e,ricarica){
 
 // ---------- avviso ----------
 let tAvviso;
-// titolo del pannello laterale: data-t serve alla copia blu sovrastampata (stile Manifesto)
-function titoloDr(t){const h=$('#drTitolo');h.textContent=t;h.dataset.t=t;}
+function titoloDr(t){$('#drTitolo').textContent=t;}
 function avviso(testo,errore=false){const a=$('#avviso');a.textContent=testo;a.classList.toggle('errore',errore);a.classList.add('on');clearTimeout(tAvviso);tAvviso=setTimeout(()=>a.classList.remove('on'),errore?6000:2600);}
 
 // ---------- accesso con Google ----------
@@ -50,7 +48,7 @@ async function mostraAccesso(msg=''){
     try{stato.io=await api('POST','/api/accesso',{credential});avvia();}
     catch(e){$('#accErr').textContent=e.message;}
   },ux_mode:'popup',auto_select:false});
-  google.accounts.id.renderButton($('#gbtn'),{theme:'filled_black',size:'large',shape:'rectangular',text:'signin_with',locale:'it'});
+  google.accounts.id.renderButton($('#gbtn'),{theme:'outline',size:'large',shape:'rectangular',text:'signin_with',locale:'it'});
 }
 // menu dell'account (nasce dal pulsante; si chiude con Esc o toccando fuori)
 function menuIo(apri){const m=$('#ioMenu'),b=$('#io');m.hidden=!apri;b.setAttribute('aria-expanded',apri);if(apri){const x=$('button:not([hidden]),a',m);if(x)x.focus();}}
@@ -104,68 +102,50 @@ function vai(){
   let s=location.hash.slice(1)||'progetti';
   if(!SEZIONI[s]||(s==='accessi'&&!stato.io.proprietario))s='progetti';
   stato.sezione=s;
-  $$('.nav.sez a').forEach(a=>{if(a.dataset.s===s)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
-  // la scelta Vetrina/Mosaico serve dove c'è un elenco da modificare
-  $('#vista').hidden=!['progetti','app'].includes(s);
+  $$('.sez a').forEach(a=>{if(a.dataset.s===s)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  const due=['progetti','app'].includes(s);
   chiudiDrawer(true);
-  board().innerHTML=tessera('carta intro-p',{c:12,r:3,cm:2,rm:3},`<div class="row"><span class="mono">Pannello · ${esc(s)}</span></div><p class="lbl"><span class="carica"></span> carico…</p>`);
-  SEZIONI[s]().catch(e=>{board().innerHTML=tessera('carta intro-p',{c:12,r:3,cm:2,rm:4},`<div class="row"><span class="mono">Qualcosa non va</span></div><div><h1>Errore</h1><p>${esc(e.message)}</p></div>`);});
+  $('#split').hidden=!due;$('#pagina').hidden=due;$('#tornaT').textContent=NOMI[s];
+  const carico=`<p class="lbl carico"><span class="carica"></span> carico…</p>`;
+  if(due)lista().innerHTML=carico;else board().innerHTML=tessera('intro-p',{c:12,cm:2},`<h1>${NOMI[s]}</h1>${carico}`);
+  SEZIONI[s]().catch(e=>{(due?lista():board()).innerHTML=tessera('intro-p',{c:12,cm:2},`<h1>Errore</h1><p class="err">${esc(e.message)}</p>`);});
 }
 
-// ---------- modifica: sul palco della Vetrina o nel foglio del Mosaico ----------
-// Lo stesso modulo (#drForm) si sposta nel palco (#ed) quando la vista è Vetrina e la voce sta nell'elenco,
-// altrimenti va nel foglio, che nasce dalla tessera toccata (apple-motion: le finestre nascono da chi le apre).
-let drSalva=null,drElimina=null,drPrimaFocus=null,drNelPalco=false,drDa=null;
-const RIDOTTO=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
-function palcoVuoto(){const ed=$('#ed');if(!ed)return;ed.style.removeProperty('--bg');ed.style.removeProperty('--tx');
-  $$('#board .sel').forEach(x=>x.classList.remove('sel'));
-  $('.in',ed).innerHTML=`<div class="vuoto-ed"><span class="mono">Modifica</span><div><h2>${stato.sezione==='app'?'Scegli un\u2019app':'Scegli un progetto'}</h2><p>Toccalo nella striscia: lo modifichi qui.</p></div></div>`;}
+// ---------- modifica: nella colonna di destra ----------
+// Il modulo (#drForm) sta sempre nella colonna di destra (#ed). Sul telefono la colonna prende tutto lo schermo
+// (body.dett) e «← indietro» riporta all'elenco (HIG Split views: elenco e dettaglio, uno alla volta su schermi stretti).
+let drSalva=null,drElimina=null,drPrimaFocus=null,drDa=null;
 // azioni: pulsanti in più accanto a quello principale, [{testo, fn(FormData, pulsante)}]; fn può restituire 'resta' per non chiudere
-// palco: {vis, sfondo, testo} per mostrare la voce nel palco della Vetrina; da: la tessera da cui nasce il foglio
-function apriDrawer({n,titolo,campi,onSalva,onElimina,testoSalva='Salva e pubblica',azioni=[],palco=null,da=null,fuoco=true}){
-  chiudiDrawer(true,false);
-  drPrimaFocus=document.activeElement;drDa=da;
-  $('#drN').textContent=n;titoloDr(titolo);$('#drCampi').innerHTML=campi;$('#drErr').textContent='';
+// vis: quello che sta nella colonna dell'immagine; chiave: la voce dell'elenco da segnare come scelta
+function apriDrawer({n,titolo,campi,onSalva,onElimina,testoSalva='Salva e pubblica',azioni=[],vis='',chiave=null,fuoco=true}){
+  drPrimaFocus=document.activeElement;drDa=chiave;
+  $('#drN').innerHTML=n;titoloDr(titolo);$('#drCampi').innerHTML=campi;$('#drVis').innerHTML=vis;$('#drVis').hidden=!vis;$('#drErr').textContent='';
+  $('#drForm').classList.toggle('conVis',!!vis);
   $('#drSalva').textContent=testoSalva;$('#drSalva').disabled=false;
   drSalva=onSalva;drElimina=onElimina;$('#drElimina').hidden=!onElimina;
   const ex=$('#drExtra');ex.innerHTML='';
-  azioni.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='btn vuoto';b.textContent=a.testo;ex.appendChild(b);
+  azioni.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='btn v';b.textContent=a.testo;ex.appendChild(b);
     b.addEventListener('click',async()=>{const t=b.textContent;b.disabled=true;$('#drErr').textContent='';
       try{if(await a.fn(new FormData($('#drForm')),b)!=='resta')chiudiDrawer();}catch(err){$('#drErr').textContent=err.message;}finally{b.disabled=false;b.textContent=t;}});});
-  const ed=$('#ed'),form=$('#drForm');
-  drNelPalco=!!(palco&&ed&&vetrina());
-  if(drNelPalco){
-    ed.style.setProperty('--bg',palco.sfondo||'var(--carta)');ed.style.setProperty('--tx',palco.testo||'var(--ink)');
-    const in_=$('.in',ed);in_.innerHTML=palco.vis||'';in_.appendChild(form);
-    $$('#board .sel').forEach(x=>x.classList.remove('sel'));if(da)da.classList.add('sel');
-    if(fuoco){const r=ed.getBoundingClientRect();if(r.top<70||r.bottom>innerHeight)ed.scrollIntoView({behavior:RIDOTTO()?'auto':'smooth',block:'nearest'});}
-  }else{
-    const d=$('#drawer'),v=$('#velo');$('.in',d).appendChild(form);d.hidden=false;v.hidden=false;
-    if(da&&!RIDOTTO()){const r=da.getBoundingClientRect(),f=d.getBoundingClientRect(),sx=r.width/f.width,sy=r.height/f.height;
-      d.style.transition='none';d.style.transform=`translate(${r.left+r.width/2-(f.left+f.width/2)}px,${r.top+r.height/2-(f.top+f.height/2)}px) scale(${sx},${sy})`;
-      d.getBoundingClientRect();d.style.transition='';d.style.transform='';}
-    requestAnimationFrame(()=>v.classList.add('aperto'));
-  }
-  if(fuoco)setTimeout(()=>{const p=$('input:not([type=hidden]):not([type=file]),textarea',form);if(p)p.focus({preventScroll:true});},60);
+  $('#edVuoto').hidden=true;$('#drForm').hidden=false;
+  segnaScelta(chiave);
+  if(fuoco){document.body.classList.add('dett');if(!largo())scrollTo(0,0);
+    setTimeout(()=>{const p=largo()?$('input:not([type=hidden]):not([type=file]),textarea',$('#drForm')):$('#torna');if(p)p.focus({preventScroll:true});},60);}
 }
-function chiudiDrawer(subito=false,rimetti=true){
-  const d=$('#drawer'),v=$('#velo'),form=$('#drForm');
-  if(drNelPalco){drNelPalco=false;$('.in',d).appendChild(form);if(rimetti)palcoVuoto();
-    if(!subito&&drDa&&document.contains(drDa)){const h=$('.hit',drDa)||drDa;h.focus({preventScroll:true});}return;}
-  if(d.hidden)return;
-  v.classList.remove('aperto');
-  // il foglio torna nella tessera da cui è nato
-  if(!subito&&drDa&&document.contains(drDa)&&!RIDOTTO()){const r=drDa.getBoundingClientRect(),f=d.getBoundingClientRect();
-    d.style.transform=`translate(${r.left+r.width/2-(f.left+f.width/2)}px,${r.top+r.height/2-(f.top+f.height/2)}px) scale(${r.width/f.width},${r.height/f.height})`;
-    setTimeout(()=>{d.hidden=true;v.hidden=true;d.style.transform='';},300);}
-  else{d.hidden=true;v.hidden=true;}
-  if(!subito&&drPrimaFocus&&document.contains(drPrimaFocus))drPrimaFocus.focus({preventScroll:true});
+function segnaScelta(chiave){$$('#lista .vo').forEach(v=>{if(chiave&&v.dataset.chiave===chiave)v.setAttribute('aria-current','true');else v.removeAttribute('aria-current');});}
+function chiudiDrawer(subito=false){
+  const aperto=!$('#drForm').hidden;
+  $('#drForm').hidden=true;$('#edVuoto').hidden=false;document.body.classList.remove('dett');segnaScelta(null);
+  $('#edVuotoT').textContent=stato.sezione==='app'?'Scegli un\u2019app':'Scegli un progetto';
+  drSalva=null;drElimina=null;
+  const v=drDa&&$(`#lista .vo[data-chiave="${CSS.escape(drDa)}"] .hit`);drDa=null;
+  if(!aperto||subito)return;
+  // sul computer la colonna di destra non resta vuota: la voce si riapre con i dati appena salvati (o com'era, dopo «Annulla»)
+  if(v&&largo()){v.click();return;}
+  const f=v||(drPrimaFocus&&document.contains(drPrimaFocus)?drPrimaFocus:null);if(f)f.focus({preventScroll:true});
 }
-// cambiando vista il modulo aperto si chiude e le tessere si ridisegnano per la vista nuova
-document.addEventListener('vista',()=>{if(!stato.io)return;chiudiDrawer(true);if(stato.sezione==='progetti'&&stato.progetti)disegnaProgetti();else if(stato.sezione==='app'&&stato.app)disegnaApp();});
 $$('[data-chiudi]').forEach(b=>b.addEventListener('click',()=>chiudiDrawer()));
-$('#velo').addEventListener('click',()=>chiudiDrawer());
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(!$('#drawer').hidden||drNelPalco)&&$('#ioMenu').hidden)chiudiDrawer();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#drForm').hidden&&$('#ioMenu').hidden&&!largo())chiudiDrawer();});
 $('#drForm').addEventListener('submit',async e=>{
   e.preventDefault();if(!drSalva)return;const b=$('#drSalva'),t=b.textContent;
   b.disabled=true;b.innerHTML='<span class="carica"></span> salvo…';$('#drErr').textContent='';
@@ -177,12 +157,12 @@ $('#drElimina').addEventListener('click',async()=>{
   if(!drElimina||!confirm('Togliere questa voce? Resta comunque nella storia del sito su GitHub.'))return;
   try{await drElimina();chiudiDrawer();}catch(err){$('#drErr').textContent=err.message;}
 });
-const campo=(nome,etichetta,valore='',{max,area,tipo='text',aiuto='',attr=''}={})=>`<label><span class="lbl">${etichetta}${aiuto?' · '+aiuto:''}</span>${area?`<textarea name="${nome}" maxlength="${max||''}" ${attr}>${esc(valore)}</textarea>`:`<input type="${tipo}" name="${nome}" value="${esc(valore)}" ${max?`maxlength="${max}"`:''} ${attr}>`}</label>`;
+const campo=(nome,etichetta,valore='',{max,area,tipo='text',aiuto='',attr=''}={})=>`<label class="campo"><span class="lbl">${etichetta}${aiuto?' · '+aiuto:''}</span>${area?`<textarea name="${nome}" maxlength="${max||''}" ${attr}>${esc(valore)}</textarea>`:`<input type="${tipo}" name="${nome}" value="${esc(valore)}" ${max?`maxlength="${max}"`:''} ${attr}>`}</label>`;
 const interruttore=(nome,etichetta,on)=>`<div class="riga"><span id="l-${nome}">${etichetta}</span><span class="swHit"><button type="button" class="sw" role="switch" aria-labelledby="l-${nome}" aria-checked="${!!on}" data-campo="${nome}"></button></span><input type="hidden" name="${nome}" value="${on?'1':''}"></div>`;
 document.addEventListener('click',e=>{const s=e.target.closest('#drForm .sw');if(!s)return;const on=s.getAttribute('aria-checked')!=='true';s.setAttribute('aria-checked',on);$(`#drForm input[name="${s.dataset.campo}"]`).value=on?'1':'';});
 
 // Posizione nell'elenco: serve sul telefono, dove non si trascina.
-const posizione=(i,n)=>`<label class="riga"><span>posizione</span><select name="posizione" style="width:auto">${Array.from({length:n},(_,k)=>`<option value="${k}"${k===i?' selected':''}>${nn(k)}</option>`).join('')}</select></label>`;
+const posizione=(i,n)=>`<label class="campo"><span class="lbl">posizione nell\u2019elenco</span><select name="posizione">${Array.from({length:n},(_,k)=>`<option value="${k}"${k===i?' selected':''}>${nn(k)}</option>`).join('')}</select></label>`;
 const sposta=(el,da,a)=>{if(isNaN(a)||a===da)return el;const c=[...el];const [m]=c.splice(da,1);c.splice(a,0,m);return c;};
 
 // ---------- immagini ----------
@@ -202,49 +182,39 @@ async function salvaProgetti(elenco,msg='Salvato. Il sito si aggiorna in circa u
   catch(e){if(await conflitto(e,async()=>{await caricaProgetti();disegnaProgetti();}))throw new Error('Dati ricaricati: riprova.');throw e;}
 }
 async function sezioneProgetti(){await caricaProgetti();disegnaProgetti();}
+let filtroP='tutti';
 function disegnaProgetti(){
   const P=stato.progetti,nB=Object.keys(stato.bozze).length,nOn=P.filter(p=>p.pubblicato).length;
-  // tessera di un progetto: colore pieno del prodotto (colori.js del sito), immagine senza filtri, interruttore "sul sito"
-  const prj=(p,i,{bozza=false,nuova=false}={})=>{const foto=fotoP(p),cls=`t prj${foto?' foto':''}${p.pubblicato||nuova?'':' off'}`;
-    return `<article class="${cls}" style="--bg:${foto?'#1C1C1C':colore(p.slug)};--tx:${foto||scuro(p.slug)?'var(--carta)':'var(--ink)'}"${nuova?` data-bozza="${esc(p.slug)}"`:` draggable="true" data-i="${i}"`}><div class="in">
-    ${p.anteprima?`<img class="im" src="${esc(urlImg(p.anteprima))}" alt="" loading="lazy">`:''}
-    <div class="row"><span class="mono">${nuova?'nuovo':nn(i)} · ${esc(p.tipo)}</span><span class="mono">${nuova?'non ancora nell\'indice':p.pubblicato?esc(p.contesto):'nascosto'}</span></div>
-    <div class="bot"><h2 class="nm">${esc(p.nome)}${bozza?'<span class="tag">bozza</span>':''}${p.etichetta?`<span class="tag">${esc(p.etichetta)}</span>`:''}</h2></div>
-    <button class="hit" type="button" aria-label="Modifica ${esc(p.nome)}${bozza?' (bozza)':''}"></button></div>
-    ${nuova?'':`<span class="sw-p swHit"><button type="button" class="sw" role="switch" aria-checked="${p.pubblicato}" aria-label="${esc(p.nome)} sul sito" data-i="${i}"></button></span>`}</article>`;};
-  board().innerHTML=tessera('carta intro-p',{c:4,r:4,cv:4,rv:5,ov:1,cm:2,rm:4},`<div class="row"><span class="mono">Pannello · progetti</span><span class="mono hide-s"><i class="dot"></i>sito collegato</span></div>
-    <div style="display:flex;flex-direction:column;gap:12px"><h1>Progetti</h1>
-    <p><b>${nOn}</b> sul sito su ${P.length}${nB?`, ${nB} ${nB===1?'bozza':'bozze'}`:''}. Tocca un progetto per modificarlo; trascinalo per cambiare l’ordine.</p>
-    <div class="acts"><button class="btn" type="button" id="nuovoP">+ Nuovo progetto</button><a class="btn vuoto" href="${SITO}" target="_blank" rel="noopener">Vedi il sito ↗</a></div></div>`)+
-  tessera('ed solo-v',{cv:8,rv:5,ov:2,cvm:2,rvm:8},'',' id="ed" aria-label="Modifica del progetto"')+
-  P.map((p,i)=>{const b=stato.bozze[p.slug];return prj(b?{...b.progetto,pubblicato:p.pubblicato}:p,i,{bozza:!!b});}).join('')+
-  bozzeNuove().map(b=>prj(b.progetto,-1,{bozza:true,nuova:true})).join('')+
-  tessera('pdf-t',{c:6,r:2,cv:6,rv:2,ov:30,cm:2,rm:3},`<div class="row"><span class="mono">Portfolio PDF</span><span class="mono hide-s" id="pdfInfo">privato</span></div>
-    <div class="acts"><button class="btn chiaro" type="button" id="pdfApri">↓ Scarica o crea su misura…</button></div>`)+
-  tessera('stat',{c:6,r:2,cv:6,rv:2,ov:31,cm:2,rm:2},`<span class="mono">Sul sito</span><b>${nOn}<small> / ${P.length}</small></b>`);
-  palcoVuoto();
+  const vede=(p,b)=>filtroP==='tutti'||(filtroP==='pubblicati'&&p.pubblicato)||(filtroP==='nascosti'&&!p.pubblicato)||(filtroP==='bozze'&&b);
+  // riga dell'elenco: numero, nome e tipo, miniatura senza filtri. Lo stato è scritto, non solo attenuato (HIG Accessibility).
+  const riga=(p,i,{bozza=false,nuova=false}={})=>`<div class="vo${p.pubblicato||nuova?'':' off'}" data-chiave="${esc(p.slug)}"${nuova?` data-bozza="${esc(p.slug)}"`:` draggable="true" data-i="${i}"`}>
+    <span class="num">${nuova?'··':nn(i)}</span>
+    <button class="hit" type="button"><span class="nm">${esc(p.nome)}${bozza?'<span class="tag">bozza</span>':''}</span><span class="mt">${esc(p.tipo)}${nuova?' · non ancora sul sito':p.pubblicato?'':' · nascosto'}</span></button>
+    <span class="img${fotoP(p)?' foto':''}">${p.anteprima?`<img src="${esc(urlImg(p.anteprima))}" alt="" loading="lazy">`:''}</span></div>`;
+  const F=[['tutti',`Tutti ${P.length}`],['pubblicati','Pubblicati'],['nascosti','Nascosti'],['bozze',nB?`Bozze ${nB}`:'Bozze']];
+  const righe=P.map((p,i)=>{const b=stato.bozze[p.slug];return vede(p,!!b)?riga(b?{...b.progetto,slug:p.slug,pubblicato:p.pubblicato}:p,i,{bozza:!!b}):'';}).join('')+
+    (['tutti','bozze'].includes(filtroP)?bozzeNuove().map(b=>riga({...b.progetto,slug:b.slug},-1,{bozza:true,nuova:true})).join(''):'');
+  lista().innerHTML=`<div class="filtri" role="group" aria-label="Mostra">${F.map(([k,t])=>`<button type="button" data-f="${k}" aria-pressed="${k===filtroP}">${t}</button>`).join('')}</div>
+    ${righe||'<p class="lbl nota">Nessun progetto qui.</p>'}
+    <button class="nuovo" type="button" id="nuovoP">+ Nuovo progetto</button>
+    <div class="pdf"><span class="lbl">Portfolio PDF · <span id="pdfInfo">privato</span></span><button class="btn v" type="button" id="pdfApri">Scarica o crea su misura…</button></div>
+    <p class="lbl nota hide-s">Trascina una riga per cambiare l’ordine (da tastiera: Alt + ↑ ↓).</p>`;
+  segnaScelta(drDa);
   // il portfolio PDF è privato: si scarica da qui (variante 2 del 4/11: scegli i progetti quando lo crei)
   api('GET','/api/portfolio/info').then(d=>{if(d.pronto&&$('#pdfInfo'))$('#pdfInfo').textContent=`completo · ${dataBreve(d.aggiornato)} · ${mb(d.byte)}`;}).catch(()=>{});
-  $('#pdfApri').addEventListener('click',e=>portfolioPDF(e.currentTarget.closest('.t')));
-  $$('#board [data-bozza] .hit').forEach(b=>b.addEventListener('click',()=>modificaProgetto(-1,b.closest('.prj').dataset.bozza,b.closest('.prj'))));
-  $$('#board .prj[data-i] .hit').forEach(b=>b.addEventListener('click',()=>modificaProgetto(+b.closest('.prj').dataset.i,undefined,b.closest('.prj'))));
-  // l'interruttore va online subito (anche con una bozza aperta, che lo segue)
-  $$('#board .prj .sw').forEach(s=>s.addEventListener('click',async e=>{
-    e.stopPropagation();const i=+s.dataset.i,el=stato.progetti.map(p=>({...p}));el[i].pubblicato=!el[i].pubblicato;
-    s.setAttribute('aria-checked',el[i].pubblicato);s.disabled=true;
-    try{
-      await salvaProgetti(el,el[i].pubblicato?`${el[i].nome} è pubblicato.`:`${el[i].nome} è nascosto.`);
-      const b=stato.bozze[el[i].slug];if(b){const d=await api('PUT',`/api/bozze/progetti/${el[i].slug}`,{progetto:{...b.progetto,pubblicato:el[i].pubblicato}});stato.bozze[el[i].slug]=d.bozza;}
-    }catch(err){avviso(err.message,true);}
-    disegnaProgetti();
-  }));
-  $('#nuovoP').addEventListener('click',e=>modificaProgetto(-1,undefined,e.currentTarget.closest('.t')));
-  riordina(board(),stato.progetti,async el=>{try{await salvaProgetti(el,'Nuovo ordine salvato.');}catch(e){avviso(e.message,true);}disegnaProgetti();});
+  $('#pdfApri').addEventListener('click',()=>portfolioPDF());
+  $$('#lista .filtri button').forEach(b=>b.addEventListener('click',()=>{filtroP=b.dataset.f;disegnaProgetti();const x=$(`#lista .filtri [data-f="${filtroP}"]`);if(x)x.focus();}));
+  $$('#lista [data-bozza] .hit').forEach(b=>b.addEventListener('click',()=>modificaProgetto(-1,b.closest('.vo').dataset.bozza)));
+  $$('#lista .vo[data-i] .hit').forEach(b=>b.addEventListener('click',()=>modificaProgetto(+b.closest('.vo').dataset.i)));
+  $('#nuovoP').addEventListener('click',()=>modificaProgetto(-1));
+  riordina(lista(),stato.progetti,async el=>{try{await salvaProgetti(el,'Nuovo ordine salvato.');}catch(e){avviso(e.message,true);}chiudiDrawer(true);disegnaProgetti();});
+  // sul computer la colonna di destra parte dal primo progetto, senza spostare il fuoco
+  if(largo()&&$('#drForm').hidden&&P.length)modificaProgetto(0,undefined,false);
 }
 // Trascinamento con il mouse (HTML5) e, da tastiera, Alt+↑/↓ sulla scheda.
 function riordina(box,elenco,salva){
   let da=null;
-  $$('.prj[data-i]',box).forEach(c=>{
+  $$('.vo[data-i]',box).forEach(c=>{
     c.addEventListener('dragstart',e=>{da=+c.dataset.i;c.classList.add('presa');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',da);setTimeout(()=>c.classList.add('trascina'));});
     c.addEventListener('dragend',()=>{c.classList.remove('presa','trascina');$$('.sopra',box).forEach(x=>x.classList.remove('sopra'));});
     c.addEventListener('dragover',e=>{if(da===null)return;e.preventDefault();$$('.sopra',box).forEach(x=>x!==c&&x.classList.remove('sopra'));c.classList.add('sopra');});
@@ -256,7 +226,7 @@ const dataBreve=t=>new Date(t).toLocaleDateString('it-IT',{day:'numeric',month:'
 const mb=b=>`${(b/1048576).toLocaleString('it-IT',{maximumFractionDigits:1})} MB`;
 // Modifica di un progetto (variante A del 4/11: bozza per progetto). i = posizione nell'indice, -1 per un progetto nuovo;
 // slugBozza = bozza di un progetto nuovo non ancora pubblicato.
-function modificaProgetto(i,slugBozza,da=null,fuoco=true){
+function modificaProgetto(i,slugBozza,fuoco=true){
   const inIndice=i>=0,nuovo=!inIndice,vuoto={slug:'',nome:'',tipo:'',contesto:'',anteprima:'',pagina:false,pubblicato:false};
   const b=slugBozza?stato.bozze[slugBozza]:inIndice?stato.bozze[stato.progetti[i].slug]:null;
   const p=b?b.progetto:inIndice?stato.progetti[i]:vuoto;
@@ -281,19 +251,17 @@ function modificaProgetto(i,slugBozza,da=null,fuoco=true){
     if(w)w.location.href='/anteprima/';else location.href='/anteprima/';disegnaProgetti();return 'resta';}});
   azioni.push({testo:'Salva bozza',fn:async f=>{const v=await salvaBozza(f);avviso(`Bozza di ${v.nome} salvata: sul sito non cambia niente.`);disegnaProgetti();}});
   const foto=fotoP(p);
-  apriDrawer({da,fuoco,
-    palco:inIndice||b?{sfondo:foto?'var(--carta)':colore(p.slug),testo:scuro(p.slug)&&!foto?'var(--carta)':'var(--ink)',
-      vis:`<div class="vis${foto?' foto':''}"><span class="mono">${inIndice?nn(i):'nuovo'} · ${esc(p.tipo)}</span>${p.anteprima?`<img src="${esc(urlImg(p.anteprima))}" alt="">`:''}<span class="nm2">${esc(p.nome)}</span></div>`}:null,
-    n:(nuovo?'nuovo progetto':`${nn(i)} · modifica`)+(b?` · bozza del ${dataBreve(b.aggiornato)}`:''),titolo:p.nome||'Nuovo',testoSalva:'Pubblica',azioni,
+  apriDrawer({fuoco,chiave:p.slug||null,
+    vis:`<div class="img${foto?' foto':''}" id="thP">${anteprima?imgTag(anteprima,'anteprima'):''}</div>
+      <div class="carica-img"><label class="btn v">${anteprima?'Cambia immagine':'Carica immagine'}<input type="file" accept="image/png,image/jpeg,image/webp" id="fileP" class="vh"></label><span class="lbl" id="statoImg">PNG scontornato o JPG, massimo 8 MB</span></div>`,
+    n:(nuovo?'Nuovo progetto':`${nn(i)} / ${stato.progetti.length} · <span class="stato${p.pubblicato?'':' no'}">${p.pubblicato?'Pubblicato':'Nascosto'}</span>`)+(b?` · bozza del ${esc(dataBreve(b.aggiornato))}`:''),titolo:p.nome||'Nuovo',testoSalva:'Pubblica',azioni,
     campi:`${campo('nome','nome',p.nome,{max:40})}
       ${nuovo&&!b?campo('slug','indirizzo','',{max:40,aiuto:'leandrohenriquez.com/lavori/…',attr:'pattern="[a-z0-9]+(-[a-z0-9]+)*" autocapitalize="off" spellcheck="false"'}):''}
       <div class="due">${campo('tipo','tipo',p.tipo,{max:40})}${campo('contesto','contesto',p.contesto,{max:40})}</div>
       <div class="due">${campo('anno','anno',p.anno||'',{max:4,attr:'inputmode="numeric" pattern="(19|20)[0-9]{2}"'})}${campo('etichetta','etichetta',p.etichetta||'',{max:6,aiuto:'es. 3D'})}</div>
       ${campo('descrizione','descrizione',p.descrizione||'',{max:420,area:true,aiuto:'va anche nel portfolio PDF'})}
-      <div class="campo"><span class="lbl">anteprima · PNG scontornato o JPG, massimo 8 MB</span><div class="anteprima"><div class="th" id="thP">${anteprima?imgTag(anteprima,'anteprima'):''}</div><label class="btn">Carica…<input type="file" accept="image/png,image/jpeg,image/webp" id="fileP" hidden></label><span class="lbl" id="statoImg"></span></div></div>
-      ${inIndice?posizione(i,stato.progetti.length):''}
-      ${interruttore('pubblicato','pubblicato nell\'indice',p.pubblicato)}
-      ${inIndice&&stato.progetti[i].pagina?`<div class="riga"><span>pagina con il 3D</span><a href="${SITO}lavori/${esc(p.slug)}/" target="_blank" rel="noopener">apri ↗</a></div>`:''}
+      <div class="due">${inIndice?posizione(i,stato.progetti.length):''}${interruttore('pubblicato','Pubblicato sul sito',p.pubblicato)}</div>
+      ${inIndice&&stato.progetti[i].pagina?`<div class="riga"><span>Scheda sul sito</span><a href="${SITO}lavori/${esc(p.slug)}/" target="_blank" rel="noopener">apri ↗</a></div>`:''}
       <p class="lbl">«Salva bozza» tiene le modifiche solo qui nel pannello; «Pubblica» le manda sul sito.</p>`,
     onElimina:!inIndice?null:async()=>{
       try{const d=await api('DELETE',`/api/progetti/${encodeURIComponent(p.slug)}?base=${stato.base.progetti}`);stato.base.progetti=d.base;stato.progetti=stato.progetti.filter(x=>x.slug!==p.slug);
@@ -321,7 +289,7 @@ function modificaProgetto(i,slugBozza,da=null,fuoco=true){
       const dataUrl=await leggiFile(file);
       const d=await api('POST',`/api/progetti/${slug}/immagini`,{base:stato.base.progetti,nome:'anteprima-'+Date.now().toString(36),base64:dataUrl.split(',')[1]});
       stato.base.progetti=d.base;anteprima=d.percorso;stato.anteprime[d.percorso]=dataUrl;
-      $('#thP').innerHTML=imgTag(anteprima,'anteprima');$('#statoImg').textContent='caricata ✓';
+      $('#thP').innerHTML=imgTag(anteprima,'anteprima');$('#thP').classList.toggle('foto',!/\.png$/i.test(anteprima));$('#statoImg').textContent='caricata ✓';
     }catch(err){$('#statoImg').textContent='';$('#drErr').textContent=err.message;}
   });
 }
@@ -329,10 +297,10 @@ function modificaProgetto(i,slugBozza,da=null,fuoco=true){
 // ---------- portfolio PDF su misura (variante 2 del 4/11) ----------
 // Scegli progetti e ordine, dai un nome: la Action "Portfolio PDF" lo prepara (circa 2 minuti) e arriva una notifica.
 let pfTimer=null;
-async function portfolioPDF(da=null){
+async function portfolioPDF(){
   const P=stato.progetti,ordine=[...P.filter(p=>p.pubblicato),...P.filter(p=>!p.pubblicato)].map(p=>p.slug),scelti=new Set(P.filter(p=>p.pubblicato).map(p=>p.slug));
   const nome=slug=>{const p=P.find(x=>x.slug===slug);return p?p.nome:slug;};
-  apriDrawer({da,n:'portfolio PDF',titolo:'Portfolio',testoSalva:'Crea PDF',
+  apriDrawer({n:'Portfolio PDF · privato',titolo:'Portfolio',testoSalva:'Crea PDF',
     campi:`<div class="campo"><span class="lbl">pronti da scaricare</span><div class="pronti" id="pfPronti"><span class="lbl"><span class="carica"></span> carico…</span></div></div>
       ${campo('nome','nome del nuovo portfolio','',{max:30,aiuto:'es. per Smeg'})}
       <div class="campo"><div class="riga" style="border:0;padding:0"><span class="lbl" id="pfConta"></span><span style="white-space:nowrap"><button type="button" class="link" id="pfTutti">tutti</button> · <button type="button" class="link" id="pfNessuno">nessuno</button></span></div><ol class="scelta" id="pfScelta"></ol></div>`,
@@ -354,7 +322,7 @@ async function portfolioPDF(da=null){
   $('#pfNessuno').addEventListener('click',()=>{scelti.clear();disegnaScelta();});
   disegnaScelta();
   async function pronti(){
-    clearTimeout(pfTimer);const box=$('#pfPronti');if(!box||$('#drawer').hidden)return;
+    clearTimeout(pfTimer);const box=$('#pfPronti');if(!box||$('#drForm').hidden)return;
     const [info,{versioni}]=await Promise.all([api('GET','/api/portfolio/info').catch(()=>({})),api('GET','/api/portfolio/versioni').catch(()=>({versioni:[]}))]);
     const riga=(testo,dx,x='')=>`<div><span>${testo}</span>${dx}${x}</div>`;
     box.innerHTML=(info.pronto?riga(`completo · ${P.filter(p=>p.pubblicato).length} progetti<br><span class="lbl">${dataBreve(info.aggiornato)} · ${mb(info.byte)} · si aggiorna da solo</span>`,'<a class="btn" href="/api/portfolio" download>↓</a>','<span></span>'):'')+
@@ -376,39 +344,29 @@ async function salvaApp(el,msg='Salvato. Il Laboratorio si aggiorna in circa un 
 async function sezioneApp(){await caricaApp();disegnaApp();}
 function disegnaApp(){
   const A=stato.app,pronte=A.filter(a=>a.stato==='pronta'&&a.pubblicato).length;
-  board().innerHTML=tessera('carta intro-p',{c:4,r:4,cv:4,rv:5,ov:1,cm:2,rm:4},`<div class="row"><span class="mono">Pannello · app</span><span class="mono hide-s">pagina Laboratorio</span></div>
-    <div style="display:flex;flex-direction:column;gap:12px"><h1>App</h1><p><b>${pronte}</b> pronte sul sito su ${A.length}. Tocca un’app per modificarla; trascinala per cambiare l’ordine.</p>
-    <div class="acts"><button class="btn" type="button" id="nuovaA">+ Nuova app</button><a class="btn vuoto" href="${SITO}laboratorio/" target="_blank" rel="noopener">Laboratorio ↗</a></div></div>`)+
-  tessera('ed solo-v',{cv:8,rv:5,ov:2,cvm:2,rvm:8},'',' id="ed" aria-label="Modifica dell\'app"')+
-  A.map((a,i)=>`<article class="t prj app-p${a.stato==='pronta'?'':' arr'}${a.pubblicato?'':' off'}" draggable="true" data-i="${i}" style="${st({c:4,r:3,cm:2,rm:3})}"><div class="in">
-    <div class="row"><span class="mono">${nn(i)} · ${esc(a.tipo)}</span><span class="mono">${a.stato==='pronta'?'pronta':'in arrivo'}</span></div>
-    <div><h2>${esc(a.nome)}</h2>${a.descrizione?`<p>${esc(a.descrizione)}</p>`:''}</div>
-    <button class="hit" type="button" aria-label="Modifica ${esc(a.nome)}"></button></div>
-    <span class="sw-p swHit"><button type="button" class="sw" role="switch" aria-checked="${a.pubblicato}" aria-label="${esc(a.nome)} nel Laboratorio" data-i="${i}"></button></span></article>`).join('');
-  palcoVuoto();
-  $$('#board .prj .hit').forEach(b=>b.addEventListener('click',()=>modificaApp(+b.closest('.prj').dataset.i,b.closest('.prj'))));
-  $$('#board .prj .sw').forEach(s=>s.addEventListener('click',async e=>{
-    e.stopPropagation();const i=+s.dataset.i,el=stato.app.map(a=>({...a}));el[i].pubblicato=!el[i].pubblicato;s.disabled=true;
-    try{await salvaApp(el,el[i].pubblicato?`${el[i].nome} è pubblicata.`:`${el[i].nome} è nascosta.`);}catch(err){avviso(err.message,true);}
-    disegnaApp();
-  }));
-  $('#nuovaA').addEventListener('click',e=>modificaApp(-1,e.currentTarget.closest('.t')));
-  riordina(board(),stato.app,async el=>{try{await salvaApp(el,'Nuovo ordine salvato.');}catch(e){avviso(e.message,true);}disegnaApp();});
+  lista().innerHTML=`<p class="lbl nota"><b>${pronte}</b> pronte sul sito su ${A.length} · <a href="${SITO}laboratorio/" target="_blank" rel="noopener">Laboratorio ↗</a></p>`+
+  A.map((a,i)=>`<div class="vo senza${a.pubblicato?'':' off'}" draggable="true" data-i="${i}" data-chiave="${esc(a.slug)}">
+    <span class="num">${nn(i)}</span>
+    <button class="hit" type="button"><span class="nm">${esc(a.nome)}</span><span class="mt">${esc(a.tipo)} · ${a.stato==='pronta'?'pronta':'in arrivo'}${a.pubblicato?'':' · nascosta'}</span></button></div>`).join('')+
+  `<button class="nuovo" type="button" id="nuovaA">+ Nuova app</button>
+   <p class="lbl nota hide-s">Trascina una riga per cambiare l’ordine (da tastiera: Alt + ↑ ↓).</p>`;
+  segnaScelta(drDa);
+  $$('#lista .vo .hit').forEach(b=>b.addEventListener('click',()=>modificaApp(+b.closest('.vo').dataset.i)));
+  $('#nuovaA').addEventListener('click',()=>modificaApp(-1));
+  riordina(lista(),stato.app,async el=>{try{await salvaApp(el,'Nuovo ordine salvato.');}catch(e){avviso(e.message,true);}chiudiDrawer(true);disegnaApp();});
+  if(largo()&&$('#drForm').hidden&&A.length)modificaApp(0,false);
 }
-function modificaApp(i,da=null,fuoco=true){
+function modificaApp(i,fuoco=true){
   const nuova=i<0,a=nuova?{slug:'',nome:'',tipo:'',descrizione:'',stato:'in-arrivo',pubblicato:false}:stato.app[i];
   let html=null;
-  apriDrawer({da,fuoco,
-    palco:nuova?null:{sfondo:a.stato==='pronta'?'#FFB37A':'var(--carta)',testo:'var(--ink)',
-      vis:`<div class="vis"><span class="mono">${nn(i)} · ${esc(a.tipo)}</span><span class="nm2">${esc(a.nome)}</span></div>`},
-    n:nuova?'nuova app':`${nn(i)} · modifica`,titolo:nuova?'Nuova':a.nome,testoSalva:nuova?'Aggiungi':'Salva e pubblica',
+  apriDrawer({fuoco,chiave:a.slug||null,
+    n:nuova?'Nuova app':`${nn(i)} / ${stato.app.length} · <span class="stato${a.pubblicato?'':' no'}">${a.pubblicato?'Pubblicata':'Nascosta'}</span>`,titolo:nuova?'Nuova':a.nome,testoSalva:nuova?'Aggiungi':'Salva e pubblica',
     campi:`${campo('nome','nome',a.nome,{max:40})}
       ${nuova?campo('slug','indirizzo','',{max:40,aiuto:'leandrohenriquez.com/app/…',attr:'autocapitalize="off" spellcheck="false"'}):''}
       ${campo('tipo','tipo',a.tipo,{max:30,aiuto:'es. calcolatore'})}
       ${campo('descrizione','descrizione',a.descrizione||'',{max:160,area:true})}
-      <div class="campo"><span class="lbl">file dell'app · una pagina HTML completa, massimo 2 MB</span><div class="anteprima"><label class="btn">${a.stato==='pronta'?'Sostituisci…':'Carica…'}<input type="file" accept=".html,text/html" hidden id="fileA"></label><span class="lbl" id="statoFile">${a.stato==='pronta'?`<a href="${SITO}app/${esc(a.slug)}/" target="_blank" rel="noopener">apri quella online ↗</a>`:'nessun file: sul sito appare come “in arrivo”'}</span></div></div>
-      ${nuova?'':posizione(i,stato.app.length)}
-      ${interruttore('pubblicato','pubblicata nel Laboratorio',a.pubblicato)}`,
+      <div class="campo"><span class="lbl">file dell'app · una pagina HTML completa, massimo 2 MB</span><div class="anteprima"><label class="btn v">${a.stato==='pronta'?'Sostituisci…':'Carica…'}<input type="file" accept=".html,text/html" class="vh" id="fileA"></label><span class="lbl" id="statoFile">${a.stato==='pronta'?`<a href="${SITO}app/${esc(a.slug)}/" target="_blank" rel="noopener">apri quella online ↗</a>`:'nessun file: sul sito appare come “in arrivo”'}</span></div></div>
+      <div class="due">${nuova?'':posizione(i,stato.app.length)}${interruttore('pubblicato','Pubblicata nel Laboratorio',a.pubblicato)}</div>`,
     onElimina:nuova?null:async()=>{
       try{const d=await api('DELETE',`/api/app/${encodeURIComponent(a.slug)}?base=${stato.base.app}`);stato.base.app=d.base;stato.app=stato.app.filter(x=>x.slug!==a.slug);avviso(`${a.nome} tolta dal Laboratorio.`);disegnaApp();}
       catch(e){if(await conflitto(e,async()=>{await caricaApp();disegnaApp();}))throw new Error('Dati ricaricati: riprova.');throw e;}
@@ -471,10 +429,10 @@ async function sezioneStatistiche(){
   let g='',xs=[],ys=[];
   const pk=giornate.findIndex(x=>x.visite===picco);
   giornate.forEach((x,i)=>{const h=(x.visite/picco)*(H-alto-basso),X=i*(bw+2),Y=H-basso-h,r=Math.min(3,bw/2,h);xs.push(X+bw/2);ys.push(Y);
-    g+=h>0?`<path d="M${X} ${H-basso} V${Y+r} Q${X} ${Y} ${X+r} ${Y} H${X+bw-r} Q${X+bw} ${Y} ${X+bw} ${Y+r} V${H-basso} Z" style="fill:${i===pk?'#3DDC84':'#4A4A4A'}"/>`:'';});
-  g+=`<line x1="0" x2="${W}" y1="${H-basso}" y2="${H-basso}" style="stroke:#4A4A4A"/>`;
-  if(pk>=0&&giornate[pk].visite>0)g+=`<line x1="${xs[pk]}" x2="${W}" y1="${ys[pk]}" y2="${ys[pk]}" style="stroke:#3DDC84" stroke-dasharray="2 3"/><text x="${W}" y="${ys[pk]-6}" text-anchor="end" style="font:500 11px var(--m);fill:var(--carta)">picco ${picco} · ${data(giornate[pk].giorno)}</text>`;
-  if(giornate.length)g+=`<text x="0" y="${H-4}" style="font:500 11px var(--m);fill:#8A8C8C">${data(giornate[0].giorno)}</text><text x="${W}" y="${H-4}" text-anchor="end" style="font:500 11px var(--m);fill:#8A8C8C">${data(giornate.at(-1).giorno)}</text>`;
+    g+=h>0?`<path d="M${X} ${H-basso} V${Y+r} Q${X} ${Y} ${X+r} ${Y} H${X+bw-r} Q${X+bw} ${Y} ${X+bw} ${Y+r} V${H-basso} Z" style="fill:${i===pk?'#2C2C2B':'#C9C9C6'}"/>`:'';});
+  g+=`<line x1="0" x2="${W}" y1="${H-basso}" y2="${H-basso}" style="stroke:#C9C9C6"/>`;
+  if(pk>=0&&giornate[pk].visite>0)g+=`<line x1="${xs[pk]}" x2="${W}" y1="${ys[pk]}" y2="${ys[pk]}" style="stroke:#2C2C2B" stroke-dasharray="2 3"/><text x="${W}" y="${ys[pk]-6}" text-anchor="end" style="font:500 12px var(--f);fill:#2C2C2B">picco ${picco} · ${data(giornate[pk].giorno)}</text>`;
+  if(giornate.length)g+=`<text x="0" y="${H-4}" style="font:400 12px var(--f);fill:#737370">${data(giornate[0].giorno)}</text><text x="${W}" y="${H-4}" text-anchor="end" style="font:400 12px var(--f);fill:#737370">${data(giornate.at(-1).giorno)}</text>`;
   svg.innerHTML=g;
   const tip=svg.parentNode.querySelector('.tip');
   svg.addEventListener('pointermove',e=>{if(!xs.length)return;const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W;let i=0,b=1e9;xs.forEach((v,k)=>{if(Math.abs(v-x)<b){b=Math.abs(v-x);i=k;}});
@@ -486,7 +444,7 @@ async function sezioneStatistiche(){
 async function sezioneAccessi(){
   const d=await api('GET','/api/accessi');
   const mail=(a,pro=false)=>tessera(`mail-t${pro?' verde':''}`,{c:4,r:2,cm:2,rm:2},`<div class="row"><span class="mono">${pro?'proprietario · entra sempre':esc(a.nota||'accesso')}${!pro&&a.aggiunta?` · ${esc(a.aggiunta)}`:''}</span></div>
-    <div class="acts"><b>${esc(pro?a:a.email)}</b>${pro?'':`<button type="button" class="btn vuoto" data-togli="${esc(a.email)}">Togli</button>`}</div>`);
+    <div class="acts"><b>${esc(pro?a:a.email)}</b>${pro?'':`<button type="button" class="btn v" data-togli="${esc(a.email)}">Togli</button>`}</div>`);
   board().innerHTML=tessera('carta intro-p',{c:4,r:3,cm:2,rm:3},`<div class="row"><span class="mono">Pannello · accessi</span></div><div><h1>Accessi</h1><p>Solo queste email Google entrano nel pannello.</p></div>`)+
     tessera('carta',{c:8,r:3,cm:2,rm:5},`<div class="row"><span class="mono">Aggiungi un accesso</span></div>
     <form class="aggiungi" id="formAcc"><input type="email" name="email" placeholder="email Google" required autocomplete="off" aria-label="Email Google"><input type="text" name="nota" placeholder="nota, es. chi è" maxlength="80" aria-label="Nota"><button class="btn" type="submit">Aggiungi</button></form>
