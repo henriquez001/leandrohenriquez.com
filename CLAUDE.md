@@ -103,10 +103,11 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   passano da `conta()` in common.js: `email-copiata`, `apri-<progetto>`, `clic-linkedin`.
 - `backend/` — pannello di gestione (Cloudflare Worker): accesso Google con elenco email, progetti,
   immagini, statistiche GoatCounter. Vedi `backend/README.md`; test con `cd backend && npm test`.
-  Pannello in stile **showroom** con la stessa struttura del sito (regola del 20/11): barra con le sezioni, tessere, viste
-  Vetrina (modifica sul palco) e Mosaico (foglio che nasce dalla tessera); account e notifiche nel menu del pulsante in alto a destra.
-  Usa i file del sito `assets/showroom/{showroom.css,pagine.css,viste.js,colori.js}`, copiati in `backend/public/sito/showroom/`
-  a ogni pubblicazione (`npm run tema`, non nel repo); `pannello.css` aggiunge solo moduli, interruttori e avvisi.
+  Pannello in stile **bianco**, struttura P3 «Due colonne» (scelta di Leandro del 24/11/2026): barra con le sezioni; in Progetti e App
+  elenco a sinistra e modifica a destra (sul telefono prima l'elenco, poi la scheda con «← indietro»); Statistiche e Accessi su una
+  pagina sola; account e notifiche nel menu del pulsante in alto a destra. Tutto in `backend/public/{index.html,pannello.css,pannello.js}`,
+  con gli stessi colori e caratteri di `assets/bianco/bianco.css`; i caratteri si copiano da `assets/fonts/` in `backend/public/sito/fonts/`
+  a ogni pubblicazione (`npm run tema`, non nel repo). I file `assets/showroom/` non servono più al pannello.
   `backend/public/tema.css` (stile D) non è più caricato.
 
 ## Prestazioni dello scroll (problemi già risolti, non reintrodurli)
