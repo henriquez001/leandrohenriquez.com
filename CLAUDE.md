@@ -63,6 +63,17 @@ nel repo, non cancellarlo). Lo stato del lavoro e i problemi aperti sono in HAND
   Il Laboratorio showroom trasforma in tessere i riquadri generati (stesso markup del pannello) con un piccolo script.
   Colori: immagini SENZA filtri (niente mix-blend: Leandro 19/11 «lascia i colori originali»); fondo tessera = colore pieno scelto a
   mano in `assets/showroom/colori.js` (COLORI, SCURI = testo chiaro, FOTO_GRANDI = immagini più grandi); senza colore si calcola.
+- Stile **bianco** (scelto da Leandro il 24/11/2026 dopo i giri 16–19 dell'anteprima; riferimento di gusto: elium.studio). Fondo bianco,
+  prodotti scontornati, titoli grandi e leggeri (Outfit 400) e testo Figtree, caratteri sul sito stesso. Mappa NUOVA: home senza lavori
+  (la frase + un solo oggetto), `/lavori/` (uno alla volta, filtri e puntini), una scheda per OGNI progetto in `/lavori/<slug>/`,
+  `/studio/`, `/contatti/`, Laboratorio, privacy, 404, app. Effetti scelti: titoli parola per parola, scritta gigante, frasi che si
+  accendono, cerchio «Apri» (M1) + ingresso col marchio, sipario nero col nome della pagina, immagini a tendina, firma «henriquez» (N4).
+  Scartati: caratteri pesanti, blocchi di colore, metafore («trovate»), effetti timidi. Codice: `assets/bianco/bianco.css` + `bianco.js`.
+  Le pagine in `stili/bianco/` sono GENERATE: `node tools/genera-bianco.js` (da data/progetti.json + data/bianco.json + data/app.json),
+  poi `node tools/applica-stile.js`; lo fa anche l'Action `stile.yml` a ogni modifica dei dati. Non si modificano a mano.
+  `data/bianco.json` (a mano, per slug): breve, testo, ruolo, esito, cliente, con, gruppo, categoria, colore, immagine, galleria.
+  Il movimento sta tutto sotto `html.mv` (spento con «riduci movimento» e senza JavaScript). Pagine che esistono solo in bianco
+  (lavori/, studio/, contatti/, schede) restano nella radice se si torna a un altro stile.
 - Vitrum non cambia con lo stile. Il pannello ha la sua estetica (backend/public/tema.css).
 
 ## Struttura

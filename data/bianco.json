@@ -1,0 +1,139 @@
+{
+ "nota": "Testi e dati in più per lo stile «bianco» (schede progetto). Chiave = slug di data/progetti.json. Testi dai portfolio 2025 e 2021, nessun dato inventato: un campo che manca non viene mostrato.",
+ "progetti": {
+  "hydra": {
+   "gruppo": "aziende",
+   "categoria": "Prodotto",
+   "cliente": "Hydra",
+   "ruolo": "Design del prodotto",
+   "esito": "Prodotto e venduto online",
+   "colore": "#1B1B1B",
+   "breve": "Un case che si usa in verticale o in orizzontale, come un banchetto.",
+   "testo": [
+    "Il case progettato per Hydra risponde ad alcune necessità di base tipiche di questo tipo di clientela.",
+    "È progettato per essere usato in posizione verticale o orizzontale, così chi ne ha bisogno può usarlo come un banchetto. In verticale resta un case unico, innovativo ed esteticamente accattivante.",
+    "Il case è stato prodotto ed è stato in vendita online."
+   ]
+  },
+  "brtw": {
+   "gruppo": "aziende",
+   "categoria": "Prodotto",
+   "con": "GanzoDesign",
+   "ruolo": "Design del prodotto, revisioni fino alla consegna",
+   "esito": "Consegnato al cliente",
+   "colore": "#D9DCDA",
+   "breve": "Uno stile definito e caratterizzante, su brief e hardware del cliente.",
+   "testo": [
+    "Il progetto è stato sviluppato in collaborazione con lo studio GanzoDesign.",
+    "Su brief e hardware del cliente è stato sviluppato un design con uno stile ben definito e caratterizzante, portando avanti il progetto su varie revisioni di allineamento fino alla consegna."
+   ],
+   "anno": "2025"
+  },
+  "baiyun": {
+   "gruppo": "aziende",
+   "categoria": "Prodotto",
+   "con": "GanzoDesign",
+   "ruolo": "Design del prodotto, revisioni fino alla consegna",
+   "esito": "Consegnato al cliente",
+   "colore": "#8FD3CF",
+   "breve": "Un design di tendenza, ma non eccessivamente caratteristico.",
+   "testo": [
+    "Il progetto è stato sviluppato in collaborazione con lo studio GanzoDesign.",
+    "Su brief e hardware del cliente è stato sviluppato un design di tendenza ma non eccessivamente caratteristico, portando avanti il progetto su varie revisioni di allineamento fino alla consegna."
+   ],
+   "anno": "2025"
+  },
+  "la-fornace": {
+   "gruppo": "aziende",
+   "categoria": "Packaging",
+   "cliente": "La Fornace",
+   "con": "Bottega Industriale",
+   "ruolo": "Fustelle e grafiche coordinate",
+   "esito": "Realizzato dall’azienda",
+   "colore": "#2A2622",
+   "breve": "Una bottiglia di olio e una di vino, in edizione limitata.",
+   "testo": [
+    "In collaborazione con lo studio Bottega Industriale è stato progettato un packaging per l’azienda La Fornace: doveva contenere una bottiglia di olio e una di vino, come confezione regalo in edizione limitata.",
+    "Sono state progettate le fustelle e le grafiche coordinate; il progetto è stato poi realizzato dall’azienda."
+   ]
+  },
+  "oopar": {
+   "gruppo": "ricerca",
+   "categoria": "Prodotto",
+   "con": "Rucina Jogani",
+   "ruolo": "Concept e progetto, in coppia",
+   "esito": "1° premio, Pending Cultures",
+   "colore": "#C5C7C8",
+   "breve": "Una sfera cromata sospesa che riflette la luce della lampada.",
+   "testo": [
+    "Oopar («sopra» in hindi) è una lampada da tavolo a forma di occhio, simbolo di protezione nella cultura indiana. Vuole trasmettere il concetto di sospensione: una sfera cromata, sospesa nel foro centrale, riflette la luce prodotta dal corpo della lampada.",
+    "Le forme e le decorazioni nascono dall’incrocio tra cultura italiana e indiana; dentro, un decoro in stile Madhubani retroilluminato.",
+    "Progettata con Rucina Jogani (MIT Institute of Design, Pune) al workshop Pending Cultures 2017 dell’Università di Firenze, dove ha vinto il primo premio."
+   ],
+   "immagine": "assets/img/oopar/frontale.webp",
+   "galleria": [
+    "assets/img/oopar/laterale.webp",
+    "assets/img/oopar/dettaglio.webp",
+    "assets/img/oopar/sfera.webp",
+    "assets/img/oopar/decoro.webp"
+   ]
+  },
+  "one": {
+   "gruppo": "ricerca",
+   "categoria": "Prodotto",
+   "ruolo": "Progetto di tesi",
+   "esito": "Tesi, Firenze",
+   "colore": "#F2C230",
+   "breve": "Un punto di vista diverso su una categoria di elettrodomestici.",
+   "testo": [
+    "Il progetto di tesi ONE è una macchina da caffè che vuole porre un punto di vista diverso su questa categoria di elettrodomestici e cerca di trascendere il concetto di branding legato alla singola macchina.",
+    "Le sue caratteristiche la rendono versatile ed eticamente sostenibile."
+   ]
+  },
+  "green-hero": {
+   "gruppo": "ricerca",
+   "categoria": "Prodotto e packaging",
+   "ruolo": "Prodotto e confezione",
+   "colore": "#E8692A",
+   "breve": "Tutti gli attrezzi per le piante di casa, in una mano.",
+   "testo": [
+    "Green Hero vuole dare a chi cura le piante in casa un kit con tutto l’occorrente, senza accontentarsi di strumenti di fortuna o di attrezzi che non hanno un vero posto in casa. Il kit è facile da portare e da usare: in una mano sola ci sono tutti gli attrezzi.",
+    "Il packaging è semplice: cartone grezzo con qualche stampa. Sul fronte, oltre alle indicazioni degli elementi del kit, strisce bianche che ricordano i lavori in corso; sul retro la filosofia di Green Hero e un QR code che rimanda all’applicazione e ai servizi per gli utenti."
+   ]
+  },
+  "andy": {
+   "gruppo": "ricerca",
+   "categoria": "Prodotto",
+   "con": "In team",
+   "ruolo": "Progetto in team",
+   "colore": "#A9C9B5",
+   "breve": "Aprire un barattolo in modo agile e rapido, per chiunque.",
+   "testo": [
+    "Andy, sviluppato in team, è un apriscatole che trasforma lo scomodo e a volte doloroso processo di apertura dei barattoli in un gesto agile e rapido.",
+    "Permette a qualunque utente di aprire da solo un barattolo di alluminio, senza rischi."
+   ]
+  },
+  "otto": {
+   "gruppo": "ricerca",
+   "categoria": "Prodotto",
+   "ruolo": "Progetto",
+   "colore": "#E4E2DF",
+   "breve": "Ogni componente si personalizza, cartuccia compresa.",
+   "testo": [
+    "Il progetto punta a migliorare l’esperienza tra utente e prodotto, lasciando al cliente il controllo totale con la personalizzazione dei singoli componenti.",
+    "Si può scegliere anche il tipo di cartuccia, idroprogressiva o standard, per una personalizzazione a 360 gradi."
+   ]
+  },
+  "frank": {
+   "gruppo": "ricerca",
+   "categoria": "Ricerca",
+   "ruolo": "Progetto",
+   "colore": "#F0E6D8",
+   "breve": "Un personaggio fatto di filiere di scarto diverse.",
+   "testo": [
+    "Frank è un progetto sulla consapevolezza sostenibile: un personaggio composto da più filiere, in cui ogni arto viene da una filiera di scarto diversa.",
+    "Montando gli arti, l’utente ascolta la storia delle singole filiere e impara che ogni oggetto e ogni materiale ha una sua storia."
+   ]
+  }
+ }
+}
