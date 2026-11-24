@@ -3,38 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Peso futuro del cane — Laboratorio hl.</title>
-<meta name="description" content="Stima del peso da adulto del tuo cane, partendo dal peso e dall'età di oggi.">
-<meta name="theme-color" content="#0D0D0D">
-<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../../assets/showroom/showroom.css">
-<link rel="stylesheet" href="../../assets/showroom/pagine.css">
+<title>Peso futuro del cane · Laboratorio di Leandro Henriquez</title>
+<meta name="description" content="Stima del peso da adulto del tuo cane, partendo dal peso e dall’età di oggi.">
+<link rel="canonical" href="https://leandrohenriquez.com/app/peso-cane/">
+<meta property="og:title" content="Peso futuro del cane · Laboratorio di Leandro Henriquez">
+<meta property="og:description" content="Stima del peso da adulto del tuo cane, partendo dal peso e dall’età di oggi.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://leandrohenriquez.com/app/peso-cane/">
+<meta property="og:image" content="https://leandrohenriquez.com/assets/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/outfit-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/figtree-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/bianco/bianco.css">
+<script>(function(d){try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;d.classList.add('mv');var s=sessionStorage;if(s.getItem('tenda')){d.classList.add('arrivo');s.removeItem('tenda')}else if(!s.getItem('visto'))d.classList.add('primo');s.setItem('visto','1')}catch(e){}})(document.documentElement)</script>
+
 </head>
 <body>
-<header class="top"><a class="logo" href="../../" aria-label="Leandro Henriquez, home"><svg role="img" aria-label="hl." xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg></a>
-  <nav class="nav" aria-label="principale"><a href="../../#lavori">Lavori</a><a href="../../#studio">Studio</a><a href="../../laboratorio/">Laboratorio</a><a href="../../vitrum/">Vitrum</a><a href="../../#contatti">Contatti</a></nav>
-  <a class="back" href="../../laboratorio/">← Laboratorio</a>
-</header>
-<main class="wrap"><div class="board" id="board">
-  <section class="t tool" style="--c:7;--r:5;--cm:2;--rm:5"><div class="in">
-    <div class="row"><span class="mono">01 · calcolatore</span><span class="mono hide-s">Laboratorio</span></div>
-    <div style="display:flex;flex-direction:column;gap:18px"><h1>Peso futuro<br>del cane</h1>
-    <form id="f" onsubmit="return false">
-      <label for="w">peso oggi (kg)<input id="w" type="number" inputmode="decimal" value="11.4" min="0.2" max="100" step="0.1"></label>
-      <label for="a">età (settimane)<input id="a" type="number" inputmode="numeric" value="24" min="6" max="52" step="1"></label>
-    </form></div></div></section>
-  <section class="t stat res-t" style="--c:5;--r:3;--cm:2;--rm:3"><div class="in" aria-live="polite"><span class="mono">kg da adulto · stima</span><b id="r">—</b>
-    <div style="display:flex;flex-direction:column;gap:8px"><div class="bar"><u id="rb" style="width:0"></u></div><span class="mono" id="rn" style="color:var(--soft)"></span></div></div></section>
-  <section class="t carta solo-pieno" style="--c:5;--r:2;--cm:2;--rm:3"><div class="in"><span class="mono">Come si calcola</span><p style="font-size:13.5px">Stima indicativa per cani di taglia media: peso adulto ≈ peso di oggi ÷ settimane × 52. Le taglie piccole finiscono di crescere prima, le grandi dopo: per un valore preciso chiedi al veterinario.</p></div></section>
-</div></main>
-<footer><span>© 2026 Leandro Henriquez</span><a href="../../privacy/">Privacy</a></footer>
+<a class="salta" href="#contenuto">Vai al contenuto</a>
+<div class="intro" aria-hidden="true"><div><svg xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51" aria-hidden="true"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg><span>henriquez</span></div></div>
+<div class="tenda" aria-hidden="true">Peso futuro del cane</div>
+<header class="bar"><a class="marchio" href="/" data-nome="henriquez" aria-label="Leandro Henriquez, inizio"><svg xmlns="http://www.w3.org/2000/svg" viewBox="35.5 36.5 61 51" aria-hidden="true"><path fill="currentColor" d="M 62.484375 62.664062 C 62.09375 60.652344 60.859375 58.742188 59.074219 57.710938 C 56.144531 56.015625 52.414062 56.71875 49.445312 57.84375 C 48.113281 58.347656 47.378906 58.621094 46.257812 59.058594 C 46.113281 59.058594 46.042969 58.984375 46.042969 58.839844 L 46.042969 36.589844 L 44.894531 36.589844 C 42.648438 38.996094 39.5 40.546875 35.988281 40.691406 L 35.988281 86.871094 L 46.042969 86.871094 L 46.042969 61.101562 C 46.042969 60.417969 46.480469 60.023438 47.078125 59.808594 C 47.71875 59.578125 48.273438 59.339844 48.878906 59.277344 C 49.785156 59.183594 50.734375 59.480469 51.390625 60.121094 C 52.390625 61.097656 52.574219 62.496094 52.574219 63.828125 L 52.574219 86.871094 L 62.625 86.871094 L 62.617188 63.855469 C 62.617188 63.464844 62.554688 63.046875 62.484375 62.664062 "/><path fill="currentColor" d="M 90.546875 76.875 C 88.082031 76.992188 86.023438 78.960938 85.808594 81.421875 C 85.679688 82.890625 86.1875 84.242188 87.085938 85.234375 C 87.261719 85.425781 87.121094 85.730469 86.863281 85.730469 L 84.304688 85.730469 C 83.023438 85.742188 81.804688 85.257812 80.863281 84.382812 C 79.96875 83.554688 79.210938 82.210938 79.210938 80.632812 L 79.207031 36.589844 L 78.058594 36.589844 C 75.816406 38.996094 72.664062 40.546875 69.152344 40.691406 L 69.152344 86.871094 L 90.789062 86.871094 C 93.550781 86.871094 95.789062 84.632812 95.789062 81.871094 C 95.789062 79.03125 93.417969 76.742188 90.546875 76.875 "/></svg><span>henriquez<i>laboratorio</i></span></a>
+  <nav aria-label="Principale" id="nav"><a href="/lavori/">Lavori</a><a href="/studio/">Studio</a><a href="/laboratorio/" aria-current="page">Laboratorio</a><a href="/contatti/">Contatti</a></nav>
+  <button class="trattini" id="tr" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu"></button></header>
+<nav class="menu" id="menu" aria-label="Menu"><a href="/lavori/">Lavori</a><a href="/studio/">Studio</a><a href="/laboratorio/">Laboratorio</a><a href="/contatti/">Contatti</a></nav>
+<main id="contenuto">
+<article class="v">
+<header><a class="indietro" href="/laboratorio/" data-nome="Laboratorio">← Laboratorio</a><h1 data-parole>Peso futuro del cane</h1><p class="lead">Quanto peserà da adulto, partendo dal peso e dall’età di oggi.</p></header>
+<div class="app">
+  <form id="f" onsubmit="return false"><label for="w">Peso oggi (kg)<input id="w" type="number" inputmode="decimal" value="11.4" min="0.2" max="100" step="0.1"></label><label for="a">Età (settimane)<input id="a" type="number" inputmode="numeric" value="24" min="6" max="52" step="1"></label></form>
+  <div class="esito" aria-live="polite"><span class="p">Kg da adulto · stima</span><b id="r">—</b><div class="misura"><u id="rb" style="width:0"></u></div><span class="p" id="rn"></span></div>
+  <p class="come">Stima indicativa per cani di taglia media: peso adulto ≈ peso di oggi ÷ settimane × 52. Le taglie piccole finiscono di crescere prima, le grandi dopo: per un valore preciso chiedi al veterinario.</p>
+</div>
+</article>
 <script>
-if(new URLSearchParams(location.search).has('mini'))document.body.classList.add('mini');
-const w=document.getElementById('w'),a=document.getElementById('a'),r=document.getElementById('r'),rb=document.getElementById('rb'),rn=document.getElementById('rn');
-function calc(){const kg=parseFloat(w.value),wk=parseFloat(a.value);
-  if(!(kg>0)||!(wk>=6&&wk<=52)){r.textContent='—';rb.style.width='0%';rn.textContent='inserisci un\'età tra 6 e 52 settimane';return;}
-  const adulto=kg/wk*52,p=Math.min(100,kg/adulto*100);
-  r.textContent=adulto.toLocaleString('it-IT',{maximumFractionDigits:1});rb.style.width=p.toFixed(0)+'%';rn.textContent='oggi è al '+p.toFixed(0)+'% del peso finale';}
-w.addEventListener('input',calc);a.addEventListener('input',calc);calc();
+if(new URLSearchParams(location.search).has('mini')){document.documentElement.classList.remove('mv','primo','arrivo');document.body.classList.add('mini');}
+(function(){var w=document.getElementById('w'),a=document.getElementById('a'),r=document.getElementById('r'),rb=document.getElementById('rb'),rn=document.getElementById('rn');
+function calc(){var kg=parseFloat(w.value),wk=parseFloat(a.value);
+  if(!(kg>0)||!(wk>=6&&wk<=52)){r.textContent='—';rb.style.width='0%';rn.textContent='Inserisci un’età tra 6 e 52 settimane';return;}
+  var adulto=kg/wk*52,p=Math.min(100,kg/adulto*100);
+  r.textContent=adulto.toLocaleString('it-IT',{maximumFractionDigits:1});rb.style.width=p.toFixed(0)+'%';rn.textContent='Oggi è al '+p.toFixed(0)+'% del peso finale';}
+w.addEventListener('input',calc);a.addEventListener('input',calc);calc();})();
 </script>
-</body></html>
+</main>
+<footer class="piede"><a class="grande" href="/contatti/" data-nome="Contatti">Parliamo di un progetto<sup>01</sup></a><a class="grande" href="/studio/" data-nome="Studio">Studio<sup>02</sup></a>
+  <div class="firma rv" aria-hidden="true"><span style="--i:0">h</span><span style="--i:1">e</span><span style="--i:2">n</span><span style="--i:3">r</span><span style="--i:4">i</span><span style="--i:5">q</span><span style="--i:6">u</span><span style="--i:7">e</span><span style="--i:8">z</span></div>
+  <div class="fin"><span>Leandro Henriquez · Industrial designer · Macerata, Italia</span><a href="mailto:henriquez.leandro.a@gmail.com" data-conta="clic-email">henriquez.leandro.a@gmail.com</a><a href="/laboratorio/">Laboratorio</a><a href="/privacy/">Privacy</a><span>Nessun cookie</span></div>
+</footer>
+<script src="/assets/bianco/bianco.js" defer></script>
+</body>
+</html>
