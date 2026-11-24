@@ -102,7 +102,7 @@ function vai(){
   let s=location.hash.slice(1)||'progetti';
   if(!SEZIONI[s]||(s==='accessi'&&!stato.io.proprietario))s='progetti';
   stato.sezione=s;
-  $$('.nav.sez a').forEach(a=>{if(a.dataset.s===s)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  $$('.sez a').forEach(a=>{if(a.dataset.s===s)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   const due=['progetti','app'].includes(s);
   chiudiDrawer(true);
   $('#split').hidden=!due;$('#pagina').hidden=due;$('#tornaT').textContent=NOMI[s];
